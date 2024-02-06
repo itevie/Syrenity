@@ -10,3 +10,6 @@ You will need to install and setup postgresql, to do this:
  - Run the sql script in sql/setup.sql
  - Validate its setup correctly by doing some test query: `SELECT * FROM users;`
 
+### Running in GitHub Codespaces
+Open this, then copy contents of `setup.sh` and run it in terminal.
+

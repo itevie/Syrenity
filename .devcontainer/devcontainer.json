@@ -4,7 +4,7 @@
     "service": "app",
     "workspaceFolder": "/workspace",
     "features": {
-        "ghcr.io/itsmechlark/features/postgresql:1": {}
+        "ghcr.io/itsmechlark/features/postgresql:1": {},
     },
     "customizations": {
         "vscode": {

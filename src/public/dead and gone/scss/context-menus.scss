@@ -1,0 +1,50 @@
+.context-container {
+  /* Positioning */
+  position: absolute;
+  min-width: 200px;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+
+  padding: 5px;
+  margin: 10px;
+
+  /* Style */
+  background-color: var(--color-popup);
+  border-radius: 10px;
+  box-shadow: 0px 0px 3px 1px var(--color-popup-backdrop);
+  display: none;
+}
+
+.context-icon {
+  float: right;
+  margin-top: -3px;
+}
+
+.context-item, .context-item > label {
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.context-item:hover {
+  background-color: var(--color-popup-hover);
+}
+
+.context-danger {
+  color: var(--color-error)
+}
+
+.context-danger:hover {
+  color: var(--color-fg-texo-0);
+  background-color: var(--color-error);
+}
+
+.context-disabled, .context-disabled > label {
+  cursor: not-allowed;
+  color: var(--color-text-dim-0);
+}
+
+.content-disabled:hover {
+  color: inherit;
+}

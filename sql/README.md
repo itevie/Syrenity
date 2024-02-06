@@ -1,0 +1,1 @@
+This folder is purely just for containing setup scripts for the Syrenity DB.

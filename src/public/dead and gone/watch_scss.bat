@@ -1,0 +1,1 @@
+sass --watch scss/defaults.scss:css/defaults.css scss/app/main.scss:css/app/main.css

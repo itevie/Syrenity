@@ -1,0 +1,186 @@
+:root {
+  /* Accent */
+  --color-accent-0: rgb(4, 228, 37);
+  --color-accent-dim-0: rgb(4, 189, 32);
+  --color-error: red;
+
+  --color-tag: var(--color-accent-dim-0);
+  --color-tag-text: #000;
+
+
+  /* Foreground */
+  --color-fg-0: #111;
+  --color-fg-text-0: white;
+  --color-text-dim-0: #888;
+
+  /* Background */
+  --color-bg-0: #222;
+  --color-bg-1: #333;
+  --color-bg-2: #444;
+
+  /* Containers (modals) */
+  --color-container-0: #222;
+  --color-container-1: #111;
+  --color-border-0: #000;
+  --color-server-bar: #111;
+  --color-server-bar-1: #222;
+  --color-channel-bar: #111;
+  --color-channel-bg: #212121;
+
+  --color-page-sidebar: #111;
+  --color-page-content: #222;
+
+  --color-popup: #111;
+  --color-popup-hover: #333;
+  --color-popup-backdrop: var(--color-accent-0);
+
+  /* Shadows */
+  --color-shadow-0: #111;
+
+  /* Font */
+  --main-font: "Arial, Helvetica", sans-serif;
+}
+
+body {
+  font-family: var(--main-font);
+  background-color: black;
+  color: white;
+}
+
+textarea {
+  font-family: var(--main-font);
+}
+
+hr {
+  border-style: solid;
+  border-color: var(--color-accent-0);
+}
+
+* {
+  /* Scrollbar */
+  scrollbar-track-color: var(--color-bg-0);
+  scrollbar-width: thin;
+}
+
+/* || Utility */
+
+.side-by-side {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* || Scrollbar */
+/* width */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: var(--color-bg-0);
+  border-radius: 10px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--color-fg-0);
+  border-radius: 10px;
+}
+
+@keyframes skeleton {
+  0% {
+    background-color: var(--color-bg-0);
+  }
+
+  50% {
+    background-color: var(--color-bg-2);
+  }
+
+  100% {
+    background-color: var(--color-bg-0);
+  }
+}
+
+@keyframes skeleton-text {
+  0% {
+    color: var(--color-text-dim-0);
+  }
+
+  50% {
+    color: var(--color-fg-text-0);
+  }
+
+  100% {
+    color: var(--color-text-dim-0);
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    transform: scale(0.9);
+    opacity: 0
+  }
+
+  100% {
+    opacity: 1
+  }
+}
+
+/* || Image enlarger */
+.image-expanded-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #00000099;
+  z-index: 10000000;
+  display: none;
+  animation: fade-in forwards ease 1;
+}
+
+.image-expanded-image {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 90%;
+  max-height: 90%;
+  animation: fade-in forwards ease 1;
+}
+
+.image-expanded-open {
+  display: block;
+  text-align: center;
+  width: 100vw;
+  margin: 10px;
+}
+
+.no-select,
+.tooltip-container,
+.context-container, 
+.server-bar,
+.content-header,
+.channel-bar,
+img {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
+
+.center {
+  text-align: center;
+}
+
+.clickable, .pointer {
+  cursor: pointer;
+}

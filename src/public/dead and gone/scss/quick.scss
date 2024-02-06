@@ -1,0 +1,33 @@
+.center {
+  text-align: center;
+}
+
+.clickable, .pointer {
+  cursor: pointer;
+}
+
+.side-by-side {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+// Makes it so the element is not selectable
+.no-select,
+.tooltip-container,
+.context-container, 
+.server-bar,
+.content-header,
+.channel-bar,
+img {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+}

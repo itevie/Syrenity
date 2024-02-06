@@ -1,0 +1,5 @@
+start_all.bat
+build/
+node_modules/
+"src/public/dead and gone"
+src/imgur_token.txt

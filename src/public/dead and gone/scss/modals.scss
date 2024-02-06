@@ -1,0 +1,104 @@
+.modal-container {
+  box-sizing: border-box;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  max-height: 100vh;;
+  overflow-y: auto;
+  z-index: 10000;
+}
+
+// This shows a backdrop on everything
+.intrusive-modal {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  background-color: #00000055;
+  z-index: 1000000;
+}
+
+.modal {
+  /* Sizing */
+  margin: 20px;
+  padding: 30px;
+  border-radius: 15px;
+  width: 500px;
+  box-sizing: border-box;
+
+  /* Style */
+  background-color: var(--color-container-0);
+  text-align: center;
+
+  /* Border */
+  border-color: var(--color-accent-0);
+  border-width: 2px;
+  border-style: solid;
+
+  /* Shadow */
+  box-shadow: var(--color-accent-0) 0px 0px 10px 3px;
+
+  /* Animation */
+  opacity: 0;
+  animation: modal-fade-in 0.3s forwards;
+  animation-delay: 0.1s;
+}
+
+.big-modal {
+  width: 700px;
+}
+
+.modal-title {
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  display: block;
+  padding: 20px;
+}
+
+.modal-icon {
+  width: 128px;
+  height: 128px;
+  background-color: var(--color-container-1);
+  border-radius: 100px;
+}
+
+.extra-link {
+  float: left;
+  color: var(--color-accent-0);
+  text-decoration: none;
+}
+
+.extra-link:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+@media (max-width: 800px) {
+  .modal {
+    box-shadow: none;
+    border: none;
+    width: 100vw;
+    border-radius: 0;
+  }
+
+  .intrusive-modal {
+    background-color: var(--color-container-0);
+  }
+}
+
+@keyframes modal-fade-in {
+  0% {
+    opacity: 0%;
+  }
+
+  100% {
+    opacity: 100%;
+  }
+}

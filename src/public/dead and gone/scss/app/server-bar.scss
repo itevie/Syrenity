@@ -1,0 +1,99 @@
+/* || Server bar */
+.server-bar {
+  padding: 7px;
+  padding-top: 0;
+  box-sizing: border-box;
+  width: var(--server-bar-width);
+  max-height: 100%;
+  background-color: var(--color-server-bar);
+  display: flex;
+  flex-direction: column;
+}
+
+.unread-icon {
+  z-index: 5;
+  background-color: var(--color-accent-0);
+  box-shadow: 0px 0px 2px 1px var(--color-shadow-0);
+  width: 10px;
+  height: 10px;
+  border-radius: 100px;
+  position: absolute;
+  margin-top: -30px;
+  margin-left: 20px;
+}
+
+.guild-bar-primary {
+  margin-top: 5px;
+}
+
+.guild-list-container {
+  flex: 1;
+  overflow-y: scroll;
+  
+  /* Disable scrollbar */
+  scrollbar-width: none;
+}
+
+
+
+.guild-list-container::-webkit-scrollbar, #server-bar::-webkit-scrollbar, #guild-list-container::-webkit-scrollbar {
+  display: none;
+}
+
+.guild-bar-icon:hover {
+  border-radius: 10px;
+}
+
+.guild-bar-image.material-symbols-outlined {
+  font-size: 2.3em;
+  box-sizing: border-box;
+  padding: 7px;
+}
+
+.guild-bar-primary {
+  border-radius: 10px;
+  background-color: inherit;
+}
+
+.guild-bar-primary:hover {
+  border-radius: 10px;
+  background-color: var(--color-accent-0);
+}
+
+.guild-bar-control-panel {
+  box-sizing: border-box;
+  background-color: var(--color-server-bar-1);
+  padding-top: 10px;
+  padding: 6px;
+  width: var(--server-bar-width);
+  margin: -7px;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+.guild-bar-control-button {
+  font-size: 32px;
+  padding: 8px;
+  transition: 0.2s;
+}
+
+.guild-bar-control-button:hover {
+  transform: scale(1.3);
+}
+
+#guild-list-skeleton,
+#channel-list-skeleton {
+  overflow: hidden;
+}
+
+#guild-list-skeleton > div {
+  width: 50px;
+  height: 50px;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: 0.2s;
+  background-color: var(--color-bg-0);
+  margin-bottom: 4px;
+  animation: skeleton 1s;
+  animation-iteration-count: infinite;
+}

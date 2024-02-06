@@ -1,0 +1,27 @@
+@use "../defaults.scss";
+
+@use "./channel-bar.scss";
+@use "./server-bar.scss";
+@use "./fullscreen.scss";
+@use "./main-content.scss";
+@use "./messages.scss";
+@use "./user-profile.scss";
+@use "./users.scss";
+
+:root {
+  --server-bar-width: 64px;
+  --channel-bar-width: 348px;
+  --header-bar-height: 48px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  height: 100vh;
+}

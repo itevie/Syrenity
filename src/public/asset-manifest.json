@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/static/css/main.fedae942.css",
+    "main.js": "/static/js/main.33d2782b.js",
+    "static/media/background.png": "/static/media/background.0d8388809a559c956285.png",
+    "index.html": "/index.html",
+    "main.fedae942.css.map": "/static/css/main.fedae942.css.map",
+    "main.33d2782b.js.map": "/static/js/main.33d2782b.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.fedae942.css",
+    "static/js/main.33d2782b.js"
+  ]
+}

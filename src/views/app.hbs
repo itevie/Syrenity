@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {{> default}}
+  <link rel="stylesheet" href="/public/css/app/main.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+  <script src="/public/js/app/app.js" type="module"></script>
+  <script src="/public/js/pages.js" type="module"></script>
+  <link rel="stylesheet" href="/public/css/pages.css">
+  <title>Document</title>
+</head>
+<body>
+  <!-- Fullscreen for loader -->
+  <div class="fullscreen" id="fullscreen-loader" style="display: none;">
+    <div class="fullscreen-content">
+      <img class="fullscreen-icon" src="/public/images/logos/no_shape_logo.png">
+      <b>Connecting...</b>
+    </div>
+  </div>
+  <!-- Page Container -->
+  <div id="page-container" class="page-container"></div>
+  <!-- User Div -->
+  <div class="user-profile-container" id="user-profile-container">
+    <div class="user-profile-header" id="user-profile-header"></div>
+    <img onerror="this.src='/public/images/icons/no_pfp.png'" class="user-profile-avatar" id="user-profile-avatar">
+    <div class="user-profile-content">
+      <b id="user-profile-username">...</b>
+      <hr>
+      <label class="user-profile-title">Syrenity Member Since</label>
+      <small id="user-profile-created-at">...</small>
+    </div>
+  </div>
+  <div class="container">
+    <div class="server-bar" id="server-bar">
+      <div class="guild-list-container">
+        <!-- DMS button -->
+        <img 
+          id="dms-button" 
+          src="/public/images/logos/no_shape_logo.png" 
+          class="base-image guild-bar-image guild-bar-primary"
+          data-tooltip-content="Direct Messages"
+          data-tooltip-flyout="right">
+        <!-- Favourites Button -->
+        <img 
+          id="favourites-button" 
+          src="/public/images/icons/favourite.png" 
+          class="base-image guild-bar-image guild-bar-primary"
+          data-tooltip-content="Favourited Channels & DMs"
+          data-tooltip-flyout="right">
+        <!-- Favourites Button -->
+        <span 
+          id="bookmark-button" 
+          class="base-image guild-bar-image guild-bar-primary material-symbols-outlined "
+          data-tooltip-content="Your bookmarked messages"
+          data-tooltip-flyout="right">bookmark</span>
+        <hr>
+        <div id="guild-list">
+          <div id="guild-list-skeleton">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+        </div>
+        <span
+          id="add-server-button"
+          class="base-image guild-bar-image guild-bar-primary material-symbols-outlined "
+          data-tooltip-content="Create a server"
+          data-tooltip-flyout="right">add</span>
+        <hr>
+      </div>
+      <div class="guild-bar-control-panel">
+        <img 
+          src="/public/images/icons/no_pfp.png" 
+          id="user-avatar" 
+          class="base-image guild-bar-icon"
+          data-user-data="avatar"
+          data-tooltip-content="You"
+          data-tooltip-flyout="right">
+        <span 
+          class="material-symbols-outlined guild-bar-control-button"
+          data-tooltip-content="Notifications"
+          data-tooltip-flyout="right">
+          notifications
+          <div class="unread-icon"></div>
+        </span>
+        <span 
+          id="guild-bar-control-settings" 
+          class="material-symbols-outlined guild-bar-control-button"
+          data-tooltip-content="Settings"
+          data-tooltip-flyout="right">
+          settings
+        </span>
+      </div>
+    </div>
+    <div class="main-part">
+      <div id="channel-bar" class="channel-bar">
+        <div id="channel-list-skeleton">
+          <div class="channel-title">
+            Loading
+          </div>
+          <div id="channel-list-skeleton-list">
+            <div>&nbsp;</div>
+            <div>&nbsp;</div>
+            <div>&nbsp;</div>
+            <div>&nbsp;</div>
+            <div>&nbsp;</div>
+            <div>&nbsp;</div>
+            <div>&nbsp;</div>
+            <div>&nbsp;</div>
+            <div>&nbsp;</div>
+          </div>
+        </div>
+        <div class="channel-container" id="channel-list-@me">
+          <div class="channel-list">
+
+          </div>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <!-- Content header, like the channel name etc -->
+        <div class="content-header">
+          <label class="content-header-title" id="content-header-title">Test Channel</label>
+          <!-- Icons on the left -->
+          <div class="content-header-right">
+            <span class="material-symbols-outlined pointer">
+              push_pin
+            </span>
+            <span class="material-symbols-outlined pointer">
+              person
+            </span>
+          </div>
+        </div>
+        <!-- Actual main content, channel container & member bar -->
+        <div class="channel-content">
+          <!-- Contains the messages & the input bar & -->
+          <div class="channel-messages-container">
+            <!-- Place where the messages will go -->
+            <div class="channel-messages-content" id="channel-content">
+              <div>
+                <h1>You're currently not in a channel! Click on one on the side!</h1>
+              </div>
+            </div>
+            <!-- Input bar -->
+            <div class="channel-input-area">
+              <!-- The typing idicator -->
+              <label class="current-typing" id="current-typing"></label>
+              <!-- The actual input area -->
+              <div class="content-input">
+                <button class="content-input-button">+</button>
+                <textarea id="input-input" rows="1" class="content-input-input" style="resize: none"></textarea>
+                <button class="content-input-button">+</button>
+              </div>
+            </div>
+          </div>
+          <!-- Member Bar -->
+          <div class="member-panel" id="member-panel">
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

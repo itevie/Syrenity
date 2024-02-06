@@ -1,0 +1,14 @@
+.user-list-item {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  padding: 5px;
+  margin: 3px;
+  width: 128px;
+}
+
+.user-list-item > div {
+  flex: 1;
+  margin-top: auto;
+  margin-bottom: auto;;
+}

@@ -1,0 +1,1 @@
+SELECT * FROM applications WHERE token = $1

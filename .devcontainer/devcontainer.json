@@ -1,0 +1,27 @@
+{
+    "name": "Syrenity Development Codespace",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "dbaeumer.vscode-eslint",
+                "christian-kohler.npm-intellisense"
+            ]
+        },
+        "codespaces": {
+            "repositories": {
+                "itevie/syrenity-client": {
+                    "permissions": {
+                        "contents": "write",
+                        "pull_requests": "write"
+                    }
+                },
+                "itevie/syrenity-api-client": {
+                    "permissions": {
+                        "contents": "write",
+                        "pull_requests": "write"
+                    }
+                }
+            }
+        }
+    }
+}

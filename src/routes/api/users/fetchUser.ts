@@ -10,6 +10,7 @@ export default {
 
     // Fetch user
     const user = await database.actions.users.fetch(userId);
+    console.log(user);
 
     return res.status(200).send(user);
   },

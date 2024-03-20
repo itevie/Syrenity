@@ -11,7 +11,6 @@ export default {
   method: "PATCH",
   path: "/api/users/:id/avatar",
   handler: async (req, res) => {
-    console.log("hi")
     // Get the details
     const userId = parseInt(req.params.id);
 
@@ -30,10 +29,9 @@ export default {
 
     // Update
     await database.actions.users.updateAvatar(userId, image);
+    let newUser = await database.actions.users.fetch(userId);
 
-    return res.status(200).send({
-      message: `Avatar updated`
-    });
+    return res.status(200).send(newUser);
   },
   details: {
     params: {

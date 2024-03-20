@@ -1,4 +1,5 @@
 import { RouteDetails } from "../types/route";
+import { index } from "./home";
 
 export default {
   method: "GET",
@@ -9,6 +10,6 @@ export default {
       return res.redirect("/");
     }
     
-    return res.status(200).render("register");
+    return res.status(200).send(index)
   }
 } as RouteDetails

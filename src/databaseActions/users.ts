@@ -130,7 +130,7 @@ export default {
       cache: {
         clearKeys: [
           CacheKey.USER,
-          CacheKey.USER_PARTIAL
+          CacheKey.USER_PARTIAL,
         ],
         name: userId,
       }

@@ -1,73 +1,66 @@
 import { RouteDetails } from "../../../types/route";
-import * as database from '../../../database';
-import { JSONSchemaType } from "ajv";
-import * as ws from '../../../ws/ws';
-import * as permissions from '../../../util/permissions';
-import config from '../../../config.json';
+import { actions } from "../../../util/database";
+import config from "../../../config.json";
+import { send } from "../../../ws/websocketUtil";
 
 interface CreateMessageBody {
-  content: string;
+    content: string,
 }
 
-export default {
-  method: "POST",
-  path: "/api/channels/:id/messages",
-  handler: async (req, res) => {
-    const channelId = parseInt(req.params.id);
+const handler: RouteDetails<CreateMessageBody> = {
+    method: "POST",
+    path: "/api/channels/:channelId/messages",
+    handler: async (req, res) => {
+        const body = req.body as CreateMessageBody;
+        const channelId = parseInt(req.params.channelId);
 
-    // Fetch channel
-    const channel = await database.actions.channels.fetch(channelId);
+        // Create the message
+        const message = await actions.channels.createMessage({
+            channelId: channelId,
+            authorId: (req.user as User).id,
+            content: body.content,
+        });
 
-    // Just create it
-    const message = await database.actions.channels.messages.create({
-      channelId: channel.id,
-      authorId: (req.user as User).id,
-      content: req.body.content,
-    });
+        // Broadcast event
+        send({
+            guildId: (await actions.channels.fetch(channelId)).guild_id,
+            channelId,
+            type: "MESSAGE_CREATE",
+            data: {
+                message,
+            }
+        });
 
-    // Broadcast
-    ws.sendMessage({
-      type: "MESSAGE_CREATE",
-      message,
-      guildId: channel.guild_id,
-      channelId: channel.id,
-    });
+        return res.status(200).send(message);
+    },
 
-    return res.status(200).send(message);
-  },
-  details: {
     auth: {
-      loggedIn: true,
+        loggedIn: true,
     },
-
-    params: {
-      id: {
-        is: "channel",
-        canView: true,
-      }
-    },
-
-    requiresPermissions: [
-      permissions.PermissionBitfield.CREATE_MESSAGE
-    ],
 
     body: {
-      schema: {
         type: "object",
         properties: {
-          content: {
-            type: "string",
-            minLength: 1,
-            maxLength: config.validity.messages.maxLength
-          }
+            content: {
+                type: "string",
+                minLength: config.validity.messages.minLength,
+                maxLength: config.validity.messages.maxLength,
+            }
         },
         required: ["content"],
         errorMessage: {
-          properties: {
-            content: "Content is ugh"
-          }
+            properties: {
+                content: "Content is invalid"
+            }
         }
-      } as JSONSchemaType<CreateMessageBody>
+    },
+
+    params: {
+        channelId: {
+            is: "channel",
+            canView: true,
+        },
     }
-  }
-} as RouteDetails
+};
+
+export default handler;

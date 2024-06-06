@@ -1,24 +1,25 @@
 import { RouteDetails } from "../../../types/route";
-import * as database from '../../../database';
+import { actions } from "../../../util/database";
 
-export default {
-  method: "GET",
-  path: "/api/guilds/:id/",
-  handler: async (req, res) => {
-    // Get the details
-    const guildId = parseInt(req.params.id);
-
-    // Fetch guild
-    const guild = await database.actions.guilds.fetch(guildId);
-
-    return res.status(200).send(guild);
-  },
-  details: {
-    params: {
-      id: {
-        is: "guild",
-        canView: true,
-      }
+const handler: RouteDetails = {
+    method: "GET",
+    path: "/api/guilds/:guildId",
+    handler: async (req, res) => {
+        return res.status(200).send(
+            await actions.guilds.fetch(parseInt(req.params.guildId))
+        );
     },
-  }
-} as RouteDetails
+
+    auth: {
+        loggedIn: true,
+    },
+
+    params: {
+        guildId: {
+            is: "guild",
+            canView: true,
+        }
+    }
+};
+
+export default handler;

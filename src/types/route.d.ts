@@ -1,60 +1,38 @@
-import express from 'express';
-import * as Ajv from 'ajv';
+import express from "express";
+import * as Ajv from "ajv";
 
 type HttpMethods = "GET" | "POST" | "DELETE" | "PATCH" | "PUT" | "HEAD";
 type ExpressRequestLambda = (req: express.Request, res: express.Response) => void;
 
-/**
- * Describes a server route
- */
-interface RouteDetails {
-  /* Route details */
-  method: HttpMethods;
-  path: string;
-  alternatePaths?: string[];
-  handler: express.RequestHandler;
+interface RouteDetails<B = unknown> {
+    method: HttpMethods,
+    path: string,
+    alternatePaths?: string[],
+    handler: express.RequestHandler,
 
-  details?: {
-    auth?: {
-      loggedIn?: boolean;
-      allowBots?: boolean;
-    },
-
-    params?: {[key: string]: ParameterDetails}
-
-    body?: {
-      schema: Ajv.JSONSchemaType<unknown>
-    };
-
-    permissions?: {
-      required: number[];
-      channelParam?: string;
-      skipIfRelationship?: boolean;
-    }
-
-    ratelimit?: {
-      amount: number;
-      every: {
-        days?: number;
-        hours?: number;
-        minutes?: number;
-        seconds?: number;
-      } | undefined;
-    }
-
-    query?: {[key: string]: QueryDetails};
-  }
+    params?: {[key: string]: ParameterDetails},
+    query?: {[key: string]: QueryDetails},
+    auth?: AuthenticationDetails,
+    body?: Ajv.JSONSchemaType<B>
 }
 
-interface QueryDetails {
-  type: 'integer' | 'string' | 'boolean';
-  options?: string[] | number[] | boolean[];
-  optional?: boolean;
-  default?: string | number;
+interface AuthenticationDetails {
+    loggedIn?: boolean,
+    allowBots?: boolean,
+    botsOnly?: boolean,
 }
 
 interface ParameterDetails {
-  is?: 'guild' | 'channel' | 'user' | 'message' | 'role';
-  canView?: boolean;
-  mustBeSelf?: boolean;
+    is?: Resource;
+    canView?: boolean;
+    mustBeSelf?: boolean;
+    mustBeFrom?: string,
+}
+
+type QueryOptions = "positiveNumber";
+interface QueryDetails {
+    type: "number" | "boolean",
+    optional?: boolean,
+    defaultValue?: string,
+    options?: QueryOptions[]
 }

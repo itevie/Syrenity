@@ -1,1 +1,0 @@
-SELECT * FROM messages WHERE is_pinned = true AND channel_id = $1;

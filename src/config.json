@@ -1,39 +1,18 @@
 {
-  "database": {
-    "constring": "postgres://postgres:postgres@127.0.0.1:5432/discord"
-  },
-  "server": {
-    "body_limit": "5mb",
-    "port": 3000,
-    "cache": {
-      "lifespan": 90000
+    "server": {
+        "bodyLimit": "2mb",
+        "port": 3000
     },
     "ws": {
-      "heartbeat_interval": 10000
-    }
-  },
-  "validity": {
-    "usernames": {
-      "minLength": 1,
-      "maxLength": 30,
-      "validCharacters": "[a-z0-9_\\-\\.]"
+        "heartbeat_interval": 30000
     },
-
-    "guildName": {
-      "minLength": 1,
-      "maxLength": 30
+    "database": {    
+        "constring": "postgres://postgres:postgres@127.0.0.1:5432/discord"
     },
-    
-    "messages": {
-      "maxLength": 2000
+    "validity": {
+        "messages": {
+            "minLength": 1,
+            "maxLength": 4000
+        }
     }
-  },
-  "syrenity+": [
-    33, 139
-  ],
-  "proxy": {
-    "enabled": true,
-    "requiresAuthentication": false,
-    "requiresSyrenity+": false
-  }
 }

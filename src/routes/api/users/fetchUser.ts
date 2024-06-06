@@ -1,24 +1,27 @@
 import { RouteDetails } from "../../../types/route";
-import * as database from '../../../database';
+import * as database from "../../../util/database";
 
-export default {
-  method: "GET",
-  path: "/api/users/:id",
-  handler: async (req, res) => {
-    // Get the details
-    const userId = parseInt(req.params.id);
-
-    // Fetch user
-    const user = await database.actions.users.fetch(userId);
-    console.log(user);
-
-    return res.status(200).send(user);
-  },
-  details: {
-    params: {
-      id: {
-        is: "user",
-      }
+const handler: RouteDetails = {
+    method: "GET",
+    path: "/api/users/:id",
+    handler: async (req, res) => {
+        const user = await database.actions.users.fetch(
+            parseInt(req.params.id)
+        );
+        
+        return res.status(200).send(user);
     },
-  }
-} as RouteDetails
+    
+    auth: {
+        loggedIn: true,
+    },
+
+    params: {
+        id: {
+            is: "user",
+            canView: true,
+        }
+    }
+};
+
+export default handler;

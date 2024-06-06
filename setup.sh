@@ -1,1 +1,0 @@
-nvm install 16 && npm i -g ts-node && npm install && psql -c "CREATE DATABASE discord;" && psql -U postgres -d discord -f "sql/setup.sql";

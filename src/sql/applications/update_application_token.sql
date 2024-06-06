@@ -1,1 +1,0 @@
-UPDATE applications SET token = $2 WHERE id = $1

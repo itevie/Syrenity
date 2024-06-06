@@ -1,1 +1,0 @@
-SELECT * FROM applications WHERE bot_account = $1

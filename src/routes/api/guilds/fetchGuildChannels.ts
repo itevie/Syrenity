@@ -3,11 +3,13 @@ import { actions } from "../../../util/database";
 
 const handler: RouteDetails = {
     method: "GET",
-    path: "/api/channels/:channelId",
+    path: "/api/guilds/:id/channels",
     handler: async (req, res) => {
-        return res.status(200).send(
-            await actions.channels.fetch(parseInt(req.params.channelId))
-        );
+        const channels = await actions.guilds.fetechChannelList(parseInt(req.params.id));
+        
+        return res.status(200).send({
+            channels,
+        });
     },
 
     auth: {
@@ -15,8 +17,8 @@ const handler: RouteDetails = {
     },
 
     params: {
-        channelId: {
-            is: "channel",
+        id: {
+            is: "guild",
             canView: true,
         }
     }

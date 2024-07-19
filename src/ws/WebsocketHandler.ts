@@ -64,18 +64,27 @@ export default class WebsocketHandler {
 
     operations = {
         "AUTHENTICATE": async (data: WSClientAuthenticate) => {
+            // Check if already authenticated
+            if (this.data.user) {
+                return this.basicError(`Already authenticated`);
+            }
+
             // Check if token is present
             if (!data.token) {
                 return this.basicError(`Token was not provided in AUTHENTICATE`);
             }
 
-            // Attempt to fetch the application
-            const application = await database.actions.applications.fetchByToken(data.token);
-            const user = await database.actions.users.fetch(application.bot_account);
+            try {
+                // Attempt to fetch the application
+                const application = await database.actions.applications.fetchByToken(data.token);
+                const user = await database.actions.users.fetch(application.bot_account);
 
-            // Done
-            if (this.data.onceAuthenticated) {
-                this.data.onceAuthenticated(user);
+                // Done
+                if (this.data.onceAuthenticated) {
+                    this.data.onceAuthenticated(user);
+                }
+            } catch {
+                return this.basicError(`Invalid token provided`);
             }
         }
     }
@@ -85,7 +94,6 @@ export default class WebsocketHandler {
      * @param data What to send
      */
     public send(data: BaseSend) {
-        console.log(data);
         this.ws.send(JSON.stringify(data));
     }
 

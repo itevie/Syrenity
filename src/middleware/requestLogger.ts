@@ -10,8 +10,6 @@ export default (
 ) => {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const request = `${req.method.toUpperCase()} ${req.originalUrl}`;
-    logger.log(`[${ip}] ${request}`);
-
     req.on("end", () => {
         if (res.statusCode > 399)  {
             logger.error(`[${ip}] (${res.statusCode}) ${request}`);

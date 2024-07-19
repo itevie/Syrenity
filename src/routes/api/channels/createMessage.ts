@@ -2,6 +2,7 @@ import { RouteDetails } from "../../../types/route";
 import { actions } from "../../../util/database";
 import config from "../../../config.json";
 import { send } from "../../../ws/websocketUtil";
+import permissionsBitfield from "../../../util/PermissionBitfield";
 
 interface CreateMessageBody {
     content: string,
@@ -15,7 +16,7 @@ const handler: RouteDetails<CreateMessageBody> = {
         const channelId = parseInt(req.params.channelId);
 
         // Create the message
-        const message = await actions.channels.createMessage({
+        const message = await actions.messages.create({
             channelId: channelId,
             authorId: (req.user as User).id,
             content: body.content,
@@ -25,7 +26,7 @@ const handler: RouteDetails<CreateMessageBody> = {
         send({
             guildId: (await actions.channels.fetch(channelId)).guild_id,
             channelId,
-            type: "MESSAGE_CREATE",
+            type: "MessageCreate",
             data: {
                 message,
             }
@@ -36,6 +37,11 @@ const handler: RouteDetails<CreateMessageBody> = {
 
     auth: {
         loggedIn: true,
+    },
+
+    permissions: {
+        permissions: permissionsBitfield.CreateMessages,
+        channelParam: "channelId",
     },
 
     body: {

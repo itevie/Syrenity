@@ -16,8 +16,8 @@ export function getAllFiles(dirPath: string, arrayOfFiles: string[] = []): strin
 }
 
 export function fuckYouJs(value: string): number | null {
-    return Number.isNaN(parseInt(value)) 
-        ? null 
+    return Number.isNaN(parseInt(value))
+        ? null
         : parseInt(value);
 }
 

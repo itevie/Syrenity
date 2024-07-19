@@ -1,1 +1,1 @@
-type Resource = "guild" | "channel" | "message" | "role" | "user";
+type Resource = "guild" | "channel" | "message" | "role" | "user" | "invite" | "file";

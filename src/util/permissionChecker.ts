@@ -1,4 +1,5 @@
 import { actions, query } from "./database";
+import permissionsBitfield from "./PermissionBitfield";
 
 /**
  * Checks if the user can view the specified resource
@@ -11,6 +12,28 @@ export async function canView(user: User, what: Resource, id: number): Promise<b
         case "guild":
             // Simple has member check will suit it
             return await actions.guilds.hasMember(id, user.id);
+        case "message":
+            const message = await actions.messages.fetch(id);
+            const channel = await actions.channels.fetch(message.channel_id);
+
+            // Check if relationship
+            if (channel.type === "dm") {
+                const relationship = await actions.relationships.fetchForChannel(channel.id);
+
+                // Check if user is one of them
+                return relationship.user1 === user.id || relationship.user2 === user.id;
+            }
+
+            // Fetch guild and check if has permission
+            const guild = await actions.guilds.fetch(channel.guild_id);
+            const hasPerm = await hasPermission({
+                permission: permissionsBitfield.ReadChannelHistory,
+                guild,
+                channel,
+                user,
+            });
+
+            return hasPerm;
         case "channel":
             const cresult = (await query({
                 text: `
@@ -84,4 +107,50 @@ export async function canView(user: User, what: Resource, id: number): Promise<b
             console.error(`Can view not implemented for ${what}`);
             process.exit(0);
     }
+}
+
+export function bitfieldToStringArray(permissions: number): string[] {
+    let result: string[] = [];
+
+    for (const i in permissionsBitfield) {
+        if (permissions & permissionsBitfield[i]) {
+            result.push(i);
+        }
+    }
+
+    return result;
+}
+
+interface PermissionCheckDetails {
+    user: User,
+    channel?: Channel,
+    guild: Guild,
+    permission: number,
+}
+
+export async function hasPermission({ user, channel, guild, permission }: PermissionCheckDetails): Promise<boolean> {
+    // Check if the user is the owner of the server
+    if (user.id === guild.owner_id) {
+        return true;
+    }
+
+    let currentBitfield = 0;
+
+    // Get guild @everyone
+    const everyone = await actions.roles.getEveryoneFor(guild.id);
+
+    // Apply them
+    currentBitfield |= everyone.bitfield_allow;
+    currentBitfield &= ~everyone.bitfield_deny;
+
+    // Apply channel overrides
+    if (channel) {
+        const everyoneOverrides = await actions.channels.fetchRoleOverride(channel.id, everyone.id);
+        if (everyoneOverrides) {
+            currentBitfield |= everyoneOverrides.bitfield_allow;
+            currentBitfield &= ~everyoneOverrides.bitfield_deny;
+        }
+    }
+
+    return (currentBitfield & permission) !== 0;
 }

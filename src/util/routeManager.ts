@@ -6,7 +6,7 @@ import Logger from "./Logger";
 import authenticate from "../middleware/authenticator";
 
 const logger = new Logger("route-manager");
-export const routes: {[key: string]: RouteDetails} = {};
+export const routes: { [key: string]: RouteDetails } = {};
 
 export function loadRoutes(app: express.Application): void {
     // Get the route files
@@ -33,8 +33,8 @@ export function loadRoutes(app: express.Application): void {
                 }
             });
             routes[`${route.method.toUpperCase()} ${path.replace(/:[a-zA-Z]+/g, "[^\\/]+")}`] = route;
-        
-            logger.log(`Loaded route ${path}`);
+
+            logger.log(`Loaded route ${route.method} ${path}`);
         }
 
         // Load base path

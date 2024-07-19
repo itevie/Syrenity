@@ -17,6 +17,10 @@ export default {
         return stripUser((await database.query({
             text: `SELECT * FROM users WHERE id = $1`,
             values: [userId],
+            cache: {
+                name: "UserByID",
+                key: userId,
+            },
             noRowsError: {
                 message: `The user with ID ${userId} does not exist`
             }
@@ -27,6 +31,10 @@ export default {
         return (await database.query({
             text: `SELECT * FROM users WHERE id = $1`,
             values: [userId],
+            cache: {
+                name: "UserByID",
+                key: userId,
+            },
             noRowsError: {
                 message: `The user with ID ${userId} does not exist`
             }
@@ -37,6 +45,10 @@ export default {
         return (await database.query({
             text: `SELECT 1 FROM users WHERE id = $1`,
             values: [userId],
+            cache: {
+                name: "UserExists",
+                key: userId,
+            },
         })).rows.length !== 0;
     },
 

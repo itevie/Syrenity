@@ -14,7 +14,7 @@ const handler: RouteDetails = {
         "/channels/:g/:c"
     ],
     handler: (req, res) => {
-        return res.status(200).send(index);
+        return res.status(200).send(fs.readFileSync(__dirname + "/../public/index.html", "utf-8"));
     }
 };
 

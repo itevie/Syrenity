@@ -10,21 +10,28 @@ interface RouteDetails<B = unknown> {
     alternatePaths?: string[],
     handler: express.RequestHandler,
 
-    params?: {[key: string]: ParameterDetails},
-    query?: {[key: string]: QueryDetails},
+    params?: { [key: string]: ParameterDetails },
+    query?: { [key: string]: QueryDetails },
     auth?: AuthenticationDetails,
-    body?: Ajv.JSONSchemaType<B>
+    body?: Ajv.JSONSchemaType<B>,
+    permissions?: PermissionDetails,
+}
+
+interface PermissionDetails {
+    permissions: number,
+    guildParam?: string,
+    channelParam?: string,
 }
 
 interface AuthenticationDetails {
     loggedIn?: boolean,
-    allowBots?: boolean,
     botsOnly?: boolean,
+    disallowBots?: boolean,
 }
 
 interface ParameterDetails {
     is?: Resource;
-    canView?: boolean;
+    canView?: boolean | null;
     mustBeSelf?: boolean;
     mustBeFrom?: string,
 }

@@ -15,8 +15,8 @@ export const wsLogger = new Logger("ws");
 export const connections = new Map<string, Connection>();
 
 interface WebsocketDispatchOptions<T extends keyof WebsocketDispatchTypes> {
-    guildId: number,
-    channelId: number,
+    guildId?: number,
+    channelId?: number,
 
     type: T,
     data: WebsocketDispatchTypes[T],
@@ -85,7 +85,7 @@ export function initialise(app: expressWs.Application): void {
                 user,
                 awaitingAuthentication: false,
             });
-            
+
             wsLogger.log(`COOKIE AUTH: ${id}`);
         } else {
             const onceAuthenticated = (user: User) => {
@@ -106,7 +106,7 @@ export function initialise(app: expressWs.Application): void {
                 wsLogger.log(`TOKEN AUTH: ${id}`);
             }
 
-            handler.init({  
+            handler.init({
                 uuid: id,
                 awaitingAuthentication: true,
                 onceAuthenticated,

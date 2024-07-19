@@ -1,14 +1,14 @@
 import express from "express";
 import { ParameterDetails } from "../types/route";
-import { AuthenticationError } from "./authenticator";
 import * as database from "../util/database";
 import { canView } from "../util/permissionChecker";
+import AuthenticationError from "../errors/AuthenticationError";
 
 export default async function validateURLParameters(
     req: express.Request,
     res: express.Response,
-    params: {[key: string]: ParameterDetails}
-): Promise<boolean | AuthenticationError> {
+    params: { [key: string]: ParameterDetails }
+): Promise<void | AuthenticationError> {
     // Loop through the params to test
     for (const i in params) {
         const paramTest = params[i];
@@ -17,20 +17,22 @@ export default async function validateURLParameters(
         // Check the is
         if (paramTest.is) {
             // The param should be int
-            if (isNaN(parseInt(param))) {
+            if (isNaN(parseInt(param)) && !["invite", "file"].includes(paramTest.is)) {
                 // If the route is @me and is = user it's fine
                 if (param !== "@me" || paramTest.is !== "user") {
-                    return {
+                    return new AuthenticationError({
                         message: `param ${i} must be of type integer (${paramTest.is})`,
                         at: `param.${i}`,
-                        status: 400,
-                    };
-                } 
+                        statusCode: 400,
+                        errorCode: "UrlParameterTypeError",
+                    });
+                }
             }
 
             // Get the action to perform
-            const action: ((id: number) => Promise<boolean | AuthenticationError>) | undefined = {
-                "user": async (id: number): Promise<boolean | AuthenticationError> => {
+            const action: ((id: string) => Promise<boolean | AuthenticationError>) | undefined = {
+                "user": async (_id: string): Promise<boolean | AuthenticationError> => {
+                    const id = parseInt(_id);
                     // Check if @me is required
                     if (
                         paramTest.mustBeSelf === true
@@ -38,19 +40,21 @@ export default async function validateURLParameters(
                             param !== "@me"
                             && param !== (req.user as FullUser)?.id.toString()
                         )
-                    ) return {
+                    ) return new AuthenticationError({
                         message: `@me must be used for this route`,
                         at: `params.${i}`,
-                        status: 400,
-                    };
+                        statusCode: 400,
+                        errorCode: "MustBeSelfForParameter",
+                    });
 
                     // Check if @me is used, but there is no one logged in
                     if (param === "@me" && !req.user) {
-                        return {
+                        return new AuthenticationError({
                             message: `Used @me in parameter, but no one is logged in`,
                             at: `params.${i}`,
-                            status: 400,
-                        }
+                            statusCode: 400,
+                            errorCode: "NotLoggedIn",
+                        });
                     } else if (param === "@me") {
                         // Modify given param
                         param = "" + (req.user as FullUser).id;
@@ -59,9 +63,10 @@ export default async function validateURLParameters(
 
                     return await database.actions.users.exists(parseInt(param));
                 },
-                "guild": database.actions.guilds.exists,
-                "channel": database.actions.channels.exists,
-                "message": database.actions.messages.exists
+                "guild": (param: string) => database.actions.guilds.exists(parseInt(param)),
+                "channel": (param: string) => database.actions.channels.exists(parseInt(param)),
+                "message": (param: string) => database.actions.messages.exists(parseInt(param)),
+                "invite": (param: string) => database.actions.invites.exists(param),
             }[paramTest.is];
 
             // Check if it worked
@@ -71,7 +76,7 @@ export default async function validateURLParameters(
             }
 
             // Run it
-            let result = await action(parseInt(param));
+            let result = await action(param);
 
             // Validate it
             if (result !== true) {
@@ -79,11 +84,12 @@ export default async function validateURLParameters(
                 if (result !== false) {
                     return result;
                 } else {
-                    return {
+                    return new AuthenticationError({
                         message: `The ${paramTest.is} ${param} does not exist`,
                         at: `params.${i}`,
-                        status: 404,
-                    }
+                        statusCode: 404,
+                        errorCode: "NonexistentResource",
+                    });
                 }
             }
         }
@@ -93,11 +99,12 @@ export default async function validateURLParameters(
             let ableToView = await canView(req.user as User, paramTest.is as Resource, parseInt(req.params[i]));
 
             if (!ableToView) {
-                return {
+                return new AuthenticationError({
                     message: `You do not have permission to view the ${paramTest.is} ${req.params[i]}`,
                     at: `params.${i}`,
-                    status: 401,
-                };
+                    statusCode: 401,
+                    errorCode: "NotAllowedToViewResource"
+                });
             }
         }
     }
@@ -119,11 +126,12 @@ export default async function validateURLParameters(
 
                 // Compare IDs
                 if (message.channel_id !== parseInt(req.params[paramTest.mustBeFrom])) {
-                    return {
-                        message: `The message ${message.channel_id} is not from the channel ${req.params[paramTest.mustBeFrom]}`,
+                    return new AuthenticationError({
+                        message: `The message ${message.id} is not from the channel ${req.params[paramTest.mustBeFrom]}`,
                         at: `params.${i}`,
-                        status: 401,
-                    };
+                        statusCode: 401,
+                        errorCode: "InvalidUrl",
+                    });
                 }
             } else {
                 console.error(`Cannot compare ${paramTest.is} and ${otherThing.is} for mustBeFrom`);
@@ -131,6 +139,4 @@ export default async function validateURLParameters(
             }
         }
     }
-
-    return true;
 }

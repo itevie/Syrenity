@@ -6,17 +6,14 @@ import ajvFormat from 'ajv-formats';
 import ajvErrors from 'ajv-errors';
 import validateURLParameters from "./authenticatorValidateParamater";
 import { actions } from "../util/database";
+import validatePermissions from "./authenticatorValidatePermissions";
+import AuthenticationError from "../errors/AuthenticationError";
 
-export interface AuthenticationError {
-    message: string,
-    at: string,
-    status: number,
-}
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvFormat(ajv);
 ajvErrors(ajv);
 
-export default async(
+export default async (
     req: express.Request,
     res: express.Response,
     next: express.NextFunction
@@ -47,23 +44,28 @@ export default async(
 
             // Check if existent
             if (!token) {
-                return res.status(400).send({
+                return res.status(400).send(new AuthenticationError({
                     message: `Invalid authorization format`,
-                    at: `header.authorization`
-                });
+                    at: `header.authorization`,
+                    errorCode: "InvalidAuthorizationFormat",
+                    data: {
+                        expectedFormat: `Token token-here`
+                    }
+                }).extract());
             }
 
             // Try fetch the application
             try {
                 const application = await actions.applications.fetchByToken(token);
                 const user = await actions.users.fetch(application.bot_account);
-                req.login(user, () => {});
+                req.login(user, () => { });
                 req.user = user;
             } catch {
-                return res.status(400).send({
+                return res.status(400).send(new AuthenticationError({
                     message: `Invalid token`,
-                    at: `header.authorization`
-                });
+                    errorCode: `InvalidToken`,
+                    at: `header.authorization`,
+                }).extract());
             }
         }
 
@@ -72,23 +74,21 @@ export default async(
             // Check if needs to be logged in
             if (route.auth.loggedIn) {
                 if (!req.user) {
-                    return res.status(401).send({
-                        message: `You need to be logged in to access this resource`
-                    });
+                    return res.status(401).send(new AuthenticationError({
+                        message: `You need to be logged in to access this resource`,
+                        errorCode: `NotLoggedIn`,
+                    }).extract());
                 }
             }
         }
 
         // Validation
         if (route.params) {
-            const valid = await validateURLParameters(req, res, route.params);
+            const error = await validateURLParameters(req, res, route.params);
 
             // Check if it was valid
-            if (typeof valid !== "boolean") {
-                return res.status(valid.status).send({
-                    message: valid.message,
-                    at: valid.at
-                });
+            if (error) {
+                return res.status(error.data?.statusCode || 400).send(error.extract());
             }
         }
 
@@ -100,10 +100,22 @@ export default async(
             // Check if it was valid
             const valid = validate(req.body);
             if (!valid) {
-                return res.status(400).send({
+                return res.status(400).send(new AuthenticationError({
                     message: `There are errors in the body of your request`,
-                    errors: generateErrorFromSchemaErrors(validate)
-                })
+                    errorCode: "InvalidBody",
+                    data: {
+                        errors: generateErrorFromSchemaErrors(validate)
+                    }
+                }).extract());
+            }
+        }
+
+        // Check if permissions need to be validated
+        if (route.permissions) {
+            const error = await validatePermissions(req, res, route.permissions);
+
+            if (error) {
+                return res.status(error.data.statusCode || 400).send(error.extract());
             }
         }
 
@@ -116,7 +128,7 @@ export default async(
 }
 
 function generateErrorFromSchemaErrors(validate: ValidateFunction) {
-    const errors: {[key: string]: any} = [];
+    const errors: { [key: string]: any } = [];
 
     for (const i in validate.errors) {
         errors.push({

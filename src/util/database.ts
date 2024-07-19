@@ -3,9 +3,11 @@ import config from "../config.json";
 import Logger from "./Logger";
 import actions from "./dbactions/init";
 import DatabaseError from "../errors/DatabaseError";
+import ErrorType from "../errors/ErrorTypes";
+import CacheManager from "./CacheManager";
 
 // Create client
-const client = new pg.Client(config.database.constring);
+export const client = new pg.Client(config.database.constring);
 const logger = new Logger("database");
 
 /**
@@ -30,12 +32,18 @@ export async function close(): Promise<void> {
     logger.log("Database client disconnected");
 }
 
+const cache = new CacheManager();
+
 /**
  * Create a query to the database
  * @param data The database query options
  * @returns The query result
  */
 export async function query(data: DatabaseQuery): Promise<pg.QueryResult> {
+    const cacheResult = cache.check(data);
+
+    if (cacheResult !== null) return cacheResult;
+
     // Create the query
     const result = await client.query({
         text: data.text,
@@ -48,23 +56,81 @@ export async function query(data: DatabaseQuery): Promise<pg.QueryResult> {
             message: data.noRowsError.message,
             safeMessage: data.noRowsError.safeMessage ?? data.noRowsError.message,
             statusCode: 404,
+            errorCode: data.noRowsError.errorCode ?? "UnknownDatabaseError"
         });
     }
+
+    // Add to cache
+    cache.add(data, result);
 
     return result;
 }
 
-interface DatabaseQuery {
+export async function quickQuery(query: string): Promise<pg.QueryResult> {
+    return await client.query({
+        text: query,
+        values: []
+    });
+}
+
+export interface DatabaseQuery {
     text: string;
     values: any[];
+    cache?: DatabaseQueryCacheOptions,
     noRowsError?: {
         message: string;
         safeMessage?: string;
+        errorCode?: ErrorType,
     };
 }
 
-interface DatabaseQueryCachOptions {
-    
+export type CacheKey =
+    // ----- Channels -----
+    | "ChannelByID"
+    | "ChannelExists"
+
+    // ----- Guilds -----
+    | "GuildByID"
+    | "GuildExists"
+    | "GuildHasMember"
+
+    // ----- Messages -----
+    | "MessageByID"
+    | "MessageExists"
+
+    // ----- Users -----
+    | "UserByID"
+    | "UserExists"
+
+export interface DatabaseQueryCachOptionsAdd {
+    /**
+     * The name of the item in the cache
+     */
+    name: CacheKey,
+
+    /**
+     * The key the item is under in the cache
+     * 
+     * i.e. user 32 in name USER_BY_ID 
+     */
+    key: any,
+
+    /**
+     * How long this item will survive in cache
+     */
+    life?: number,
 }
 
-export {actions};
+export interface DatabaseQueryCachOptionsDelete {
+    /**
+     * Whether or not calling this query will clear cache
+     */
+    clear?: {
+        names: CacheKey[],
+        keys: any[],
+    }
+}
+
+export type DatabaseQueryCacheOptions = DatabaseQueryCachOptionsAdd | DatabaseQueryCachOptionsDelete;
+
+export { actions };

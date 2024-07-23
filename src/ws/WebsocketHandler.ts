@@ -76,8 +76,8 @@ export default class WebsocketHandler {
 
             try {
                 // Attempt to fetch the application
-                const application = await database.actions.applications.fetchByToken(data.token);
-                const user = await database.actions.users.fetch(application.bot_account);
+                const application = await database.actions.tokens.fetchByToken(data.token);
+                const user = await database.actions.users.fetch(application.account);
 
                 // Done
                 if (this.data.onceAuthenticated) {

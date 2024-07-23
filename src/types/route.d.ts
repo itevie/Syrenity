@@ -27,6 +27,7 @@ interface AuthenticationDetails {
     loggedIn?: boolean,
     botsOnly?: boolean,
     disallowBots?: boolean,
+    sessionOnly?: boolean,
 }
 
 interface ParameterDetails {

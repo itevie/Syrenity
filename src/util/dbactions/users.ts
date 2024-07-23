@@ -71,5 +71,18 @@ export default {
             `,
             values: [userId]
         })).rows as Guild[];
+    },
+
+    setAvatar: async (userId: number, newAvatar: string): Promise<void> => {
+        await database.query({
+            text: `UPDATE users SET avatar = $2 WHERE id = $1`,
+            values: [userId, newAvatar],
+            cache: {
+                clear: {
+                    names: ["UserByID"],
+                    keys: [userId]
+                }
+            }
+        });
     }
 }

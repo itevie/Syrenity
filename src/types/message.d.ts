@@ -6,4 +6,6 @@ interface Message {
     author_id: number,
     is_pinned: number,
     is_edited: number,
+    is_system: boolean,
+    sys_type: string | null,
 }

@@ -22,7 +22,7 @@ const handler: RouteDetails = {
                 if (err) return next(err);
 
                 // Done
-                return res.status(200).redirect("/");
+                return res.status(200).send({ message: "test" })
             });
         })(req, res, next);
     }

@@ -95,7 +95,7 @@ export default async function validateURLParameters(
         }
 
         // Check canview
-        if (!("canView" in paramTest) || paramTest.canView) {
+        if ((!("canView" in paramTest) || paramTest.canView) && req.params[i] !== "-1") {
             let ableToView = await canView(req.user as User, paramTest.is as Resource, parseInt(req.params[i]));
 
             if (!ableToView) {

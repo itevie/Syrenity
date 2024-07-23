@@ -9,6 +9,9 @@ type ErrorType =
     // Body Validation
     | "InvalidBody"
 
+    // Files
+    | "MustBeSyrenityFileUrl"
+
     // URL Validation
     | "UrlParameterTypeError"
     | "MustBeSelfForParameter"
@@ -23,6 +26,7 @@ type ErrorType =
     | "NotLoggedIn"
     | "InvalidToken"
     | "InvalidAuthorizationFormat"
+    | "SessionsOnly"
 
     // Resource
     | "NonexistentResource"

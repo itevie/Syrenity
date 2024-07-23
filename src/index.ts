@@ -16,6 +16,7 @@ import requestLogger from "./middleware/requestLogger";
 import { hasPermission } from "./util/permissionChecker";
 import { defaultBitfield } from "./util/PermissionBitfield";
 import ErrorHandler from "./middleware/ErrorHandler";
+import { generateToken } from "./util/util";
 
 // Basic setup
 const logger = new Logger("server");

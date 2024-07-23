@@ -1,3 +1,4 @@
+import { SystemMessageTypes } from "../../broadcasting/SystemMessageTypes";
 import { actions, query } from "../database";
 
 export interface MessageUpdateOptions {
@@ -8,6 +9,8 @@ export interface CreateMessageOptions {
     content: string,
     authorId: number,
     channelId: number,
+    isSystem?: boolean,
+    systemType?: keyof SystemMessageTypes
 }
 
 export interface MessageQueryOptions {
@@ -57,11 +60,11 @@ export default {
     create: async (options: CreateMessageOptions): Promise<Message> => {
         return (await query({
             text: `
-                INSERT INTO messages(channel_id, content, author_id, created_at)
-                    VALUES(${options.channelId}, $1, ${options.authorId}, CURRENT_TIMESTAMP)
+                INSERT INTO messages(channel_id, content, author_id, created_at, is_system, sys_type)
+                    VALUES(${options.channelId}, $1, ${options.authorId}, CURRENT_TIMESTAMP, $2, $3)
                     RETURNING *
             `,
-            values: [options.content]
+            values: [options.content, options.isSystem || false, options.systemType || null]
         })).rows[0] as Message;
     },
 

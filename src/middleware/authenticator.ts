@@ -56,8 +56,8 @@ export default async (
 
             // Try fetch the application
             try {
-                const application = await actions.applications.fetchByToken(token);
-                const user = await actions.users.fetch(application.bot_account);
+                const t = await actions.tokens.fetchByToken(token);
+                const user = await actions.users.fetch(t.account);
                 req.login(user, () => { });
                 req.user = user;
             } catch {
@@ -79,6 +79,15 @@ export default async (
                         errorCode: `NotLoggedIn`,
                     }).extract());
                 }
+            }
+
+            // CHeck if session only
+            if (route.auth.sessionOnly) {
+                if (req.headers.authorization)
+                    return res.status(401).send(new AuthenticationError({
+                        message: `You must be accessing this resource via a browser session`,
+                        errorCode: "SessionsOnly"
+                    }).extract());
             }
         }
 

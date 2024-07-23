@@ -4,7 +4,10 @@ const handler: RouteDetails = {
     method: "GET",
     path: "/api/ping",
     handler: (req, res) => {
-        return res.status(200).send("Pong!");
+        return res.status(200).send({
+            message: "Pong!",
+            user: (req.user)
+        });
     }
 };
 

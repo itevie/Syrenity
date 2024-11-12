@@ -102,6 +102,9 @@ export type CacheKey =
     | "UserByID"
     | "UserExists"
 
+    // ----- Roles -----
+    | "RoleByID"
+
 export interface DatabaseQueryCachOptionsAdd {
     /**
      * The name of the item in the cache

@@ -7,3 +7,7 @@ interface Channel {
     name: string,
     topic: string,
 }
+
+interface ChannelFull extends Channel {
+    role_overrides: ChannelRoleOverride[],
+}

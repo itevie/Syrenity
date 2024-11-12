@@ -6,4 +6,5 @@ interface Role {
     bitfield_deny: number,
     is_everyone: boolean,
     color: string,
+    rank: number,
 }

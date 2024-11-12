@@ -1,34 +1,35 @@
 type ErrorType =
-    // Basic
-    | "UnknownError"
-    | "UnknownServerError"
-    | "UnknownDatabaseError"
+  // Basic
+  | "UnknownError"
+  | "UnknownServerError"
+  | "UnknownDatabaseError"
 
-    // Database
+  // Database
 
-    // Body Validation
-    | "InvalidBody"
+  // Body Validation
+  | "InvalidBody"
 
-    // Files
-    | "MustBeSyrenityFileUrl"
+  // Files
+  | "MustBeSyrenityFileUrl"
 
-    // URL Validation
-    | "UrlParameterTypeError"
-    | "MustBeSelfForParameter"
-    | "InvalidUrl"
+  // URL Validation
+  | "UrlParameterTypeError"
+  | "MustBeSelfForParameter"
+  | "InvalidUrl"
 
-    // Permission
-    | "MissingPermissions"
-    | "NotAllowedToViewResource"
-    | "NotAuthor"
+  // Permission
+  | "MissingPermissions"
+  | "NotAllowedToViewResource"
+  | "NotAuthor"
 
-    // Authentication
-    | "NotLoggedIn"
-    | "InvalidToken"
-    | "InvalidAuthorizationFormat"
-    | "SessionsOnly"
+  // Authentication
+  | "NotLoggedIn"
+  | "InvalidToken"
+  | "InvalidAuthorizationFormat"
+  | "SessionsOnly"
+  | "InvalidEmailOrPassword"
 
-    // Resource
-    | "NonexistentResource"
-    | "AlreadyAMember"
+  // Resource
+  | "NonexistentResource"
+  | "AlreadyAMember";
 export default ErrorType;

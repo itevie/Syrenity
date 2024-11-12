@@ -1,7 +1,7 @@
-import BaseError, { ErrorDetails } from "./BaseError";
+import SyrenityError, { ErrorDetails } from "./BaseError";
 
-export default class AuthenticationError extends BaseError {
-    constructor(details: ErrorDetails) {
-        super(details);
-    }
+export default class AuthenticationError extends SyrenityError {
+  constructor(details: ErrorDetails) {
+    super(details);
+  }
 }

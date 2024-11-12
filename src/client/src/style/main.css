@@ -1,0 +1,61 @@
+:root {
+  --sy-serverbar-color: #111;
+  --sy-topbar-color: #111;
+  --sy-channelbar-color: #222;
+  --sy-chat-color: #222;
+  --sy-messageinput-color: var(--sy-channelbar-color);
+
+  --sy-panel-border-color: #555;
+  --sy-panel-border-width: 1px;
+}
+
+.sy-serverbar {
+  background-color: var(--sy-serverbar-color);
+  width: 64px;
+}
+
+.sy-serverbar > *::-webkit-scrollbar {
+  display: none;
+}
+
+.sy-serverlist,
+.sy-topbar,
+.sy-channellist,
+.sy-accountarea {
+  border-width: var(--sy-panel-border-width);
+  border-color: var(--sy-panel-border-color);
+}
+
+.sy-serverlist {
+  border-right-style: solid;
+  gap: 5px;
+}
+
+.sy-topbar {
+  border-bottom-style: solid;
+  background-color: var(--sy-topbar-color);
+  height: 50px;
+}
+
+.sy-channelbar {
+  background-color: var(--sy-channelbar-color);
+  width: 300px;
+}
+
+.sy-channellist {
+  border-right-style: solid;
+}
+
+.sy-messageinput {
+  background-color: var(--sy-messageinput-color);
+}
+
+.sy-chatarea {
+  background-color: var(--sy-chat-color);
+  gap: 10px;
+}
+
+.sy-accountarea {
+  border-top-style: solid;
+  border-right-style: solid;
+}

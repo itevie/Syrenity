@@ -8,3 +8,9 @@ CREATE TABLE invites (
     max_uses INT DEFAULT NULL,
     uses INT DEFAULT 0 NOT NULL
 );
+
+CREATE TABLE assigned_roles (
+    member_id INT REFERENCES users(id) NOT NULL,
+    role_id INT REFERENCES roles(id) NOT NULL,
+    guild_id INT REFERENCES guilds(id) NOT NULL
+);

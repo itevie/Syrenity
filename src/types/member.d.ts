@@ -3,3 +3,7 @@ interface Member {
     user_id: number,
     nickname: string,
 }
+
+interface MemberFull extends Member {
+    roles: Role[]
+}

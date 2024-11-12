@@ -1,139 +1,86 @@
 import WebSocket from "ws";
-import config from "../config.json";
-import * as database from "../util/database";
-import { Operation } from "./opCodes";
-import { WSClientAuthenticate } from "./WebsocketMessages";
-import { WebsocketDispatchTypes } from "./WebsocketDispatchTypes";
+import {
+  BaseWSMessage,
+  IdentifyWSMessage,
+  WebsocketType,
+} from "./websocketData";
+import database from "../database/database";
 
-interface WebsocketConnectionInitOptions {
-    uuid: string;
-    awaitingAuthentication: boolean;
-    onceAuthenticated?: (user: User) => void;
-    user?: User;
-}
-
-interface BaseSend {
-    op: Operation,
-    t?: keyof WebsocketDispatchTypes,
-    d: object,
+interface WSConnectionOptions {
+  uuid: string;
+  onceAuthenticated: (user: User) => void;
+  user?: User;
 }
 
 export default class WebsocketHandler {
-    private uuid: string;
-    private ws: WebSocket;
-    private data: WebsocketConnectionInitOptions;
+  private ws: WebSocket;
+  private data: WSConnectionOptions;
 
-    constructor(id: string, ws: WebSocket) {
-        this.uuid = id;
-        this.ws = ws;
+  constructor(data: WSConnectionOptions, ws: WebSocket) {
+    this.ws = ws;
+    this.data = data;
 
-        this.ws.on("message", rawMessage => {
-            let message: any;
-            try {
-                message = JSON.parse(rawMessage.toString());
-            } catch {
-                this.send({
-                    op: "ERROR",
-                    d: {
-                        error: `Invalid JSON message was sent: ${rawMessage.toString()}`
-                    }
-                });
-
-                return;
-            }
-
-            // Check for OP
-            if (!message.op) {
-                return this.basicError(`Missing operation: ${rawMessage.toString()}`);
-            }
-
-            // Check if valid op
-            if (!this.operations[message.op]) {
-                return this.basicError(`Invalid operation: ${message.op}`);
-            }
-
-            // Check for d
-            if (!message.d) {
-                return this.basicError(`Missing d field: ${rawMessage.toString()}`);
-            }
-
-            // Execute
-            this.operations[message.op](message.d);
+    this.ws.on("message", (rawMessage) => {
+      let message: BaseWSMessage;
+      try {
+        message = JSON.parse(rawMessage.toString());
+      } catch {
+        return this.send("Error", {
+          error: `Invalid JSON message was sent: ${rawMessage.toString()}`,
         });
-    }
+      }
 
-    operations = {
-        "AUTHENTICATE": async (data: WSClientAuthenticate) => {
-            // Check if already authenticated
-            if (this.data.user) {
-                return this.basicError(`Already authenticated`);
-            }
-
-            // Check if token is present
-            if (!data.token) {
-                return this.basicError(`Token was not provided in AUTHENTICATE`);
-            }
-
-            try {
-                // Attempt to fetch the application
-                const application = await database.actions.tokens.fetchByToken(data.token);
-                const user = await database.actions.users.fetch(application.account);
-
-                // Done
-                if (this.data.onceAuthenticated) {
-                    this.data.onceAuthenticated(user);
-                }
-            } catch {
-                return this.basicError(`Invalid token provided`);
-            }
-        }
-    }
-
-    /**
-     * Sends the JSON data to the client
-     * @param data What to send
-     */
-    public send(data: BaseSend) {
-        this.ws.send(JSON.stringify(data));
-    }
-
-    public basicError(message: string) {
-        this.send({
-            op: "ERROR",
-            d: {
-                message
-            }
+      // Check if it is valid
+      if (!message.type)
+        return this.send("Error", {
+          error: `Missing type: ${rawMessage.toString()}`,
         });
-    }
 
-    /**
-     * Initiates the websocket connection
-     * @param options The connection options
-     */
-    public async init(options: WebsocketConnectionInitOptions): Promise<void> {
-        this.data = options;
+      if (!this.operations[message.type])
+        return this.basicError("Invalid operation");
 
-        // Check if the user is already logged in
-        if (!options.awaitingAuthentication) {
-            // Send details to the client
-            this.send({
-                op: "HELLO",
-                d: {
-                    heartbeat_interval: config.ws.heartbeat_interval,
-                    user: this.data.user ?? null,
-                    guilds: this.data.user
-                        ? await database.actions.users.fetchGuilds(this.data.user.id)
-                        : []
-                }
-            });
-        } else {
-            // Ask the connection to authenticate via token
-            this.send({
-                op: "AUTHENTICATE",
-                d: {
-                    heartbeat_interval: config.ws.heartbeat_interval,
-                }
-            });
-        }
-    }
+      this.operations[message.type](message.payload);
+    });
+
+    this.send("Authenticate", {});
+  }
+
+  operations = {
+    Identify: async (data: IdentifyWSMessage) => {
+      console.log(data);
+      if (this.data.user) return this.basicError("Already authenticated");
+      if (!data.token || typeof data.token !== "string")
+        return this.basicError(
+          "Token was not provided in authentication payload"
+        );
+
+      try {
+        const user = await database.users.fetchByToken(data.token);
+        this.data.user = user;
+        this.data.onceAuthenticated(user);
+        this.send("Hello", {
+          user,
+        });
+      } catch (e) {
+        return this.basicError(`Failed to authenticate: ${e.message}`);
+      }
+    },
+  };
+
+  private basicError(error: string) {
+    this.send("Error", {
+      error,
+    });
+  }
+
+  public send(type: WebsocketType, data: object) {
+    this.ws.send(
+      JSON.stringify({
+        type,
+        payload: {
+          ...data,
+        },
+      })
+    );
+  }
 }

@@ -1,0 +1,3 @@
+[submodule "src/client/src/dawn-ui"]
+	path = src/client/src/dawn-ui
+	url = https://github.com/itevie/dawn-ui

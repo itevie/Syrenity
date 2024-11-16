@@ -1,14 +1,26 @@
 {
-    "compilerOptions": {
-        "resolveJsonModule": true,
-        "target": "es2022",
-        "module": "NodeNext",
-        "strictNullChecks": true,
-        "typeRoots": [
-            "./src/t"
-        ]
-    },
-    "ts-node": {
-        "files": true
-    },
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "build",
+    "esModuleInterop": true,
+    "noImplicitReturns": false,
+    "target": "es2022",
+    "allowSyntheticDefaultImports": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "typeRoots": ["./src/types"],
+    "resolveJsonModule": true,
+    "strictNullChecks": true
+  },
+  "ts-node": {
+    "files": true
+  },
+  "files": ["src/**/*.d.ts"],
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts",
+    "src/public/ts/general.js",
+    "src/public/ts/axios.js",
+    "src/public/ts/lib/marked.esm.js"
+  ]
 }

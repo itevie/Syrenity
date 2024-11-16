@@ -1,7 +1,7 @@
 import { generateToken } from "../util/util";
 import { Database } from "./database";
 
-export class DatabaseTokens {
+export default class DatabaseTokens {
   public db: Database;
 
   constructor(db: Database) {

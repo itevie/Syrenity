@@ -2,8 +2,8 @@ import pg from "pg";
 import Logger from "../util/Logger";
 import ErrorType from "../errors/ErrorTypes";
 import DatabaseError from "../errors/DatabaseError";
-import { DatabaseUsers } from "./users";
-import { DatabaseTokens } from "./tokens";
+import DatabaseUsers from "./users";
+import DatabaseTokens from "./tokens";
 import DatabaseServers from "./servers";
 
 export interface DatabaseQueryOptions {
@@ -20,6 +20,7 @@ export class Database {
   public client: pg.Client;
   public logger = new Logger("database");
 
+  // @ts-ignore
   public users = new DatabaseUsers(this);
   public tokens = new DatabaseTokens(this);
   public servers = new DatabaseServers(this);

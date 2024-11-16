@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Client } from "./syrenity-client/index";
 import Row from "./dawn-ui/components/Row";
-import FullPage from "./dawn-ui/components/FullPage";
 import Server from "./syrenity-client/structures/Server";
 import Icon from "./dawn-ui/components/Icon";
 import Column from "./dawn-ui/components/Column";
@@ -14,10 +13,11 @@ import { addUser } from "./stores/userStore";
 import { combineStyles } from "./dawn-ui/util";
 import { showContextMenu } from "./dawn-ui/components/ContextMenuManager";
 import {
-  addModel,
-  showInformation,
-  showInputModel,
+  addAlert,
+  showInfoAlert,
+  showInputAlert,
 } from "./dawn-ui/components/AlertManager";
+import FullPage from "./dawn-ui/components/FullPage";
 
 export let client: Client;
 
@@ -121,7 +121,6 @@ function App() {
 
   function showUserAreaCtx(e: React.MouseEvent<HTMLImageElement, MouseEvent>) {
     showContextMenu({
-      attachTo: e.currentTarget,
       event: e,
       elements: [
         {
@@ -138,7 +137,7 @@ function App() {
   }
 
   async function joinServerButton() {
-    addModel({
+    addAlert({
       title: "Join or create a server",
       body: <label>What exciting adventure shall we set ahead on today?</label>,
       buttons: [
@@ -153,7 +152,7 @@ function App() {
           id: "join",
           text: "Join",
           click: async () => {
-            const input = await showInputModel("Enter Invite Code");
+            const input = await showInputAlert("Enter Invite Code");
             if (!input) return;
           },
         },
@@ -161,7 +160,7 @@ function App() {
           id: "create",
           text: "Create",
           click: async () => {
-            const name = await showInputModel("Enter the server name");
+            const name = await showInputAlert("Enter the server name");
             if (!name) return;
             const server = await client.createServer(name);
             console.log(server);
@@ -176,7 +175,6 @@ function App() {
     e: React.MouseEvent<HTMLImageElement, MouseEvent>
   ) {
     showContextMenu({
-      attachTo: e.currentTarget,
       event: e,
       elements: [
         {
@@ -185,7 +183,7 @@ function App() {
           onClick: async () => {
             const guild = await client.servers.fetch(id);
             const invite = await guild.invites.create();
-            showInformation(invite.id);
+            showInfoAlert(invite.id);
           },
         },
       ],

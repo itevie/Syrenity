@@ -1,14 +1,5 @@
-import SyNavbar from "../components/SyNavbar";
-import Content from "../dawn-ui/components/Content";
-import Page from "../dawn-ui/components/Page";
+import SyPage from "../components/SyPage";
 
 export default function Home() {
-  return (
-    <Page>
-      <SyNavbar />
-      <Content>
-        <></>          
-      </Content>
-    </Page>
-  )
+  return <SyPage>Syrenity</SyPage>;
 }

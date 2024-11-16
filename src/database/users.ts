@@ -1,26 +1,9 @@
 import AuthenticationError from "../errors/AuthenticationError";
-import SyrenityError from "../errors/BaseError";
+import { stripUser } from "../util/util";
 import database, { Database } from "./database";
 import * as bcrypt from "bcrypt";
 
-/**
- * Strips a FullUser of its scary details
- * @param oldUser The object to strip
- * @returns A normal user object
- */
-export function stripUser(oldUser: FullUser): User {
-  return {
-    id: oldUser.id,
-    username: oldUser.username,
-    discriminator: oldUser.discriminator,
-    avatar: oldUser.avatar,
-    created_at: oldUser.created_at,
-    bio: oldUser.bio,
-    is_bot: oldUser.is_bot,
-  };
-}
-
-export class DatabaseUsers {
+export default class DatabaseUsers {
   public db: Database;
 
   constructor(db: Database) {

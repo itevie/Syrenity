@@ -35,3 +35,20 @@ export function randomID(length: number) {
   }
   return result;
 }
+
+/**
+ * Strips a FullUser of its scary details
+ * @param oldUser The object to strip
+ * @returns A normal user object
+ */
+export function stripUser(oldUser: FullUser): User {
+  return {
+    id: oldUser.id,
+    username: oldUser.username,
+    discriminator: oldUser.discriminator,
+    avatar: oldUser.avatar,
+    created_at: oldUser.created_at,
+    bio: oldUser.bio,
+    is_bot: oldUser.is_bot,
+  };
+}

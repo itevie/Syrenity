@@ -10,6 +10,7 @@ import Home from "./pages/Home";
 import { Provider } from "react-redux";
 import store from "./stores/store";
 import ContextMenuManager from "./dawn-ui/components/ContextMenuManager";
+import { FlyoutManager } from "./dawn-ui/components/Flyout";
 
 const router = createBrowserRouter([
   {
@@ -37,6 +38,7 @@ root.render(
   <Provider store={store}>
     <ContextMenuManager />
     <AlertManager />
+    <FlyoutManager />
     <RouterProvider router={router} />
   </Provider>
 );

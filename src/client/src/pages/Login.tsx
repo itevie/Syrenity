@@ -34,10 +34,7 @@ export default function Login() {
   return (
     <SyPage>
       <Row>
-        <Container
-          style={{ width: "500px" }}
-          title="Login to your Syrenity account"
-        >
+        <Container title="Login to your Syrenity account">
           <table style={{ width: "100%" }}>
             <tbody>
               <tr>

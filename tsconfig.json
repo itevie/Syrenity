@@ -15,6 +15,7 @@
   "ts-node": {
     "files": true
   },
+  "exclude": ["old/v0"],
   "files": ["src/**/*.d.ts"],
   "include": [
     "src/**/*.ts",

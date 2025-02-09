@@ -48,7 +48,7 @@ interface ParameterDetails {
 
 type QueryOptions = "positiveNumber";
 interface QueryDetails {
-  type: "number" | "boolean";
+  type: "number" | "boolean" | "string";
   optional?: boolean;
   defaultValue?: string;
   options?: QueryOptions[];

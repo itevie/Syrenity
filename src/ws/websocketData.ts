@@ -1,4 +1,9 @@
-export type WebsocketType = "Hello" | "Identify" | "Authenticate" | "Error";
+export type WebsocketType =
+  | "Hello"
+  | "Identify"
+  | "Authenticate"
+  | "Error"
+  | "Dispatch";
 
 export interface BaseWSMessage {
   type: WebsocketType;

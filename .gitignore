@@ -5,3 +5,4 @@ node_modules/
 src/imgur_token.txt
 files/
 stuff/
+!src/routes/files

@@ -11,6 +11,7 @@ type ErrorType =
 
   // Files
   | "MustBeSyrenityFileUrl"
+  | "FileNotOnDisk"
 
   // URL Validation
   | "UrlParameterTypeError"

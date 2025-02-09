@@ -28,6 +28,7 @@
 
 .sy-serverlist {
   border-right-style: solid;
+  overflow: auto;
   gap: 5px;
 }
 
@@ -40,6 +41,7 @@
 .sy-channelbar {
   background-color: var(--sy-channelbar-color);
   width: 300px;
+  overflow-y: scroll;
 }
 
 .sy-channellist {
@@ -58,4 +60,30 @@
 .sy-accountarea {
   border-top-style: solid;
   border-right-style: solid;
+}
+
+.sy-attachment-image {
+  max-width: 600px;
+  height: 400px;
+  transition: 0.3s;
+  object-fit: contain;
+}
+
+.sy-attachment-image:hover {
+  filter: brightness(80%);
+  cursor: pointer;
+}
+
+.sy-image-fullscreen {
+  --image-padding: 100px;
+  width: 100vw;
+  height: 100vh;
+  max-width: calc(100vw - var(--image-padding));
+  max-height: calc(100vh - var(--image-padding));
+  margin: 10px;
+  object-fit: contain;
+}
+
+.sy-message-content > p {
+  margin: 0;
 }

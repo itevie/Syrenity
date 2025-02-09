@@ -37,7 +37,7 @@ export default function Register() {
   return (
     <SyPage>
       <Row>
-        <Container style={{ width: "500px" }} title="Register to Syrenity">
+        <Container title="Register to Syrenity">
           <table style={{ width: "100%" }}>
             <tbody>
               <tr>

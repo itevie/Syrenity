@@ -119,8 +119,8 @@ export default async (
     }
 
     // Validation
-    if (route.params) {
-      const error = await validateURLParameters(req, res, route.params);
+    if (req.params) {
+      const error = await validateURLParameters(req, res, route.params || {});
 
       // Check if it was valid
       if (error) {

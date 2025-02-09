@@ -1,11 +1,11 @@
 import { ReactNode } from "react";
 import Page from "../dawn-ui/components/Page";
-import SyNavbar from "./SyNavbar";
+import PageNavbar from "./PageNavbar";
 
 export default function SyPage({ children }: { children: ReactNode }) {
   return (
     <>
-      <SyNavbar />
+      <PageNavbar />
       <Page>{children}</Page>
     </>
   );

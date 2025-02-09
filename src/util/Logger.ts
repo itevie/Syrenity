@@ -11,8 +11,9 @@ export default class Logger {
     return `[${this.name}]: ` + `${contents}`;
   }
 
-  public log(contents: string): void {
-    console.log(this.generateDefaultText(contents));
+  public log(...contents: any[]): void {
+    for (const content of contents)
+      console.log(this.generateDefaultText(content));
   }
 
   public error(contents: string): void {

@@ -1,18 +1,26 @@
+import { useEffect, useState } from "react";
 import { client } from "../App";
 import Column from "../dawn-ui/components/Column";
 import { showContextMenu } from "../dawn-ui/components/ContextMenuManager";
-import Icon from "../dawn-ui/components/Icon";
 import Row from "../dawn-ui/components/Row";
 import { useAppSelector } from "../stores/store";
-import File from "../syrenity-client/structures/File";
 import Message from "../syrenity-client/structures/Message";
+import UserIcon from "./UserIcon";
+import { AxiosResponse } from "axios";
+import MessageImageAttachment from "./MessageImageAttachment";
+import { setFullscreenImage } from "./ImageViewer";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { showInfoAlert } from "../dawn-ui/components/AlertManager";
 
 export default function MessageC({ message }: { message: Message }) {
   const users = useAppSelector((x) => x.users);
+  const [embeds, setEmbeds] = useState<JSX.Element[]>([]);
 
   function showMsgContextMenu(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     showContextMenu({
       event: e,
+      ignoreClasses: [".dawn-icon", ".sy-attachment-image"],
       elements: [
         {
           type: "button",
@@ -23,7 +31,9 @@ export default function MessageC({ message }: { message: Message }) {
           type: "button",
           label: "Delete Message",
           scheme: "danger",
-          onClick: alert,
+          onClick: async () => {
+            await message.delete();
+          },
         },
         {
           type: "button",
@@ -46,26 +56,79 @@ export default function MessageC({ message }: { message: Message }) {
     });
   }
 
+  useEffect(() => {
+    (async () => {
+      const urls = message.content.match(/https:\/\/[^\s]+/g);
+      const allowedUrls: string[] = [];
+      if (!urls) return;
+
+      for await (const url of urls) {
+        try {
+          const result = (await client.rest.get(
+            `/api/proxy?url=${url}`
+          )) as AxiosResponse;
+          if (
+            !result.headers["content-type"] ||
+            !result.headers["content-type"].startsWith("image/")
+          )
+            continue;
+          allowedUrls.push(`${result.config.baseURL}/api/proxy?url=${url}`);
+
+          setEmbeds((old) => {
+            return [
+              ...old,
+              <MessageImageAttachment
+                onClick={(url) => {
+                  setFullscreenImage(url, allowedUrls);
+                }}
+                url={`${result.config.baseURL}/api/proxy?url=${url}`}
+              />,
+            ];
+          });
+        } catch {}
+      }
+    })();
+  }, [message]);
+
   return (
     <Row
-      util={["no-shrink"]}
-      style={{ gap: "10px" }}
-      onContextMenu={(e) => showMsgContextMenu(e)}
+      style={{
+        gap: "10px",
+      }}
     >
-      <Icon
-        size="48px"
-        src={File.check(users[message.authorId]?.avatar)}
-        fallback="/public/images/logos/no_shape_logo.png"
-      />
-      <Column util={["flex-grow"]} style={{ gap: "5px" }}>
+      <UserIcon id={message.authorId} />
+      <Column
+        style={{ gap: "5px", overflowX: "scroll" }}
+        onContextMenu={(e) => showMsgContextMenu(e)}
+      >
         <Row util={["align-center"]} style={{ gap: "10px" }}>
           <b>
             {users[message.authorId]?.username ??
               `Loading... (ID ${message.authorId})`}
+            ({message.id})
           </b>
           <small>{message.createdAt.toLocaleString()}</small>
         </Row>
-        <label>{message.content}</label>
+        <Markdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            a: ({ node, ...props }) => (
+              <a
+                {...props}
+                onClick={(e) => {
+                  e.preventDefault();
+                  showInfoAlert(
+                    `Are you sure you want to visit ${(e.target as HTMLAnchorElement).href}`
+                  );
+                }}
+              />
+            ),
+          }}
+          className={"sy-message-content"}
+        >
+          {message.content}
+        </Markdown>
+        {embeds.length > 0 && <Row util={["flex-wrap"]}>{embeds}</Row>}
       </Column>
     </Row>
   );

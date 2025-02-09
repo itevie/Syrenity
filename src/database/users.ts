@@ -1,19 +1,13 @@
 import AuthenticationError from "../errors/AuthenticationError";
 import { stripUser } from "../util/util";
-import database, { Database } from "./database";
+import database, { query } from "./database";
 import * as bcrypt from "bcrypt";
 
-export default class DatabaseUsers {
-  public db: Database;
-
-  constructor(db: Database) {
-    this.db = db;
-  }
-
-  public async get(id: number | string): Promise<User> {
+const _actions = {
+  async get(id: number | string): Promise<User> {
     return stripUser(
       (
-        await this.db.query<FullUser>({
+        await query<FullUser>({
           text: "SELECT * FROM users WHERE id = $1",
           values: [id],
           noRowsError: {
@@ -23,11 +17,11 @@ export default class DatabaseUsers {
         })
       ).rows[0]
     );
-  }
+  },
 
-  public async getFull(id: number | string): Promise<FullUser> {
+  async getFull(id: number | string): Promise<FullUser> {
     return (
-      await this.db.query<FullUser>({
+      await query<FullUser>({
         text: "SELECT * FROM users WHERE id = $1",
         values: [id],
         noRowsError: {
@@ -36,11 +30,11 @@ export default class DatabaseUsers {
         },
       })
     ).rows[0];
-  }
+  },
 
-  public async getByEmail(email: string): Promise<FullUser> {
+  async getByEmail(email: string): Promise<FullUser> {
     return (
-      await this.db.query<FullUser>({
+      await query<FullUser>({
         text: "SELECT * FROM users WHERE email = $1",
         values: [email],
         noRowsError: {
@@ -49,9 +43,9 @@ export default class DatabaseUsers {
         },
       })
     ).rows[0];
-  }
+  },
 
-  public async validateEmailPassword(
+  async validateEmailPassword(
     email: string,
     password: string
   ): Promise<FullUser> {
@@ -65,16 +59,16 @@ export default class DatabaseUsers {
     }
 
     return user;
-  }
+  },
 
-  public async fetchByToken(tokenString: string): Promise<FullUser> {
+  async fetchByToken(tokenString: string): Promise<FullUser> {
     const token = await database.tokens.fetch(tokenString);
     return await this.getFull(token.account);
-  }
+  },
 
-  public async getServers(id: number | string): Promise<Server[]> {
+  async getServers(id: number | string): Promise<Server[]> {
     return (
-      await this.db.query<Server>({
+      await query<Server>({
         text: `
         WITH guild_ids AS (
             SELECT guild_id
@@ -92,5 +86,7 @@ export default class DatabaseUsers {
         values: [id],
       })
     ).rows;
-  }
-}
+  },
+};
+
+export default _actions;

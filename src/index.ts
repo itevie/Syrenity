@@ -9,20 +9,15 @@ import passport from "passport";
 
 import Logger from "./util/Logger";
 import config from "./config.json";
-import {
-  actions,
-  initialise as initialiseDatabase,
-  query,
-  quickQuery,
-} from "./util/database";
+import { initialise as initialiseDatabase, quickQuery } from "./util/database";
 import { initialise as initialiseWs, send } from "./ws/websocketUtil";
 import { loadRoutes } from "./util/routeManager";
 import requestLogger from "./middleware/requestLogger";
 import { hasPermission } from "./util/permissionChecker";
 import { defaultBitfield } from "./util/PermissionBitfield";
 import ErrorHandler from "./middleware/ErrorHandler";
-import { generateToken } from "./util/util";
-import database from "./database/database";
+import { generateToken, randomID } from "./util/util";
+import database, { initialise, query } from "./database/database";
 
 // Basic setup
 const logger = new Logger("server");
@@ -38,7 +33,10 @@ const app = expressWs(express()).app;
 
 app.use(requestLogger);
 // Setup static files
-app.use("/public", express.static(path.join(__dirname, "/client/build")));
+app.use(
+  "/public",
+  express.static(path.resolve(path.join(__dirname, "client/build")))
+);
 
 // Setup other middleware
 app.use(cors());
@@ -74,7 +72,7 @@ app.use(passport.session());
 // Final setup
 (async () => {
   await initialiseDatabase();
-  await database.initialise(config.database.constring);
+  await initialise(config.database.constring);
   initialiseWs(app);
   loadRoutes(app);
 

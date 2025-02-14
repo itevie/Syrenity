@@ -12,6 +12,7 @@ import messages from "./messages";
 export interface DatabaseQueryOptions {
   text: string;
   values: any[];
+  ignoreErrors?: boolean;
   noRowsError?: {
     message: string;
     safeMessage?: string;
@@ -44,25 +45,63 @@ const database = {
 
 export default database;
 
-export async function query<T extends pg.QueryResultRow>(
+export async function queryOne<T extends pg.QueryResultRow>(
   options: DatabaseQueryOptions
-): Promise<pg.QueryResult<T>> {
-  if (!client) throw new Error("Database client was not initialised.");
+): Promise<T> {
+  if (!client) {
+    console.error(`Database client was not initialised.`);
+    process.exit(1);
+  }
 
   const result = await client.query<T>({
     text: options.text,
     values: options.values,
   });
 
-  if (options.noRowsError && result.rowCount === 0) {
-    throw new DatabaseError({
-      message: options.noRowsError.message,
-      safeMessage:
-        options.noRowsError.safeMessage ?? options.noRowsError.message,
-      statusCode: 404,
-      errorCode: options.noRowsError.errorCode ?? "UnknownDatabaseError",
-    });
+  if (result.rowCount === 0) {
+    if (options.noRowsError === undefined && options.ignoreErrors) {
+      return null as unknown as T;
+    } else if (options.noRowsError === undefined && !options.ignoreErrors) {
+      console.error(`No rows error not handled`, options);
+      process.exit(1);
+    } else if (options.noRowsError !== undefined) {
+      throw new DatabaseError({
+        message: options.noRowsError.message,
+        safeMessage:
+          options.noRowsError.safeMessage ?? options.noRowsError.message,
+        statusCode: 404,
+        errorCode: options.noRowsError.errorCode ?? "UnknownDatabaseError",
+      });
+    }
   }
 
-  return result;
+  return result.rows[0];
+}
+
+export async function query<T extends pg.QueryResultRow>(
+  options: DatabaseQueryOptions
+): Promise<pg.QueryResult<T>> {
+  try {
+    if (!client) throw new Error("Database client was not initialised.");
+
+    const result = await client.query<T>({
+      text: options.text,
+      values: options.values,
+    });
+
+    if (options.noRowsError && result.rowCount === 0) {
+      throw new DatabaseError({
+        message: options.noRowsError.message,
+        safeMessage:
+          options.noRowsError.safeMessage ?? options.noRowsError.message,
+        statusCode: 404,
+        errorCode: options.noRowsError.errorCode ?? "UnknownDatabaseError",
+      });
+    }
+
+    return result;
+  } catch (e) {
+    console.log(options);
+    throw e;
+  }
 }

@@ -6,6 +6,12 @@ import {
   hasPermission,
 } from "../util/permissionChecker";
 import AuthenticationError from "../errors/AuthenticationError";
+import SyReaction from "../models/Reaction";
+import SyRelationship from "../models/Relationship";
+import permissionsBitfield from "../util/PermissionBitfield";
+
+const DM_PERMISSIONS =
+  permissionsBitfield.CreateMessages | permissionsBitfield.ReadChannelHistory;
 
 export default async function validatePermissions(
   req: express.Request,
@@ -29,6 +35,26 @@ export default async function validatePermissions(
     // Check to set guild
     if (!guild && channel.type === "channel") {
       guild = await actions.guilds.fetch(channel.guild_id);
+    } else if (channel.type === "dm") {
+      const relationship = await SyRelationship.fetchByChannel(channel.id);
+      const user = req.user as User;
+      if (
+        relationship.data.user1 !== user.id &&
+        relationship.data.user2 !== user.id
+      )
+        return new AuthenticationError({
+          message: "You are not apart of this DM channel",
+          statusCode: 401,
+          errorCode: "NotARecipient",
+        });
+
+      if (!(permissionDetails.permissions & DM_PERMISSIONS))
+        return new AuthenticationError({
+          message: "Cannot perform this action on DMs",
+          errorCode: "MissingPermissions",
+          statusCode: 401,
+        });
+      return;
     }
   }
 

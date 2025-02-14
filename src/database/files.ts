@@ -34,11 +34,15 @@ const _actions = {
     });
   },
 
-  create: async (fileName: string, originalUrl?: string): Promise<SyFile> => {
+  create: async (
+    fileName: string,
+    originalUrl?: string,
+    mime?: string
+  ): Promise<SyFile> => {
     return (
       await query<SyFile>({
-        text: "INSERT INTO files (file_name, original_url) VALUES ($1, $2) RETURNING *",
-        values: [fileName, originalUrl],
+        text: "INSERT INTO files (file_name, original_url, mime) VALUES ($1, $2, $3) RETURNING *",
+        values: [fileName, originalUrl, mime],
       })
     ).rows[0];
   },
@@ -68,7 +72,8 @@ const _actions = {
     if (fileObject === null)
       fileObject = await _actions.create(
         `proxied-${randomID(10)}.${extension(response.headers["content-type"])}`,
-        url
+        url,
+        response.headers["content-type"]
       );
 
     const folder = path.resolve(

@@ -4,7 +4,7 @@ import { getAllFiles } from "./util";
 import { RouteDetails } from "../types/route";
 import Logger from "./Logger";
 import authenticate from "../middleware/authenticator";
-import config from "../config.json";
+import config from "../config";
 
 const logger = new Logger("route-manager");
 export const routes: { [key: string]: RouteDetails } = {};

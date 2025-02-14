@@ -1,4 +1,11 @@
-import { createReadStream, existsSync, readFileSync } from "fs";
+import {
+  createReadStream,
+  createWriteStream,
+  exists,
+  existsSync,
+  readFileSync,
+  ReadStream,
+} from "fs";
 import { fileStoreLocation } from "../..";
 import { RouteDetails } from "../../types/route";
 import { actions } from "../../util/database";
@@ -6,6 +13,9 @@ import path from "path";
 import SyrenityError from "../../errors/BaseError";
 import { lookup } from "mime-types";
 import database from "../../database/database";
+import config from "../../config";
+import { PassThrough } from "stream";
+import sharp from "sharp";
 
 const handler: RouteDetails = {
   method: "GET",
@@ -13,6 +23,16 @@ const handler: RouteDetails = {
   handler: async (req, res) => {
     const id = req.params.id as string;
     const file = await actions.files.get(id);
+    const size = parseInt(req.query.size as string) || null;
+
+    if (size && !config.files.allowedCustomSizes.includes(size as any))
+      return res.status(400).send(
+        new SyrenityError({
+          message: `Invalid file size, allowed sizes are: ${config.files.allowedCustomSizes.join(", ")}`,
+          statusCode: 400,
+          errorCode: "InvalidFileSize",
+        })
+      );
 
     if (!file)
       return res.status(404).send(
@@ -23,16 +43,18 @@ const handler: RouteDetails = {
         })
       );
 
-    const p = path.join(
+    const directoryPath = path.join(
       fileStoreLocation,
-      file.created_at.toLocaleDateString().replace(/\//g, "-"),
-      `${file.id}-${file.file_name}`
+      file.created_at.toLocaleDateString().replace(/\//g, "-")
     );
 
-    if (!existsSync(p)) {
+    const filePath = path.join(directoryPath, `${file.id}-${file.file_name}`);
+
+    let stream: PassThrough | ReadStream;
+
+    if (!existsSync(filePath)) {
       if (file.original_url) {
         try {
-          //await database.files.delete(file.id);
           const result = await database.files.downloadTo(
             file.original_url,
             file
@@ -43,8 +65,7 @@ const handler: RouteDetails = {
               "application/octet-stream"
           );
 
-          result[1].pipe(res);
-          return;
+          stream = result[1];
         } catch (e) {
           return res.status(500).send(
             new SyrenityError({
@@ -62,25 +83,43 @@ const handler: RouteDetails = {
             errorCode: "FileNotOnDisk",
           }).extract()
         );
+    } else {
+      const mimeType = lookup(file.file_name) || "application/octet-stream";
+      res.setHeader("Content-Type", mimeType);
+      stream = createReadStream(filePath);
     }
 
-    const mimeType = lookup(file.file_name) || "application/octet-stream";
-    res.setHeader("Content-Type", mimeType);
-
-    try {
-      const fileStream = createReadStream(p);
-      fileStream.pipe(res);
-    } catch (e) {
-      console.log("test");
-      console.log(e);
-      return res.status(500).send(
-        new SyrenityError({
-          message: "Could not fetch the file for some unknown reason",
-          statusCode: 500,
-          errorCode: "UnknownServerError",
-        }).extract()
+    // Check if user wants a smaller size
+    if (size) {
+      const newPath = path.join(
+        directoryPath,
+        `${size}@${file.id}-${file.file_name}`
       );
+
+      if (!existsSync(newPath)) {
+        const passthrough = new PassThrough();
+        stream
+          .pipe(sharp({ animated: true }).resize(size, size))
+          .pipe(passthrough);
+        stream = passthrough;
+        passthrough.pipe(createWriteStream(newPath));
+      } else {
+        stream = createReadStream(newPath);
+      }
     }
+
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    res.setHeader("Last-Modified", file.created_at.toUTCString());
+    res.setHeader("ETag", file.id);
+
+    stream.pipe(res);
+  },
+
+  query: {
+    size: {
+      optional: true,
+      type: "number",
+    },
   },
 
   params: {

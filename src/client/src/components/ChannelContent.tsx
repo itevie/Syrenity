@@ -4,12 +4,23 @@ import Message from "../syrenity-client/structures/Message";
 import Column from "../dawn-ui/components/Column";
 import Row from "../dawn-ui/components/Row";
 import MessageC from "./Message";
+import { client, wrapLoading } from "../App";
+import { useAppSelector } from "../stores/store";
+import { UserReactionApiData } from "../syrenity-client/structures/Reaction";
 
 const SCROLL_THRESHOLD = 100;
 const last: Map<number, number> = new Map();
 const doneList: Map<number, boolean> = new Map();
 const lastScroll: Map<number, number> = new Map();
-export const loadNewMessage: Map<number, (message: Message) => void> =
+
+// ----- Event Listeners -----
+export const messageCreated: Map<number, (message: Message) => void> =
+  new Map();
+export const messageDeleted: Map<number, (messageId: number) => void> =
+  new Map();
+export const messageUpdated: Map<number, (message: Message) => void> =
+  new Map();
+export const messageReaction: Map<number, (message: Message) => void> =
   new Map();
 
 export default function ChannelContent({
@@ -17,10 +28,10 @@ export default function ChannelContent({
 }: {
   channel: Channel | null;
 }) {
-  console.log("CH", channel?.id);
   const [messages, setMessages] = useState<Message[]>([]);
   const [done, setDone] = useState<boolean>(false);
   const messageAreaRef = useRef<HTMLDivElement>(null);
+  const [editing, setEditing] = useState<number | null>(null);
 
   const scrollToBottom = useCallback(
     (delay: number = 100) => {
@@ -45,8 +56,8 @@ export default function ChannelContent({
     lastScroll.set(channel.id, Date.now());
 
     const oldest = last.get(channel.id);
-    const newMessages = await channel.messages.query(
-      oldest ? { startAt: oldest } : {}
+    const newMessages = await wrapLoading(
+      channel.messages.query(oldest ? { startAt: oldest } : {})
     );
     newMessages.reverse();
 
@@ -81,10 +92,44 @@ export default function ChannelContent({
 
     messageAreaRef.current?.addEventListener("wheel", handleScroll);
 
-    loadNewMessage.set(channel.id, (m) => {
+    messageCreated.set(channel.id, (m) => {
       setMessages((old) => {
         scrollToBottom();
         return [...old, m];
+      });
+    });
+
+    messageDeleted.set(channel.id, (m) => {
+      setMessages((old) => {
+        let index = old.findIndex((x) => x.id === m);
+        if (index) {
+          old.splice(index, 1);
+        }
+        return [...old];
+      });
+    });
+
+    messageReaction.set(channel.id, (m) => {
+      setMessages((old) => {
+        const index = old.findIndex((x) => x.id === m.id);
+        if (index) {
+          const n = [...old];
+          n[index] = m;
+          return [...n];
+        }
+        return old;
+      });
+    });
+
+    messageUpdated.set(channel.id, (m) => {
+      setMessages((old) => {
+        let index = old.findIndex((x) => x.id === m.id);
+        if (index) {
+          const temp = [...old];
+          temp[index] = m;
+          return temp;
+        }
+        return old;
       });
     });
 
@@ -92,25 +137,36 @@ export default function ChannelContent({
       await loadMoreMessages();
       scrollToBottom();
 
-      window.history.pushState(
-        null,
-        "",
-        `/channels/${channel.guildId}/${channel.id}`
-      );
+      if (channel.type === "dm") {
+        window.history.pushState(null, "", `/channels/@me/${channel.id}`);
+      } else {
+        window.history.pushState(
+          null,
+          "",
+          `/channels/${channel.guildId}/${channel.id}`
+        );
+      }
     })();
 
-    return () => messageArea.removeEventListener("wheel", handleScroll);
+    return () => {
+      messageArea.removeEventListener("wheel", handleScroll);
+    };
   }, [channel, loadMoreMessages, scrollToBottom]);
 
   async function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     let value = e.currentTarget.value.trim();
-    if (!value.length) return;
 
     if (e.key === "Enter" && !e.shiftKey) {
+      if (!value.length) return;
       e.preventDefault();
 
       await channel?.messages.send(value);
       (e.target as HTMLTextAreaElement).value = "";
+    } else if (e.key === "ArrowUp" && value.length === 0) {
+      const past = messages
+        .filter((x) => x.authorId === client.user?.id)
+        .sort((a, b) => b.id - a.id);
+      if (past.length > 0) setEditing(past[0].id);
     }
   }
 
@@ -126,7 +182,27 @@ export default function ChannelContent({
       >
         {done && <label>You've reached the end - go away.</label>}
         {(messages || []).map((x) => (
-          <MessageC key={x.id} message={x} />
+          <MessageC
+            scrollDown={(amount) => {
+              console.log("scrolling", amount);
+              if (messageAreaRef.current) {
+                messageAreaRef.current.scrollTop += amount;
+              }
+            }}
+            editing={editing === x.id}
+            setEditing={async (e) => {
+              if (e === true) {
+                setEditing(x.id);
+              } else {
+                setEditing(null);
+                if (e !== null) {
+                  await x.edit(e);
+                }
+              }
+            }}
+            key={x.id}
+            message={x}
+          />
         ))}
       </div>
       <Row util={["no-shrink", "no-gap"]} className="sy-messageinput">

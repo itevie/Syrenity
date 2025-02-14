@@ -9,7 +9,6 @@ export const channelSlice = createSlice({
   initialState,
   reducers: {
     addChannels: (state, action: PayloadAction<ChannelAPIData[]>) => {
-      console.log(action.payload);
       return {
         ...state,
         ...Object.fromEntries(action.payload.map((x) => [x.id, x])),

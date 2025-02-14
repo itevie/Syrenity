@@ -1,6 +1,6 @@
 import axios from "axios";
 import { RouteDetails } from "../../../types/route";
-import config from "../../../config.json";
+import config from "../../../config";
 import { PassThrough } from "stream";
 import database from "../../../database/database";
 import { randomID } from "../../../util/util";

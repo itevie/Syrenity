@@ -17,6 +17,7 @@ interface WSSendOptions<T extends keyof WebsocketDispatchTypes> {
 
   guild?: number;
   channel?: number;
+  recipients?: number[];
 }
 
 export const wsLogger = new Logger("ws");
@@ -25,24 +26,35 @@ export const connections = new Map<string, WSConnection>();
 export async function send<T extends keyof WebsocketDispatchTypes>(
   data: WSSendOptions<T>
 ) {
-  let recipients: number[] = [];
+  let recipients: number[] = data.recipients ?? [];
   const connectedIds = Array.from(connections.entries())
     .filter((x) => !!x[1].user)
     .map((x) => x[1].user.id);
 
+  if (connectedIds.length === 0) return;
+
   // If there is a guild, find all user's (that are connected) within the guild
   if (data.guild) {
-    recipients = (
-      await query({
-        text: `
+    recipients = [
+      ...recipients,
+      ...(
+        await query({
+          text: `
                 SELECT user_id
                     FROM members
                     WHERE guild_id = $1 AND user_id IN(${connectedIds.join(",")})
             `,
-        values: [data.guild],
-      })
-    ).rows.map((r) => r.user_id);
+          values: [data.guild],
+        })
+      ).rows.map((r) => r.user_id),
+    ];
+  } else {
+    recipients = [...recipients, ...connectedIds];
   }
+
+  wsLogger.log(
+    `Sending Dispatch: ${data.type} to ${recipients.length} recipients`
+  );
 
   connections.forEach((connection) => {
     if (recipients.includes(connection.user.id)) {

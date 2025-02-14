@@ -8,10 +8,20 @@ type ErrorType =
 
   // Body Validation
   | "InvalidBody"
+  | "CannotEditDMChannel"
 
   // Files
   | "MustBeSyrenityFileUrl"
   | "FileNotOnDisk"
+  | "InvalidFileSize"
+  | "InvalidMimeType"
+  | "InvalidFileType"
+
+  // Emojis
+  | "BadEmoji"
+
+  // Relationship
+  | "NotARecipient"
 
   // URL Validation
   | "UrlParameterTypeError"

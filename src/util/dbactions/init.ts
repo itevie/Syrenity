@@ -1,4 +1,3 @@
-import users from "./users";
 import guilds from "./guilds";
 import channels from "./channels";
 import members from "./members";
@@ -11,15 +10,14 @@ import invites from "./invites";
 import tokens from "./tokens";
 
 export default {
-    users,
-    channels,
-    guilds,
-    members,
-    applications,
-    messages,
-    roles,
-    relationships,
-    files,
-    invites,
-    tokens,
-}
+  channels,
+  guilds,
+  members,
+  applications,
+  messages,
+  roles,
+  relationships,
+  files,
+  invites,
+  tokens,
+};

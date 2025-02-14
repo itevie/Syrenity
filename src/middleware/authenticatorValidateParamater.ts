@@ -3,6 +3,9 @@ import { ParameterDetails } from "../types/route";
 import * as database from "../util/database";
 import { canView } from "../util/permissionChecker";
 import AuthenticationError from "../errors/AuthenticationError";
+import SyMessage from "../models/Message";
+import files from "../util/dbactions/files";
+import SyUser from "../models/User";
 
 export default async function validateURLParameters(
   req: express.Request,
@@ -65,15 +68,17 @@ export default async function validateURLParameters(
             req.params[i] = param;
           }
 
-          return await database.actions.users.exists(parseInt(param));
+          return await SyUser.exists(parseInt(param));
         },
-        guild: (param: string) =>
-          database.actions.guilds.exists(parseInt(param)),
-        channel: (param: string) =>
-          database.actions.channels.exists(parseInt(param)),
-        message: (param: string) =>
-          database.actions.messages.exists(parseInt(param)),
-        invite: (param: string) => database.actions.invites.exists(param),
+        guild: async (param: string) =>
+          await database.actions.guilds.exists(parseInt(param)),
+        channel: async (param: string) =>
+          await database.actions.channels.exists(parseInt(param)),
+        message: async (param: string) =>
+          await SyMessage.exists(parseInt(param)),
+        invite: async (param: string) =>
+          await database.actions.invites.exists(param),
+        file: async (param: string) => !!(await files.get(param)),
       }[paramTest.is];
 
       // Check if it worked

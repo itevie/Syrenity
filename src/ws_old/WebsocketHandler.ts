@@ -1,5 +1,5 @@
 import WebSocket from "ws";
-import config from "../config.json";
+import config from "../config";
 import * as database from "../util/database";
 import { Operation } from "./opCodes";
 import { WSClientAuthenticate } from "./WebsocketMessages";

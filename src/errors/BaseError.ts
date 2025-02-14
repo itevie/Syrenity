@@ -33,4 +33,8 @@ export default class SyrenityError extends Error {
 
     return data;
   }
+
+  public toString() {
+    return this.extract();
+  }
 }

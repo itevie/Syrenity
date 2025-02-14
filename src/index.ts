@@ -8,16 +8,15 @@ import connectPostgres from "connect-pg-simple";
 import passport from "passport";
 
 import Logger from "./util/Logger";
-import config from "./config.json";
+import config from "./config";
 import { initialise as initialiseDatabase, quickQuery } from "./util/database";
-import { initialise as initialiseWs, send } from "./ws/websocketUtil";
+import { initialise as initialiseWs } from "./ws/websocketUtil";
 import { loadRoutes } from "./util/routeManager";
 import requestLogger from "./middleware/requestLogger";
-import { hasPermission } from "./util/permissionChecker";
 import { defaultBitfield } from "./util/PermissionBitfield";
 import ErrorHandler from "./middleware/ErrorHandler";
-import { generateToken, randomID } from "./util/util";
-import database, { initialise, query } from "./database/database";
+import { initialise, query } from "./database/database";
+import SyServer, { DatabaseServer } from "./models/Servers";
 
 // Basic setup
 const logger = new Logger("server");
@@ -85,6 +84,17 @@ app.use(passport.session());
       `Listening on port ${config.server.port} (http://localhost:${config.server.port}/)`
     );
   });
+
+  const servers = (
+    await query<DatabaseServer>({
+      text: "SELECT * FROM guilds",
+      values: [],
+    })
+  ).rows.map((x) => new SyServer(x));
+  for await (const server of servers) {
+    await server.organiseChannels();
+    console.log("Updated ", server.data.id);
+  }
 
   // Check args
   const args = process.argv[2] || "";

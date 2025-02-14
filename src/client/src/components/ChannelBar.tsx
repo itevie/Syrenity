@@ -1,6 +1,5 @@
 import Button from "../dawn-ui/components/Button";
 import Column from "../dawn-ui/components/Column";
-import { combineStyles } from "../dawn-ui/util";
 import { useAppSelector } from "../stores/store";
 import Channel from "../syrenity-client/structures/Channel";
 import Server from "../syrenity-client/structures/Server";
@@ -21,26 +20,24 @@ export default function ChannelBar(props: {
         >
           {props.selectedServer?.name}
         </Column>
-        <Column util={["flex-grow"]} className="sy-channellist">
+        <Column util={["flex-grow", "small-gap"]} className="sy-channellist">
           {Object.entries(channels)
             .filter(([_, s]) => s.guild_id === props.selectedServer?.id)
+            .sort((a, b) => a[1].position - b[1].position)
             .map(([_, s]) => (
               <Button
                 key={s.id}
                 type="inherit"
-                style={combineStyles(
-                  {
-                    textAlign: "left",
-                  },
-                  props.selected?.id === s.id
-                    ? {
-                        backgroundColor: "var(--dawn-control-hover-background)",
-                      }
-                    : null
-                )}
+                util={[
+                  "hover",
+                  props.selected?.id === s.id ? "focus" : "giraffe",
+                ]}
+                style={{
+                  textAlign: "left",
+                }}
                 onClick={() => props.setSelected(s.id)}
               >
-                {s.name}
+                {s.name} ({s.id}: {s.position})
               </Button>
             ))}
         </Column>

@@ -1,17 +1,17 @@
 import passport from "passport";
 import LocalStrategy from "passport-local";
 import * as bcrypt from "bcrypt";
-import * as database from "../util/database";
+import SyUser from "../models/User";
 
 passport.use(
   new LocalStrategy.Strategy(
     async (username: string, password: string, cb: Function) => {
       try {
         // Fetch the user by their email
-        const user = await database.actions.users.fetchByEmail(username);
+        const user = await SyUser.fetchByEmail(username);
 
         // Check passwords
-        if ((await bcrypt.compare(password, user.password)) === false)
+        if ((await bcrypt.compare(password, user.fullData.password)) === false)
           return cb(null, false);
 
         // Success

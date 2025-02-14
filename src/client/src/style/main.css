@@ -86,4 +86,5 @@
 
 .sy-message-content > p {
   margin: 0;
+  word-break: break-word;
 }

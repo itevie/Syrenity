@@ -1,6 +1,8 @@
 import database from "../../../../../database/database";
+import SyMessage from "../../../../../models/Message";
 import { RouteDetails } from "../../../../../types/route";
 import permissionsBitfield from "../../../../../util/PermissionBitfield";
+import { send } from "../../../../../ws/websocketUtil";
 
 const route: RouteDetails = {
   method: "DELETE",
@@ -11,11 +13,16 @@ const route: RouteDetails = {
   },
 
   handler: async (req, res) => {
-    const messageId = parseInt(req.params.message);
-    await database.messages.delete(messageId);
+    const message = await SyMessage.fetch(parseInt(req.params.message));
+    await message.delete();
 
     send({
-      guild: await database.servers.get(messageId),
+      guild: (await message.fetchChannel()).data.guild_id,
+      channel: message.data.channel_id,
+      type: "MessageDelete",
+      payload: {
+        message_id: message.data.id,
+      },
     });
 
     return res.status(200).send({

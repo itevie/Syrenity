@@ -1,7 +1,7 @@
 import SyrenityError from "../../../../errors/BaseError";
+import SyInvite from "../../../../models/Invite";
+import SyMember from "../../../../models/Member";
 import { RouteDetails } from "../../../../types/route";
-import { actions } from "../../../../util/database";
-import { send } from "../../../../ws/websocketUtil";
 
 const handler: RouteDetails = {
   method: "POST",
@@ -9,11 +9,9 @@ const handler: RouteDetails = {
 
   handler: async (req, res) => {
     const user = req.user as User;
-    const inviteId = req.params.inviteId as string;
-    const invite = await actions.invites.fetch(inviteId);
+    const invite = await SyInvite.fetch(req.params.inviteId);
 
-    // Check if the user is already in the guild
-    if (await actions.members.hasMember(user.id, invite.guild_id)) {
+    if (await SyMember.has(invite.data.guild_id, user.id)) {
       return res.status(400).send(
         new SyrenityError({
           errorCode: "AlreadyAMember",
@@ -22,19 +20,9 @@ const handler: RouteDetails = {
       );
     }
 
-    // Add user
-    const member = await actions.members.addTo(user.id, invite.guild_id);
+    const member = await invite.use(user.id);
 
-    // Broadcast
-    send({
-      guild: invite.guild_id,
-      type: "GuildMemberAdd",
-      payload: {
-        member,
-      },
-    });
-
-    return res.status(200).send(member);
+    return res.status(200).send(member.data);
   },
 
   auth: {

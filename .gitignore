@@ -6,3 +6,4 @@ src/imgur_token.txt
 files/
 stuff/
 !src/routes/files
+!src/routes/api/v2/files

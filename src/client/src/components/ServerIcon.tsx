@@ -6,6 +6,8 @@ import { showContextMenu } from "../dawn-ui/components/ContextMenuManager";
 import { showInfoAlert } from "../dawn-ui/components/AlertManager";
 import { client } from "../App";
 import File from "../syrenity-client/structures/File";
+import { generateAvatar } from "../util";
+import { fallbackImage } from "../config";
 
 export default function ServerIcon({
   server,
@@ -20,8 +22,12 @@ export default function ServerIcon({
         key={`pfp-${server.id}`}
         onClick={() => onClick(server)}
         size="48px"
-        src={File.check(server.avatar) ?? ""}
-        fallback="/public/images/logos/no_shape_logo.png"
+        src={
+          File.check(server.avatar, 64) ??
+          generateAvatar(server.name) ??
+          fallbackImage
+        }
+        fallback={fallbackImage}
         onContextMenu={(e) =>
           showContextMenu({
             event: e,

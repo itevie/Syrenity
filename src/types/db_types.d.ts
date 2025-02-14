@@ -40,6 +40,7 @@ interface SyFile {
   file_name: string;
   original_url: string | null;
   is_deleting: boolean;
+  mime: string | null;
 }
 
 interface Invite {

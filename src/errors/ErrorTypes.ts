@@ -39,6 +39,8 @@ type ErrorType =
   | "InvalidAuthorizationFormat"
   | "SessionsOnly"
   | "InvalidEmailOrPassword"
+  | "TooManyUsers"
+  | "EmailExists"
 
   // Resource
   | "NonexistentResource"

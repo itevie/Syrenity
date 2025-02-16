@@ -5,6 +5,8 @@ import SyRelationship, {
   DatabaseRelationship,
   ExpandedRelationship,
 } from "./Relationship";
+import DatabaseError from "../errors/DatabaseError";
+import { randomRange } from "../util/util";
 
 export interface DatabaseUser {
   id: number;
@@ -100,6 +102,17 @@ export default class SyUser {
       (await queryOne<DatabaseUser>({
         text: "SELECT * FROM users WHERE id = $1",
         values: [id],
+        ignoreErrors: true,
+      })) !== null
+    );
+  }
+
+  public static async emailExists(email: string): Promise<boolean> {
+    return (
+      (await queryOne<DatabaseUser>({
+        text: "SELECT * FROM users WHERE email = $1",
+        values: [email],
+        ignoreErrors: true,
       })) !== null
     );
   }
@@ -142,5 +155,52 @@ export default class SyUser {
     }
 
     return user;
+  }
+
+  public static async getDiscriminatorsFor(
+    username: string
+  ): Promise<string[]> {
+    return (
+      await query<{ discriminator: string }>({
+        text: "SELECT discriminator FROM users WHERE username = $1",
+        values: [username],
+      })
+    ).rows.map((x) => x.discriminator);
+  }
+
+  public static async create(
+    email: string,
+    password: string,
+    username: string
+  ): Promise<SyUser> {
+    if (await SyUser.emailExists(email))
+      throw new DatabaseError({
+        message: "Email already registered",
+        errorCode: "EmailExists",
+        statusCode: 400,
+      });
+
+    const discrims = await SyUser.getDiscriminatorsFor(username);
+    if (discrims.length > 9996)
+      throw new DatabaseError({
+        message: "Too many users have this username",
+        errorCode: "TooManyUsers",
+        statusCode: 400,
+      });
+
+    let discriminator: string = "";
+    do {
+      const d = randomRange(0, 1000).toString().padStart(4, "0");
+      if (!discrims.includes(d)) discriminator = d;
+    } while (discriminator === "");
+
+    const _password = await bcrypt.hash(password, 10);
+
+    const user = await queryOne<DatabaseUser>({
+      text: "INSERT INTO users (username, discriminator, password, email) VALUES ($1, $2, $3, $4) RETURNING *",
+      values: [username, discriminator, _password, email],
+    });
+
+    return new SyUser(user);
   }
 }

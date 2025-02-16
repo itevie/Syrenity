@@ -11,7 +11,9 @@ import { Provider } from "react-redux";
 import store from "./stores/store";
 import ContextMenuManager from "./dawn-ui/components/ContextMenuManager";
 import { FlyoutManager } from "./dawn-ui/components/Flyout";
+import Invite from "./pages/Invite";
 import Showcase from "./dawn-ui/Showcase";
+import UserViewer from "./components/UserViewer";
 
 const router = createBrowserRouter(
   [
@@ -30,6 +32,14 @@ const router = createBrowserRouter(
     {
       path: "/",
       element: <Home />,
+    },
+    {
+      path: "/invites/:invite",
+      element: <Invite />,
+    },
+    {
+      path: "/s",
+      element: <Showcase />,
     },
   ],
   {
@@ -53,6 +63,7 @@ root.render(
     <ContextMenuManager />
     <AlertManager />
     <FlyoutManager />
+    <UserViewer />
     <RouterProvider router={router} />
   </Provider>
 );

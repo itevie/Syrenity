@@ -1,12 +1,13 @@
 import { useRef } from "react";
 import Button from "../dawn-ui/components/Button";
 import Link from "../dawn-ui/components/Link";
-import { axiosWrapper } from "../dawn-ui/util";
+import { AxiosWrapper, axiosWrapper } from "../dawn-ui/util";
 import { showInfoAlert } from "../dawn-ui/components/AlertManager";
 import { baseUrl } from "../App";
 import Row from "../dawn-ui/components/Row";
 import SyPage from "../components/SyPage";
 import Container from "../dawn-ui/components/Container";
+import { handleClientError, isErr, wrap } from "../util";
 
 export default function Register() {
   const usernameRef = useRef<HTMLInputElement>(null);
@@ -19,18 +20,26 @@ export default function Register() {
     const password = passwordRef.current?.value;
 
     try {
-      const result = await axiosWrapper("post", baseUrl + "/auth/register", {
-        username,
-        email,
-        password,
-      });
-
-      showInfoAlert(
-        `Welcome to Syrenity, ${result.data.username}#${result.data.discriminator}!`
+      const client = new AxiosWrapper();
+      client.noErrorMessage = true;
+      const result = await wrap(
+        client.post(baseUrl + "/auth/register", {
+          username,
+          email,
+          password,
+        })
       );
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 1000);
+
+      if (isErr(result)) {
+        handleClientError("register", result.v);
+      } else {
+        showInfoAlert(
+          `Welcome to Syrenity, ${result.v.data.username}#${result.v.data.discriminator}!`
+        );
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 1000);
+      }
     } catch {}
   }
 

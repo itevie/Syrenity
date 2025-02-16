@@ -74,7 +74,11 @@ export default async (
     }
 
     // Check for email and password in body
-    if (req.body.email && req.body.password) {
+    if (
+      req.body.email &&
+      req.body.password &&
+      route.path !== "/auth/register"
+    ) {
       try {
         const user = await database.users.validateEmailPassword(
           req.body.email,

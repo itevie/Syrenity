@@ -1,6 +1,6 @@
 import { client } from "../App";
 import { fallbackImage } from "../config";
-import { joinOrCreateServer } from "../context-menus-alerts/joinOrCreateServer";
+import { joinOrCreateServer } from "./alerts/joinOrCreateServer";
 import {
   addAlert,
   closeAlert,
@@ -41,6 +41,38 @@ export default function ServerBar(props: {
                 <Column>
                   <label>This is temporary</label>
                   <Row>
+                    <Button
+                      big
+                      onClick={() => {
+                        addAlert({
+                          title: "Change Hue",
+                          body: (
+                            <input
+                              type="range"
+                              min="0"
+                              max="360"
+                              onChange={(e) => {
+                                document.body.style.setProperty(
+                                  "--sy-base-color",
+                                  e.target.value
+                                );
+                              }}
+                            />
+                          ),
+                          buttons: [
+                            {
+                              text: "close",
+                              id: "close",
+                              click(close) {
+                                close();
+                              },
+                            },
+                          ],
+                        });
+                      }}
+                    >
+                      Change app hue
+                    </Button>
                     <Button
                       big
                       onClick={async () => {

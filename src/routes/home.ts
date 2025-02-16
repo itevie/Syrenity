@@ -7,7 +7,13 @@ import { RouteDetails } from "../types/route";
 const handler: RouteDetails = {
   method: "GET",
   path: "/",
-  alternatePaths: ["/login", "/channels/:g?/:c?"],
+  alternatePaths: [
+    "/login",
+    "/register",
+    "/channels/:g?/:c?",
+    "/invites/:invite",
+    "/s",
+  ],
   handler: (req, res) => {
     return res
       .status(200)

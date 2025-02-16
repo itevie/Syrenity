@@ -44,13 +44,13 @@ export default class SyChannel {
     }
 
     const newChannel = await queryOne<DatabaseChannel>({
-      text: "UPDATE channels SET position = $2 WHERE AND id = $1",
+      text: "UPDATE channels SET position = $2 WHERE id = $1",
       values: [this.data.id, position],
     });
 
     const channels = (
       await query<{ id: number }>({
-        text: "SELECT id FROM channels WHERE guild_id = $1 ORDER BY position ASCENDING",
+        text: "SELECT id FROM channels WHERE guild_id = $1 ORDER BY position ASC",
         values: [this.data.guild_id],
       })
     ).rows.map((x) => x.id);

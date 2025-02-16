@@ -15,22 +15,31 @@ import ChannelContent, {
   messageDeleted,
   messageReaction,
   messageUpdated,
-} from "./components/ChannelContent";
+} from "./components/channel-content/ChannelContent";
 import { addChannels } from "./stores/channelStore";
 import ImageViewer from "./components/ImageViewer";
 import Logger from "./dawn-ui/Logger";
 import { showLoadingAlert } from "./dawn-ui/components/AlertManager";
 import FullscreenLoader from "./components/FullscreenLoader";
 import DmBar from "./components/DmBar";
-
-export let client: Client;
-const logger = new Logger("client");
-const clientDebugLogger = new Logger("client-debug");
+import { AxiosWrapper } from "./dawn-ui/util";
+import { handleClientError, isErr, wrap } from "./util";
+import { setUserViewerUser } from "./components/UserViewer";
 
 export const baseUrl =
   window.location.hostname === "localhost"
     ? "http://localhost:3000"
     : `${window.location.protocol}//${window.location.host}`;
+
+export const axiosClient = new AxiosWrapper();
+axiosClient.noErrorMessage = true;
+axiosClient.config.headers = {
+  Authorization: `Token ${localStorage.getItem("token") as string}`,
+};
+
+export let client: Client;
+const logger = new Logger("client");
+const clientDebugLogger = new Logger("client-debug");
 
 //const channelContentStore: Map<number, ReactElement> = new Map();
 export let loading = 0;
@@ -138,6 +147,23 @@ function App() {
       messageReaction.get(m.channelID)?.(m);
     });
 
+    client.on("channelCreate", (c) => {
+      dispatch(addChannels([c._data]));
+    });
+
+    client.on("channelPositionUpdate", async (server, c) => {
+      const newChannels = (await server.channels.fetchList())
+        .filter((x) => x.guildId === server.id)
+        .map((x) => {
+          return {
+            ...x._data,
+            position: c.indexOf(x.id),
+          };
+        });
+
+      dispatch(addChannels(newChannels));
+    });
+
     client.on("serverMemberAdd", async (m) => {
       if (m.userId === client.user?.id) {
         const s = await wrapLoading(client.user.fetchServers());
@@ -166,21 +192,30 @@ function App() {
   }, []);
 
   async function loadServer(id: number | "@me") {
+    logger.log(`Loading server ${id}`);
     if (id === "@me") {
       setSelectedServer("@me");
       return;
     }
 
-    let server = await client.servers.fetch(id);
-    setSelectedServer(server);
-    let channels = await server.channels.fetchList();
-    setChannels(channels);
-    dispatch(addChannels(channels.map((x) => x._data)));
+    let server = await wrap(client.servers.fetch(id));
+    if (isErr(server)) {
+      handleClientError("load server", server.v);
+    } else {
+      setSelectedServer(server.v);
+      let channels = await server.v.channels.fetchList();
+      setChannels(channels);
+      dispatch(addChannels(channels.map((x) => x._data)));
+    }
   }
 
   async function loadChannel(id: number) {
-    let channel = await client.channels.fetch(id);
-    setSelectedChannel(channel);
+    let channel = await wrap(client.channels.fetch(id));
+    if (isErr(channel)) {
+      handleClientError("load channel", channel.v);
+    } else {
+      setSelectedChannel(channel.v);
+    }
 
     /* if (!channelContentStore.has(channel.id)) {
       channelContentStore.set(channel.id, <ChannelContent channel={channel} />);

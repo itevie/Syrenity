@@ -6,6 +6,7 @@ export default function PageNavbar() {
   return (
     <Navbar title="Syrenity" breadcrumb>
       <Row>
+        <Link href="/channels">Oepn App</Link>
         <Link href="/login">Login</Link>
         <Link href="/register">Register</Link>
       </Row>

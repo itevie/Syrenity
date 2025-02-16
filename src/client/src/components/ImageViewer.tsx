@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import showImageContextMenu from "../context-menus-alerts/imageContextMenu";
+import showImageContextMenu from "./context-menus/imageContextMenu";
 import Column from "../dawn-ui/components/Column";
 import Row from "../dawn-ui/components/Row";
 import Button from "../dawn-ui/components/Button";

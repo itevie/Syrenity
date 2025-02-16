@@ -32,6 +32,7 @@ export default class SyMember {
       (await queryOne<DatabaseInvite>({
         text: "SELECT * FROM members WHERE guild_id = $1 AND user_id = $2",
         values: [serverId, userId],
+        ignoreErrors: true,
       })) !== null
     );
   }

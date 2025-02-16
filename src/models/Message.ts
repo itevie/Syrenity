@@ -103,6 +103,7 @@ export default class SyMessage {
         await query({
           text: `SELECT 1 FROM messages WHERE id = $1`,
           values: [id],
+          ignoreErrors: true,
         })
       ).rows.length !== 0
     );

@@ -116,7 +116,7 @@ export default class SyReaction {
     );
 
     send({
-      type: "MessageReactionRemove",
+      type: "MessageReactionAdd",
       channel: channel.data.id,
       guild: channel.data.guild_id,
       payload: {

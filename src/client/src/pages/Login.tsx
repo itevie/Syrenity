@@ -57,6 +57,8 @@ export default function Login() {
                 <td></td>
                 <td>
                   <Link href="/login/forgot-password">Forgot Password?</Link>
+                  <br></br>
+                  <Link href="/register">No Account?</Link>
                 </td>
               </tr>
             </tbody>

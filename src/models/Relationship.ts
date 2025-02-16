@@ -48,6 +48,7 @@ export default class SyRelationship {
       (await queryOne<DatabaseUser>({
         text: "SELECT * FROM relationships WHERE user1 = $1 OR user2 = $2",
         values: [user1, user2],
+        ignoreErrors: true,
       })) !== null
     );
   }

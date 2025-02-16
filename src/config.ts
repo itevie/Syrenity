@@ -2,7 +2,7 @@ const config = {
   // Settings for the server itself
   server: {
     // Max size for the body of HTTP requests
-    bodyLimit: "2mb",
+    bodyLimit: "5mb",
 
     // The port the server should listen on
     port: 3000,
@@ -40,6 +40,12 @@ const config = {
 
   // These are all for settings of what is valid for certain pieces ofdata
   validity: {
+    username: {
+      minLength: 1,
+      maxLength: 30,
+      pattern: "[a-zA-Z0-9\\._\\-]",
+    },
+
     messages: {
       minLength: 1,
       maxLength: 4000,

@@ -1,6 +1,7 @@
 import { isAxiosError } from "axios";
 import { showErrorAlert } from "./dawn-ui/components/AlertManager";
 import { defaultLogger } from "./dawn-ui/Logger";
+import { baseUrl, client } from "./App";
 
 export function generateAvatar(
   text: string,
@@ -37,13 +38,22 @@ export function handleClientError(what: string, error: any) {
   if (isAxiosError(error)) {
     switch (error.response?.status) {
       case 401:
-        showErrorAlert(`You do not have permission to ${what}`);
+        showErrorAlert(
+          `Hey! You can't do that. You do not have permission to "${what}"`
+        );
         break;
       default:
         const message = error.response?.data?.error?.message ?? "Unknown Error";
         showErrorAlert(`${message}`, `Failed to ${what}`);
     }
   }
+}
+
+export function fixUrlWithProxy(_url: string): string {
+  const base = new URL(client.options.baseUrl || baseUrl);
+  const url = new URL(_url);
+  if (base.host === url.host) return url.toString();
+  else return `${base.protocol}//${base.host}/api/proxy?url=${url}`;
 }
 
 export type Err<E> = {

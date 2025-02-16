@@ -1,12 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import Channel from "../syrenity-client/structures/Channel";
-import Message from "../syrenity-client/structures/Message";
-import Column from "../dawn-ui/components/Column";
-import Row from "../dawn-ui/components/Row";
-import MessageC from "./Message";
-import { client, wrapLoading } from "../App";
-import { useAppSelector } from "../stores/store";
-import { UserReactionApiData } from "../syrenity-client/structures/Reaction";
+import Channel from "../../syrenity-client/structures/Channel";
+import Message from "../../syrenity-client/structures/Message";
+import Column from "../../dawn-ui/components/Column";
+import Row from "../../dawn-ui/components/Row";
+import MessageC from "../message/Message";
+import { client, wrapLoading } from "../../App";
+import { useAppSelector } from "../../stores/store";
+import { UserReactionApiData } from "../../syrenity-client/structures/Reaction";
+import GoogleMatieralIcon from "../../dawn-ui/components/GoogleMaterialIcon";
+import uploadFile from "../../dawn-ui/uploadFile";
+import { handleClientError, isErr, wrap } from "../../util";
+import {
+  addAlert,
+  showLoadingAlert,
+} from "../../dawn-ui/components/AlertManager";
+import EmojiPicker from "emoji-picker-react";
 
 const SCROLL_THRESHOLD = 100;
 const last: Map<number, number> = new Map();
@@ -32,6 +40,7 @@ export default function ChannelContent({
   const [done, setDone] = useState<boolean>(false);
   const messageAreaRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState<number | null>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const scrollToBottom = useCallback(
     (delay: number = 100) => {
@@ -167,11 +176,32 @@ export default function ChannelContent({
         .filter((x) => x.authorId === client.user?.id)
         .sort((a, b) => b.id - a.id);
       if (past.length > 0) setEditing(past[0].id);
-    }
+    } /* else if (e.ctrlKey && e.key === "v") {
+      try {
+        const clipboardItems = await window.navigator.clipboard.read();
+        for (const item of clipboardItems) {
+          for (const type of item.types) {
+            if (type.startsWith("image/") || type === "application/pdf") {
+              console.log(`Clipboard contains a file of type: ${type}`);
+              const blob = await item.getType(type);
+              buffer
+              console.log("File blob:", blob);
+              // You can now process the file blob as needed
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error accessing clipboard:", err);
+      }
+    }*/
   }
 
   return (
-    <Column util={["flex-grow", "no-gap"]} style={{ overflowX: "hidden" }}>
+    <Column
+      util={["flex-grow", "no-gap"]}
+      style={{ overflowX: "hidden" }}
+      className="sy-chat-content"
+    >
       <Column util={["no-shrink", "justify-center"]} className="sy-topbar">
         {channel?.name}
       </Column>
@@ -184,13 +214,14 @@ export default function ChannelContent({
         {(messages || []).map((x) => (
           <MessageC
             scrollDown={(amount) => {
-              console.log("scrolling", amount);
               if (messageAreaRef.current) {
                 messageAreaRef.current.scrollTop += amount;
               }
             }}
             editing={editing === x.id}
             setEditing={async (e) => {
+              if (x.authorId !== client.user?.id) return;
+
               if (e === true) {
                 setEditing(x.id);
               } else {
@@ -205,9 +236,69 @@ export default function ChannelContent({
           />
         ))}
       </div>
-      <Row util={["no-shrink", "no-gap"]} className="sy-messageinput">
-        <textarea style={{ resize: "none" }} onKeyUp={handleKeyDown} />
-      </Row>
+      <div className="sy-messageinput-container">
+        <Row
+          util={["no-shrink", "small-gap", "align-center"]}
+          className="sy-messageinput"
+        >
+          <GoogleMatieralIcon
+            name="add"
+            util={["clickable"]}
+            onClick={async () => {
+              const loader = showLoadingAlert();
+              const data = await uploadFile();
+              loader.stop();
+
+              if (!data) return;
+
+              const file = await wrap(
+                client.files.upload(data.name, data.result)
+              );
+
+              if (isErr(file)) {
+                return handleClientError("upload file", file.v);
+              }
+
+              if (inputRef.current)
+                inputRef.current.value += `<f:${file.v.id}>`;
+            }}
+          />
+          <textarea
+            ref={inputRef}
+            style={{ resize: "none" }}
+            className="sy-messageinput-input"
+            onKeyUp={handleKeyDown}
+          />
+          <GoogleMatieralIcon
+            name="mood"
+            util={["clickable"]}
+            onClick={() => {
+              addAlert({
+                title: "Emoji",
+                body: (
+                  <Row util={["align-center", "justify-center"]}>
+                    <EmojiPicker
+                      onEmojiClick={(emoji) => {
+                        if (inputRef.current)
+                          inputRef.current.value += emoji.emoji;
+                      }}
+                    />
+                  </Row>
+                ),
+                buttons: [
+                  {
+                    id: "close",
+                    text: "Close",
+                    click(close) {
+                      close();
+                    },
+                  },
+                ],
+              });
+            }}
+          />
+        </Row>
+      </div>
     </Column>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { setFullscreenImage } from "./ImageViewer";
-import showImageContextMenu from "../context-menus-alerts/imageContextMenu";
+import showImageContextMenu from "./context-menus/imageContextMenu";
+import { fallbackImage } from "../config";
 
 interface MessageImageAttachmentProps {
   url: string;
@@ -17,18 +18,15 @@ export default function MessageImageAttachment({
 
   return (
     <div className="sy-attachment-image">
-      {!hasLoaded && (
-        <img src="/public/images/logos/no_shape_logo.png" alt="Loading..." />
-      )}
+      {!hasLoaded && <img src={fallbackImage} alt="Loading..." />}
       <img
         onLoad={(e) => {
           setHasLoaded(true);
-          /*setTimeout(() => {
-            console.log((e.target as HTMLImageElement).getBoundingClientRect());
+          setTimeout(() => {
             onLoad(
               (e.target as HTMLImageElement).getBoundingClientRect().height
             );
-          }, 100);*/
+          }, 100);
         }}
         className="sy-attachment-image"
         src={url}

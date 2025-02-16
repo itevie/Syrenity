@@ -6,7 +6,6 @@ const handler: RouteDetails = {
   path: "/auth/password",
   handler: (req, res, next) => {
     passport.authenticate("local", (err: Error, user: FullUser) => {
-      console.log(err, user);
       // Check if there was an error
       if (err) return next(err);
 

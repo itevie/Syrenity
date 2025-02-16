@@ -1,11 +1,16 @@
-:root {
-  --sy-serverbar-color: #111;
-  --sy-topbar-color: #111;
-  --sy-channelbar-color: #222;
-  --sy-chat-color: #222;
-  --sy-messageinput-color: var(--sy-channelbar-color);
+body {
+  --sy-base-color: 300;
+  --dawn-neutral-base-color: var(--sy-base-color) !important;
 
-  --sy-panel-border-color: #555;
+  --sy-surrounding-color: hsla(var(--sy-base-color), 20%, 10%, 1);
+
+  --sy-serverbar-color: var(--sy-surrounding-color);
+  --sy-topbar-color: var(--sy-surrounding-color);
+  --sy-channelbar-color: hsla(var(--sy-base-color), 10%, 10%, 1);
+  --sy-chat-color: hsla(var(--sy-base-color), 5%, 15%, 1);
+  --sy-messageinput-color: hsla(var(--sy-base-color), 5%, 20%, 1);
+
+  --sy-panel-border-color: hsla(var(--sy-base-color), 50%, 15%, 1);
   --sy-panel-border-width: 1px;
 }
 
@@ -41,15 +46,50 @@
 .sy-channelbar {
   background-color: var(--sy-channelbar-color);
   width: 300px;
-  overflow-y: scroll;
+  height: 100%;
+}
+
+.sy-channelbar-inner {
+  height: 100%;
+}
+
+.sy-channelbar-channel {
+  padding: 10px;
 }
 
 .sy-channellist {
   border-right-style: solid;
+  gap: 5px;
+  padding: 10px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.sy-chat-content {
+  background-color: var(--sy-chat-color);
+}
+
+.sy-messageinput-container {
+  margin: 10px;
+  box-sizing: border-box;
 }
 
 .sy-messageinput {
+  box-sizing: border-box;
+  border-radius: 10px;
+  padding: 5px;
   background-color: var(--sy-messageinput-color);
+}
+
+.sy-messageinput > * {
+  padding: 5px;
+}
+
+.sy-messageinput-input,
+.sy-messageinput-input:focus,
+.sy-messageinput-input:hover {
+  background-color: inherit;
+  border-style: none;
 }
 
 .sy-chatarea {
@@ -87,4 +127,30 @@
 .sy-message-content > p {
   margin: 0;
   word-break: break-word;
+}
+
+.sy-user-viewer {
+  width: 600px;
+  height: 80vh;
+  padding: 0;
+}
+
+.sy-user-viewer-banner {
+  width: 100%;
+  height: 150px;
+
+  border-top-left-radius: var(--dawn-border-radius);
+  border-top-right-radius: var(--dawn-border-radius);
+
+  background-color: black;
+}
+
+.sy-user-viewer-below-banner {
+  margin-top: -90px;
+  margin-left: 20px;
+}
+
+.sy-user-viewer-main-content {
+  padding: 10px;
+  padding-top: 0px;
 }

@@ -1,11 +1,11 @@
-import { client } from "../App";
+import { client } from "../../App";
 import {
   addAlert,
   closeAlert,
   showInfoAlert,
   showInputAlert,
-} from "../dawn-ui/components/AlertManager";
-import { isErr, handleClientError, wrap } from "../util";
+} from "../../dawn-ui/components/AlertManager";
+import { isErr, handleClientError, wrap } from "../../util";
 
 export function joinOrCreateServer() {
   addAlert({

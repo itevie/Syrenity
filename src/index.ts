@@ -93,7 +93,6 @@ app.use(passport.session());
   ).rows.map((x) => new SyServer(x));
   for await (const server of servers) {
     await server.organiseChannels();
-    console.log("Updated ", server.data.id);
   }
 
   // Check args

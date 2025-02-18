@@ -18,6 +18,7 @@ const config = {
   database: {
     // Where the database is stored
     constring: "postgres://postgres:postgres@127.0.0.1:5432/syrenity",
+    testconstring: "postgres://postgres:postgres@127.0.0.1:5432/syrenity-test",
   },
 
   // Settings for files

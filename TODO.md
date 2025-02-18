@@ -1,2 +1,0 @@
-- Make it so every place that has an image uses a hash instead
-- Hashes are stored in database, they either contain a URL, or a location on the file system

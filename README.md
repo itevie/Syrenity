@@ -1,22 +1,24 @@
 # Syrenity
-A Discord-like web application created using Node.JS with Express, and a database using Postgresql.
 
-## Running
-Download the repository.
+A Discord-like web application for chatting with your friends.
 
-You will need to install and setup postgresql, to do this:
- - Install postgres
- - Create a database called "discord" or modify the constring in src/config.json to use a custom name / server
-    - You can try `psql -c "CREATE DATABASE Discord;"`
- - Run the sql script in sql/setup.sql
-    - You can try `psql -d Discord -f "sql/setup.sql"`
- - Validate its setup correctly by doing some test query: `SELECT * FROM users;`
-    - You can try `psql -d Discord -c "SELECT * FROM users;"`
+> :warning: At the moment, there is no official website for this at the moment.
 
-Then you can run it by doing:
-1. Run `npm install`
-2. Run `ts-node src/index.ts`.
+## Related projects
 
-### Running in GitHub Codespaces
-Open this, then copy contents of `setup.sh` and run it in terminal.
+- [Syrenity Client](https://github.com/itevie/syrenity-api-client)
+- [Dawn UI](https://github.com/itevie/dawn-ui)
 
+## Running yourself
+
+1. Download the repository
+2. Install [NodeJS](https://nodejs.org/en), [PostgreSQL](https://www.postgresql.org/) on your system
+3. Initialise the repository
+   - Create a database called `syrenity`: `psql -c "CREATE DATABASE syrenity;"`
+   - Load the dump `psql -d syrenity -f "src/sql/dump.sql"`
+4. Run `npm install` or `pnpm install`, then `npm install -g ts-node` or with `pnpm`
+5. Start it with `ts-node src/index.ts`
+
+## Issues
+
+If you find any issues with any part of the project, please either open an issue, or contact me. Make sure to include as much details about the issue as you can.

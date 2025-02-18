@@ -6,6 +6,8 @@ const permissionsBitfield = {
   CreateInvites: 1 << 4,
   ManageInvites: 1 << 5,
   ManageRoles: 1 << 6,
+  ManageServer: 1 << 7,
+  KickMembers: 1 << 8,
 } as const;
 
 export const defaultBitfield =

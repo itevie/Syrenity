@@ -30,6 +30,8 @@ interface PermissionDetails {
   permissions: number;
   guildParam?: string;
   channelParam?: string;
+  userParam?: string;
+  unlessSelf?: boolean;
 }
 
 interface AuthenticationDetails {

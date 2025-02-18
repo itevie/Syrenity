@@ -6,7 +6,7 @@ import Button from "../dawn-ui/components/Button";
 
 export let setFullscreenImage: (
   image: string,
-  images: string[]
+  images?: string[]
 ) => void = () => {};
 
 export default function ImageViewer() {
@@ -15,8 +15,13 @@ export default function ImageViewer() {
 
   useEffect(() => {
     setFullscreenImage = (image, images) => {
-      setImages(images);
-      setIndex(images.indexOf(image));
+      if (!images) {
+        setImages([image]);
+        setIndex(0);
+      } else {
+        setImages(images);
+        setIndex(images.indexOf(image));
+      }
     };
   }, []);
 

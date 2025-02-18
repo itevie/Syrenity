@@ -8,14 +8,9 @@ import { useDispatch } from "react-redux";
 import { addUser } from "./stores/userStore";
 import FullPage from "./dawn-ui/components/FullPage";
 import ServerBar from "./components/ServerBar";
-import { addServers } from "./stores/serverStore";
+import { handleServers } from "./stores/serverStore";
 import ChannelBar from "./components/ChannelBar";
-import ChannelContent, {
-  messageCreated,
-  messageDeleted,
-  messageReaction,
-  messageUpdated,
-} from "./components/channel-content/ChannelContent";
+import ChannelContent from "./components/channel-content/ChannelContent";
 import { addChannels } from "./stores/channelStore";
 import ImageViewer from "./components/ImageViewer";
 import Logger from "./dawn-ui/Logger";
@@ -72,6 +67,9 @@ function App() {
   );
   const [channels, setChannels] = useState<Channel[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
+  const [selectedChannel2, setSelectedChannel2] = useState<Channel | null>(
+    null
+  );
   const [channelContent, setChannelContent] = useState<ReactElement | null>(
     null
   );
@@ -103,7 +101,7 @@ function App() {
       if (reconnect) return;
 
       const s = await wrapLoading(user.fetchServers());
-      dispatch(addServers(s.map((x) => x._data)));
+      dispatch(handleServers(["ADD", s.map((x) => x._data)]));
 
       let path = window.location.pathname.match(
         /channels\/([0-9]+|@me)(\/([0-9]+))?/
@@ -127,26 +125,6 @@ function App() {
       loader = showLoadingAlert();
     });
 
-    client.on("messageCreate", (msg) => {
-      messageCreated.get(msg.channelID)?.(msg);
-    });
-
-    client.on("messageDelete", (m, c) => {
-      messageDeleted.get(c)?.(m);
-    });
-
-    client.on("messageUpdate", (m) => {
-      messageUpdated.get(m.channelID)?.(m);
-    });
-
-    client.on("messageReactionAdd", (r, m) => {
-      messageReaction.get(m.channelID)?.(m);
-    });
-
-    client.on("messageReactionRemove", (r, m) => {
-      messageReaction.get(m.channelID)?.(m);
-    });
-
     client.on("channelCreate", (c) => {
       dispatch(addChannels([c._data]));
     });
@@ -167,7 +145,13 @@ function App() {
     client.on("serverMemberAdd", async (m) => {
       if (m.userId === client.user?.id) {
         const s = await wrapLoading(client.user.fetchServers());
-        dispatch(addServers(s.map((x) => x._data)));
+        dispatch(handleServers(["ADD", s.map((x) => x._data)]));
+      }
+    });
+
+    client.on("serverMemberRemove", async (m) => {
+      if (m.userId === client.user?.id) {
+        dispatch(handleServers(["REMOVE", [m.serverId]]));
       }
     });
 
@@ -179,10 +163,9 @@ function App() {
       await client.users.fetch(message.author_id);
     });
 
-    client.on("apiServerClassCreation", async (server) => {
-      await client.users.fetch(server.owner_id);
+    client.on("serverUpdate", (server) => {
+      dispatch(handleServers(["ADD", [server._data]]));
     });
-
     if (!localStorage.getItem("token")) {
       window.location.href = "/login";
     }
@@ -215,6 +198,7 @@ function App() {
       handleClientError("load channel", channel.v);
     } else {
       setSelectedChannel(channel.v);
+      setSelectedChannel2(await client.channels.fetch(208));
     }
 
     /* if (!channelContentStore.has(channel.id)) {

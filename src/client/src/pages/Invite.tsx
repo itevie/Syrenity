@@ -42,8 +42,6 @@ export default function Invite() {
         return;
       }
 
-      console.log(result.v.data, File.check(result.v.data.guild.avatar ?? ""));
-
       setInvite(result.v.data);
     })();
   }, []);

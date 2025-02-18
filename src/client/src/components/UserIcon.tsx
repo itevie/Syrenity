@@ -16,6 +16,7 @@ export default function UserIcon({
   onClick?: () => void;
 }) {
   const users = useAppSelector((x) => x.users);
+  console.log(File.check(users[id]?.avatar, 64));
 
   return (
     <Icon

@@ -2,42 +2,25 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Channel from "../../syrenity-client/structures/Channel";
 import Message from "../../syrenity-client/structures/Message";
 import Column from "../../dawn-ui/components/Column";
-import Row from "../../dawn-ui/components/Row";
 import MessageC from "../message/Message";
-import { client, wrapLoading } from "../../App";
-import { useAppSelector } from "../../stores/store";
-import { UserReactionApiData } from "../../syrenity-client/structures/Reaction";
-import GoogleMatieralIcon from "../../dawn-ui/components/GoogleMaterialIcon";
-import uploadFile from "../../dawn-ui/uploadFile";
-import { handleClientError, isErr, wrap } from "../../util";
+import Logger, { defaultLogger } from "../../dawn-ui/Logger";
+import ChatBar from "./ChatBar";
 import {
-  addAlert,
-  showLoadingAlert,
-} from "../../dawn-ui/components/AlertManager";
-import EmojiPicker from "emoji-picker-react";
+  ClientEventFunction,
+  ClientEvents,
+} from "../../syrenity-client/client/Websocket";
+import { client } from "../../App";
+import useChannelMessagesHook from "./channelMessagesHook";
 
 const SCROLL_THRESHOLD = 100;
-const last: Map<number, number> = new Map();
-const doneList: Map<number, boolean> = new Map();
-const lastScroll: Map<number, number> = new Map();
-
-// ----- Event Listeners -----
-export const messageCreated: Map<number, (message: Message) => void> =
-  new Map();
-export const messageDeleted: Map<number, (messageId: number) => void> =
-  new Map();
-export const messageUpdated: Map<number, (message: Message) => void> =
-  new Map();
-export const messageReaction: Map<number, (message: Message) => void> =
-  new Map();
 
 export default function ChannelContent({
   channel,
 }: {
   channel: Channel | null;
 }) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [done, setDone] = useState<boolean>(false);
+  const { messages, loadMoreMessages, isDone } =
+    useChannelMessagesHook(channel);
   const messageAreaRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState<number | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -45,6 +28,7 @@ export default function ChannelContent({
   const scrollToBottom = useCallback(
     (delay: number = 100) => {
       setTimeout(() => {
+        if (messageAreaRef.current?.scrollTop ?? 0 < SCROLL_THRESHOLD) return;
         messageAreaRef.current?.scrollTo({
           top: messageAreaRef.current.scrollHeight,
           behavior: "smooth",
@@ -54,42 +38,15 @@ export default function ChannelContent({
     [channel]
   );
 
-  const loadMoreMessages = useCallback(async () => {
-    if (
-      !channel ||
-      doneList.get(channel.id) ||
-      Date.now() - (lastScroll.get(channel.id) || 0) < 500
-    )
-      return;
-
-    lastScroll.set(channel.id, Date.now());
-
-    const oldest = last.get(channel.id);
-    const newMessages = await wrapLoading(
-      channel.messages.query(oldest ? { startAt: oldest } : {})
-    );
-    newMessages.reverse();
-
-    if (!newMessages.length) {
-      setDone(true);
-      doneList.set(channel.id, true);
-      return;
-    }
-
-    last.set(channel.id, newMessages[0]?.id ?? oldest);
-    setMessages((prev) => [...newMessages, ...prev]);
-  }, [channel]);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
-    setMessages([]);
-    setDone(false);
-    if (!channel) return;
-    doneList.set(channel.id, false);
-    last.delete(channel.id);
-    const messageArea = messageAreaRef.current;
-    if (!messageArea) return;
-
     const handleScroll = async () => {
+      const messageArea = messageAreaRef.current;
+      if (!messageArea) return;
+
       if (messageArea.scrollTop < SCROLL_THRESHOLD) {
         const prevHeight = messageArea.scrollHeight;
         await loadMoreMessages();
@@ -99,68 +56,28 @@ export default function ChannelContent({
       }
     };
 
-    messageAreaRef.current?.addEventListener("wheel", handleScroll);
-
-    messageCreated.set(channel.id, (m) => {
-      setMessages((old) => {
-        scrollToBottom();
-        return [...old, m];
-      });
-    });
-
-    messageDeleted.set(channel.id, (m) => {
-      setMessages((old) => {
-        let index = old.findIndex((x) => x.id === m);
-        if (index) {
-          old.splice(index, 1);
-        }
-        return [...old];
-      });
-    });
-
-    messageReaction.set(channel.id, (m) => {
-      setMessages((old) => {
-        const index = old.findIndex((x) => x.id === m.id);
-        if (index) {
-          const n = [...old];
-          n[index] = m;
-          return [...n];
-        }
-        return old;
-      });
-    });
-
-    messageUpdated.set(channel.id, (m) => {
-      setMessages((old) => {
-        let index = old.findIndex((x) => x.id === m.id);
-        if (index) {
-          const temp = [...old];
-          temp[index] = m;
-          return temp;
-        }
-        return old;
-      });
-    });
-
-    (async () => {
-      await loadMoreMessages();
-      scrollToBottom();
-
-      if (channel.type === "dm") {
-        window.history.pushState(null, "", `/channels/@me/${channel.id}`);
-      } else {
-        window.history.pushState(
-          null,
-          "",
-          `/channels/${channel.guildId}/${channel.id}`
-        );
-      }
-    })();
+    if (messageAreaRef.current)
+      messageAreaRef.current.addEventListener("wheel", handleScroll);
 
     return () => {
-      messageArea.removeEventListener("wheel", handleScroll);
+      messageAreaRef.current?.removeEventListener("wheel", handleScroll);
     };
-  }, [channel, loadMoreMessages, scrollToBottom]);
+  }, [channel, loadMoreMessages]);
+
+  useEffect(() => {
+    defaultLogger.log(`Loading channel ${channel?.id}`);
+    if (!channel) return;
+
+    if (channel.type === "dm") {
+      window.history.pushState(null, "", `/channels/@me/${channel.id}`);
+    } else {
+      window.history.pushState(
+        null,
+        "",
+        `/channels/${channel.guildId}/${channel.id}`
+      );
+    }
+  }, [channel]);
 
   async function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     let value = e.currentTarget.value.trim();
@@ -176,24 +93,7 @@ export default function ChannelContent({
         .filter((x) => x.authorId === client.user?.id)
         .sort((a, b) => b.id - a.id);
       if (past.length > 0) setEditing(past[0].id);
-    } /* else if (e.ctrlKey && e.key === "v") {
-      try {
-        const clipboardItems = await window.navigator.clipboard.read();
-        for (const item of clipboardItems) {
-          for (const type of item.types) {
-            if (type.startsWith("image/") || type === "application/pdf") {
-              console.log(`Clipboard contains a file of type: ${type}`);
-              const blob = await item.getType(type);
-              buffer
-              console.log("File blob:", blob);
-              // You can now process the file blob as needed
-            }
-          }
-        }
-      } catch (err) {
-        console.error("Error accessing clipboard:", err);
-      }
-    }*/
+    }
   }
 
   return (
@@ -210,7 +110,7 @@ export default function ChannelContent({
         className="sy-chatarea dawn-column flex-grow"
         style={{ padding: "10px", overflowX: "hidden", overflowY: "auto" }}
       >
-        {done && <label>You've reached the end - go away.</label>}
+        {isDone && <label>You've reached the end - go away.</label>}
         {(messages || []).map((x) => (
           <MessageC
             scrollDown={(amount) => {
@@ -236,69 +136,7 @@ export default function ChannelContent({
           />
         ))}
       </div>
-      <div className="sy-messageinput-container">
-        <Row
-          util={["no-shrink", "small-gap", "align-center"]}
-          className="sy-messageinput"
-        >
-          <GoogleMatieralIcon
-            name="add"
-            util={["clickable"]}
-            onClick={async () => {
-              const loader = showLoadingAlert();
-              const data = await uploadFile();
-              loader.stop();
-
-              if (!data) return;
-
-              const file = await wrap(
-                client.files.upload(data.name, data.result)
-              );
-
-              if (isErr(file)) {
-                return handleClientError("upload file", file.v);
-              }
-
-              if (inputRef.current)
-                inputRef.current.value += `<f:${file.v.id}>`;
-            }}
-          />
-          <textarea
-            ref={inputRef}
-            style={{ resize: "none" }}
-            className="sy-messageinput-input"
-            onKeyUp={handleKeyDown}
-          />
-          <GoogleMatieralIcon
-            name="mood"
-            util={["clickable"]}
-            onClick={() => {
-              addAlert({
-                title: "Emoji",
-                body: (
-                  <Row util={["align-center", "justify-center"]}>
-                    <EmojiPicker
-                      onEmojiClick={(emoji) => {
-                        if (inputRef.current)
-                          inputRef.current.value += emoji.emoji;
-                      }}
-                    />
-                  </Row>
-                ),
-                buttons: [
-                  {
-                    id: "close",
-                    text: "Close",
-                    click(close) {
-                      close();
-                    },
-                  },
-                ],
-              });
-            }}
-          />
-        </Row>
-      </div>
+      <ChatBar inputRef={inputRef} onKey={handleKeyDown} />
     </Column>
   );
 }

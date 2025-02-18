@@ -1,5 +1,5 @@
 import { SystemMessageTypes } from "../broadcasting/SystemMessageTypes";
-import { query } from "../database/database";
+import { query, queryOne } from "../database/database";
 import SyChannel from "./Channel";
 import SyReaction, { DatabaseReaction, UsefulReaction } from "./Reaction";
 
@@ -52,6 +52,16 @@ export default class SyMessage {
       text: "DELETE FROM messages WHERE id = $1",
       values: [this.data.id],
     });
+  }
+
+  public async setPinned(value: boolean): Promise<SyMessage> {
+    const result = await queryOne<DatabaseMessage>({
+      text: "UPDATE messages SET is_pinned = $2 WHERE id = $1 RETURNING *",
+      values: [this.data.id, value],
+    });
+
+    this.data = result;
+    return this;
   }
 
   public async edit(update: EditMessageOptions): Promise<SyMessage> {

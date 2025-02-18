@@ -47,7 +47,6 @@ export default class WebsocketHandler {
 
   operations = {
     Identify: async (data: IdentifyWSMessage) => {
-      console.log(data);
       if (this.data.user) return this.basicError("Already authenticated");
       if (!data.token || typeof data.token !== "string")
         return this.basicError(

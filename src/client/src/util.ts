@@ -51,6 +51,9 @@ export function handleClientError(what: string, error: any) {
 
 export function fixUrlWithProxy(_url: string): string {
   const base = new URL(client.options.baseUrl || baseUrl);
+
+  if (_url.startsWith("/")) return `${base.protocol}//${base.host}${_url}`;
+
   const url = new URL(_url);
   if (base.host === url.host) return url.toString();
   else return `${base.protocol}//${base.host}/api/proxy?url=${url}`;

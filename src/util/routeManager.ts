@@ -38,7 +38,6 @@ export function loadRoutes(app: express.Application): void {
   };
 
   const versionDefaults: { [key: string]: [number, RouteDetails] } = {};
-  console.log("SET IT");
 
   for (const routeFile of routeFiles) {
     // Check if should skip (name's starting with _)

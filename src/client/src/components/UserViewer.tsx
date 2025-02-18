@@ -8,61 +8,80 @@ import Column from "../dawn-ui/components/Column";
 import Row from "../dawn-ui/components/Row";
 import Tabbed from "../dawn-ui/components/Tabbed";
 import { setFullscreenImage } from "./ImageViewer";
+import { useAppSelector } from "../stores/store";
+import File from "../syrenity-client/structures/File";
+import { fixUrlWithProxy } from "../util";
 
 export let setUserViewerUser: (user: User) => void = () => {};
 
 export default function UserViewer() {
-  const [user, setUser] = useState<User | null>(null);
+  const users = useAppSelector((x) => x.users);
+  const [userId, setUserId] = useState<number | null>(null);
 
   useEffect(() => {
     setUserViewerUser = (user) => {
-      setUser(user);
+      setUserId(user.id);
     };
   }, []);
 
-  return (
-    user && (
-      <Fullscreen
-        onClick={(e) => {
-          if (
-            (e.target as HTMLDivElement).classList.contains("dawn-fullscreen")
-          )
-            setUser(null);
-        }}
-      >
-        <Container className="sy-user-viewer" onClick={(e) => {}}>
-          <Column>
+  return userId === null ? (
+    <></>
+  ) : (
+    <Fullscreen
+      onClick={(e) => {
+        if ((e.target as HTMLDivElement).classList.contains("dawn-fullscreen"))
+          setUserId(null);
+      }}
+    >
+      <Container className="sy-user-viewer" onClick={(e) => {}}>
+        <Column>
+          {users[userId].profile_banner ? (
+            <img
+              className="sy-user-viewer-banner clickable"
+              src={fixUrlWithProxy(File.check(users[userId].profile_banner))}
+              onClick={() => {
+                setFullscreenImage(
+                  fixUrlWithProxy(File.check(users[userId].profile_banner))
+                );
+              }}
+            ></img>
+          ) : (
             <div className="sy-user-viewer-banner"></div>
-            <Row className="sy-user-viewer-below-banner">
-              <UserIcon
-                id={user?.id}
-                size="128px"
-                onClick={() => {
-                  setFullscreenImage(user.avatar.url, [user.avatar.url]);
-                }}
-              />
+          )}
+
+          <Row className="sy-user-viewer-below-banner">
+            <UserIcon
+              id={userId}
+              size="128px"
+              onClick={() => {
+                setFullscreenImage(
+                  fixUrlWithProxy(File.check(users[userId].avatar))
+                );
+              }}
+            />
+          </Row>
+          <Column className="sy-user-viewer-main-content">
+            <Row util={["small-gap", "align-center"]}>
+              <Words type="heading" style={{ fontSize: "1.5em" }}>
+                {users[userId].username}
+              </Words>
+              <small>#{users[userId].discriminator}</small>
             </Row>
-            <Column className="sy-user-viewer-main-content">
-              <Row util={["small-gap", "align-center"]}>
-                <Words type="heading" style={{ fontSize: "1.5em" }}>
-                  {user.username}
-                </Words>
-                <small>#{user.discriminator}</small>
-              </Row>
-              <Tabbed>
-                {{
-                  "About Me": (
-                    <Column>
-                      <Words type="heading">Joined Syrenity</Words>
-                      <Words>{user.createdAt.toDateString()}</Words>
-                    </Column>
-                  ),
-                }}
-              </Tabbed>
-            </Column>
+            <Tabbed>
+              {{
+                "About Me": (
+                  <Column>
+                    <Words type="heading">Joined Syrenity</Words>
+                    <Words>
+                      {new Date(users[userId].created_at).toDateString()}
+                    </Words>
+                  </Column>
+                ),
+              }}
+            </Tabbed>
           </Column>
-        </Container>
-      </Fullscreen>
-    )
+        </Column>
+      </Container>
+    </Fullscreen>
   );
 }

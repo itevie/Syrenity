@@ -2,6 +2,7 @@ import { DatabaseChannel } from "../models/Channel";
 import { DatabaseMember } from "../models/Member";
 import { ExpandedMessage } from "../models/Message";
 import { DatabaseReaction } from "../models/Reaction";
+import { DatabaseServer } from "../models/Servers";
 import { DatabaseUser, StrippedDatabaseUser } from "../models/User";
 
 export interface WebsocketDispatchTypes {
@@ -23,6 +24,10 @@ export interface WebsocketDispatchTypes {
 
   ServerMemberRemove: {
     member: DatabaseMember;
+  };
+
+  ServerUpdate: {
+    server: DatabaseServer;
   };
 
   ChannelCreate: {

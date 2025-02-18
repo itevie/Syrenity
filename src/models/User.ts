@@ -15,16 +15,18 @@ export interface DatabaseUser {
   email: string;
   email_verified: boolean;
   discriminator: number;
-  avatar: string;
+  avatar: string | null;
   created_at: Date;
   is_bot: boolean;
   bio: string;
+  profile_banner: string | null;
 }
 
 export type StrippedDatabaseUser = Omit<DatabaseUser, "password" | "email">;
 
 export interface EditUserOptions {
   avatar?: string;
+  profile_banner?: string;
 }
 
 export default class SyUser {

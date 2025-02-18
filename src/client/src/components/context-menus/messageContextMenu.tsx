@@ -25,6 +25,23 @@ export function showMessageContextMenu(options: MessageContextMenuOptions) {
       },
       {
         type: "button",
+        label: options.message.isPinned ? "Unpin" : "Pin",
+        async onClick() {
+          const result = await wrap(
+            options.message.isPinned
+              ? options.message.unpin()
+              : options.message.pin()
+          );
+          if (isErr(result)) {
+            return handleClientError(
+              options.message.isPinned ? "unpin" : "pin",
+              result.v
+            );
+          }
+        },
+      },
+      {
+        type: "button",
         label: "Delete Message",
         scheme: "danger",
         onClick: async () => {

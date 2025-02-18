@@ -3,7 +3,7 @@ type ErrorType =
   | "UnknownError"
   | "UnknownServerError"
   | "UnknownDatabaseError"
-
+  | "Conflict"
   // Database
 
   // Body Validation

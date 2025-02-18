@@ -37,6 +37,18 @@ export default class SyMember {
     );
   }
 
+  public static async fetch(
+    serverId: number,
+    userId: number
+  ): Promise<SyMember> {
+    return new SyMember(
+      await queryOne<DatabaseMember>({
+        text: "SELECT * FROM members WHERE guild_id = $1 AND user_id = $2",
+        values: [serverId, userId],
+      })
+    );
+  }
+
   public static async create(
     serverId: number,
     userId: number

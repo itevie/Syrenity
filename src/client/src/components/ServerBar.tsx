@@ -90,6 +90,23 @@ export default function ServerBar(props: {
                     >
                       Change PFP
                     </Button>
+                    <Button
+                      big
+                      onClick={async () => {
+                        const result = await uploadFile("image/*");
+                        const file = await client.files.upload(
+                          result.name,
+                          result.result
+                        );
+                        await client.user?.edit({
+                          profile_banner: file.id,
+                        });
+                        closeAlert();
+                        showInfoAlert("Updated!");
+                      }}
+                    >
+                      Change Banner
+                    </Button>
                   </Row>
                 </Column>
               ),

@@ -1,5 +1,6 @@
-import { queryOne } from "../database/database";
+import { multiUpadate, queryOne } from "../database/database";
 import { query } from "../util/database";
+import { send } from "../ws/websocketUtil";
 import SyChannel from "./Channel";
 import SyMember from "./Member";
 
@@ -13,6 +14,11 @@ export interface DatabaseServer {
 
 export interface CreateServerOptions {
   name: string;
+}
+
+export interface EditServerOptions {
+  name?: string;
+  avatar?: string;
 }
 
 export default class SyServer {
@@ -56,6 +62,25 @@ export default class SyServer {
         values: [this.data.id],
       })
     ).rows.map((x) => new SyChannel(x));
+  }
+
+  public async edit(options: EditServerOptions): Promise<SyServer> {
+    const data = await multiUpadate<DatabaseServer>(
+      "guilds",
+      this.data.id,
+      options
+    );
+    this.data = data;
+
+    send({
+      type: "ServerUpdate",
+      guild: this.data.id,
+      payload: {
+        server: this.data,
+      },
+    });
+
+    return this;
   }
 
   public static async create(

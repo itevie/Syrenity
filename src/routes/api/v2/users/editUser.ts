@@ -17,7 +17,22 @@ const handler: RouteDetails<EditUserOptions> = {
     ) {
       return res.status(400).send(
         new SyrenityError({
-          message: "The file must be an image",
+          message: "The avatar file must be an image",
+          errorCode: "InvalidFileType",
+          statusCode: 400,
+        })
+      );
+    }
+
+    if (
+      body.profile_banner &&
+      !(await database.files.get(body.profile_banner)).mime?.startsWith(
+        "image/"
+      )
+    ) {
+      return res.status(400).send(
+        new SyrenityError({
+          message: "The profile banner file must be an image",
           errorCode: "InvalidFileType",
           statusCode: 400,
         })
@@ -44,6 +59,10 @@ const handler: RouteDetails<EditUserOptions> = {
     type: "object",
     properties: {
       avatar: {
+        type: "string",
+        nullable: true,
+      },
+      profile_banner: {
         type: "string",
         nullable: true,
       },

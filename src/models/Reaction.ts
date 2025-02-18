@@ -43,7 +43,6 @@ export default class SyReaction {
   }
 
   public static makeUseful(reactions: DatabaseReaction[]): UsefulReaction[] {
-    console.log(reactions);
     return Object.entries(
       reactions.reduce<{ [key: string]: UsefulReaction }>((p, c) => {
         return {

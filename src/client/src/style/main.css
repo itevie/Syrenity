@@ -136,8 +136,9 @@ body {
 }
 
 .sy-user-viewer-banner {
-  width: 100%;
-  height: 150px;
+  width: 600px;
+  height: calc(600px * 1 / 2.5);
+  object-fit: cover;
 
   border-top-left-radius: var(--dawn-border-radius);
   border-top-right-radius: var(--dawn-border-radius);

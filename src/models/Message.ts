@@ -98,12 +98,10 @@ export default class SyMessage {
 
   public static async fetch(id: number): Promise<SyMessage> {
     return new SyMessage(
-      (
-        await query<DatabaseMessage>({
-          text: "SELECT * FROM messages WHERE id = $1",
-          values: [id],
-        })
-      ).rows[0]
+      await queryOne<DatabaseMessage>({
+        text: "SELECT * FROM messages WHERE id = $1",
+        values: [id],
+      })
     );
   }
 

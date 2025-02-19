@@ -12,13 +12,9 @@ import messages from "./messages";
 export interface DatabaseQueryOptions {
   text: string;
   values: any[];
-  ignoreErrors?: boolean;
-  noRowsError?: {
-    message: string;
-    safeMessage?: string;
-    errorCode?: ErrorType;
-  };
 }
+
+export type DbReturn<T> = Promise<Result<T, DatabaseError>>;
 
 const logger = new Logger("database");
 
@@ -49,7 +45,7 @@ export async function multiUpadate<T extends pg.QueryResultRow>(
   tableName: string,
   id: number,
   data: object
-): Promise<T> {
+): Promise<T | null> {
   const setClause = Object.entries(data)
     .map((x, i) => `${x[0]} = $${i + 2}`)
     .join(", ");
@@ -72,62 +68,36 @@ export async function multiUpadate<T extends pg.QueryResultRow>(
 }
 
 export async function queryOne<T extends pg.QueryResultRow>(
-  options: DatabaseQueryOptions
-): Promise<T> {
+  query: pg.QueryConfig
+): Promise<T | null> {
   if (!client) {
     console.error(`Database client was not initialised.`);
     process.exit(1);
   }
 
-  const result = await client.query<T>({
-    text: options.text,
-    values: options.values,
-  });
+  try {
+    const result = await client.query<T>(query);
 
-  if (result.rowCount === 0) {
-    if (options.noRowsError === undefined && options.ignoreErrors) {
-      return null as unknown as T;
-    } else if (options.noRowsError === undefined && !options.ignoreErrors) {
-      console.error(`No rows error not handled`, options);
-      process.exit(1);
-    } else if (options.noRowsError !== undefined) {
-      throw new DatabaseError({
-        message: options.noRowsError.message,
-        safeMessage:
-          options.noRowsError.safeMessage ?? options.noRowsError.message,
-        statusCode: 404,
-        errorCode: options.noRowsError.errorCode ?? "UnknownDatabaseError",
-      });
-    }
+    return result.rows.length === 0 ? null : result.rows[0];
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
   }
-
-  return result.rows[0];
 }
 
 export async function query<T extends pg.QueryResultRow>(
-  options: DatabaseQueryOptions
+  query: pg.QueryConfig
 ): Promise<pg.QueryResult<T>> {
+  if (!client) {
+    console.error(`Database client was not initialised.`);
+    process.exit(1);
+  }
   try {
-    if (!client) throw new Error("Database client was not initialised.");
-
-    const result = await client.query<T>({
-      text: options.text,
-      values: options.values,
-    });
-
-    if (options.noRowsError && result.rowCount === 0) {
-      throw new DatabaseError({
-        message: options.noRowsError.message,
-        safeMessage:
-          options.noRowsError.safeMessage ?? options.noRowsError.message,
-        statusCode: 404,
-        errorCode: options.noRowsError.errorCode ?? "UnknownDatabaseError",
-      });
-    }
+    const result = await client.query<T>(query);
 
     return result;
   } catch (e) {
-    console.log(options);
-    throw e;
+    console.log(query);
+    process.exit(1);
   }
 }

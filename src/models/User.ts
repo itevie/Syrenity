@@ -1,4 +1,4 @@
-import { query, queryOne } from "../database/database";
+import { DbReturn, query, queryOne } from "../database/database";
 import bcrypt from "bcrypt";
 import AuthenticationError from "../errors/AuthenticationError";
 import SyRelationship, {
@@ -104,7 +104,6 @@ export default class SyUser {
       (await queryOne<DatabaseUser>({
         text: "SELECT * FROM users WHERE id = $1",
         values: [id],
-        ignoreErrors: true,
       })) !== null
     );
   }
@@ -114,49 +113,63 @@ export default class SyUser {
       (await queryOne<DatabaseUser>({
         text: "SELECT * FROM users WHERE email = $1",
         values: [email],
-        ignoreErrors: true,
       })) !== null
     );
   }
 
-  public static async fetch(id: number): Promise<SyUser> {
-    return new SyUser(
-      await queryOne<DatabaseUser>({
-        text: "SELECT * FROM users WHERE id = $1",
-        values: [id],
-        noRowsError: {
+  public static async fetch(id: number): DbReturn<SyUser> {
+    const result = await queryOne<DatabaseUser>({
+      text: "SELECT * FROM users WHERE id = $1",
+      values: [id],
+    });
+
+    if (result === null)
+      return err(
+        new DatabaseError({
           message: `User ${id} does not exist`,
-        },
-      })
-    );
+          statusCode: 404,
+          errorCode: "NonexistentResource",
+        })
+      );
+
+    return ok(new SyUser(result));
   }
 
-  public static async fetchByEmail(email: string): Promise<SyUser> {
-    return new SyUser(
-      await queryOne<DatabaseUser>({
-        text: "SELECT * FROM users WHERE id = $1",
-        values: [email],
-        noRowsError: {
+  public static async fetchByEmail(email: string): DbReturn<SyUser> {
+    const result = await queryOne<DatabaseUser>({
+      text: "SELECT * FROM users WHERE email = $1",
+      values: [email],
+    });
+
+    if (result === null)
+      return err(
+        new DatabaseError({
           message: `Email does not exist`,
-        },
-      })
-    );
+          statusCode: 404,
+          errorCode: "NonexistentResource",
+        })
+      );
+
+    return ok(new SyUser(result));
   }
 
   public static async fetchByEmailAndPassword(
     email: string,
     password: string
-  ): Promise<SyUser> {
-    const user = await SyUser.fetchByEmail(email);
+  ): DbReturn<SyUser> {
+    const { data: user, error } = await SyUser.fetchByEmail(email);
+
+    if (error) return err(error);
+
     if (!(await bcrypt.compare(password, user.fullData.password))) {
       throw new AuthenticationError({
-        errorCode: "NotLoggedIn",
-        message: "Not logged in",
+        errorCode: "InvalidEmailOrPassword",
+        message: "Incorrect credentials",
         statusCode: 401,
       });
     }
 
-    return user;
+    return ok(user);
   }
 
   public static async getDiscriminatorsFor(
@@ -174,35 +187,42 @@ export default class SyUser {
     email: string,
     password: string,
     username: string
-  ): Promise<SyUser> {
+  ): DbReturn<SyUser> {
+    // Check if email already exists
     if (await SyUser.emailExists(email))
-      throw new DatabaseError({
-        message: "Email already registered",
-        errorCode: "EmailExists",
-        statusCode: 400,
-      });
+      return err(
+        new DatabaseError({
+          message: "Email already registered",
+          errorCode: "EmailExists",
+          statusCode: 400,
+        })
+      );
 
+    // Check if there are too many discriminators for this username
     const discrims = await SyUser.getDiscriminatorsFor(username);
     if (discrims.length > 9996)
-      throw new DatabaseError({
-        message: "Too many users have this username",
-        errorCode: "TooManyUsers",
-        statusCode: 400,
-      });
+      return err(
+        new DatabaseError({
+          message: "Too many users have this username",
+          errorCode: "TooManyUsers",
+          statusCode: 400,
+        })
+      );
 
+    // Generate discriminator
     let discriminator: string = "";
     do {
       const d = randomRange(0, 1000).toString().padStart(4, "0");
       if (!discrims.includes(d)) discriminator = d;
     } while (discriminator === "");
 
+    // Hash and create
     const _password = await bcrypt.hash(password, 10);
-
-    const user = await queryOne<DatabaseUser>({
+    const user = (await queryOne<DatabaseUser>({
       text: "INSERT INTO users (username, discriminator, password, email) VALUES ($1, $2, $3, $4) RETURNING *",
       values: [username, discriminator, _password, email],
-    });
+    })) as DatabaseUser;
 
-    return new SyUser(user);
+    return ok(new SyUser(user));
   }
 }

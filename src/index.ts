@@ -1,3 +1,14 @@
+import "ts-error-as-value/lib/globals";
+global.wrapResult = async <T, E extends Error = Error>(
+  promise: Promise<T>
+): Promise<Result<T, E>> => {
+  try {
+    return ok(await promise);
+  } catch (e) {
+    return err(e);
+  }
+};
+
 import express from "express";
 import expressWs from "express-ws";
 import path from "path";

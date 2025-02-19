@@ -7,7 +7,7 @@ import { send } from "../../../../ws/websocketUtil";
 const handler: RouteDetails<EditUserOptions> = {
   method: "PATCH",
   path: "/users/:user",
-  handler: async (req, res) => {
+  handler: async (req, res, next) => {
     let user = await SyUser.fetch(parseInt(req.params.user));
     const body = req.body as EditUserOptions;
 
@@ -15,7 +15,7 @@ const handler: RouteDetails<EditUserOptions> = {
       body.avatar &&
       !(await database.files.get(body.avatar)).mime?.startsWith("image/")
     ) {
-      return res.status(400).send(
+      return next(
         new SyrenityError({
           message: "The avatar file must be an image",
           errorCode: "InvalidFileType",
@@ -30,7 +30,7 @@ const handler: RouteDetails<EditUserOptions> = {
         "image/"
       )
     ) {
-      return res.status(400).send(
+      return next(
         new SyrenityError({
           message: "The profile banner file must be an image",
           errorCode: "InvalidFileType",
@@ -39,7 +39,9 @@ const handler: RouteDetails<EditUserOptions> = {
       );
     }
 
-    user = await user.edit(req.body as EditUserOptions);
+    const { data: newUser, error } = await user.edit(
+      req.body as EditUserOptions
+    );
 
     send({
       type: "UserUpdate",

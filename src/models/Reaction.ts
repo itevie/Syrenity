@@ -90,13 +90,12 @@ export default class SyReaction {
     userId: number,
     emoji: string
   ): Promise<SyReaction | null> {
-    return new SyReaction(
-      await queryOne<DatabaseReaction>({
-        text: "SELECT * FROM reactions WHERE message_id = $1 AND user_id = $2 AND emoji = $3",
-        values: [messageId, userId, emoji],
-        ignoreErrors: true,
-      })
-    );
+    const result = await queryOne<DatabaseReaction>({
+      text: "SELECT * FROM reactions WHERE message_id = $1 AND user_id = $2 AND emoji = $3",
+      values: [messageId, userId, emoji],
+      ignoreErrors: true,
+    });
+    return result ? new SyReaction(result) : null;
   }
 
   public static async create(

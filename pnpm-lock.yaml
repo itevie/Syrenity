@@ -95,6 +95,9 @@ importers:
       sharp:
         specifier: ^0.33.5
         version: 0.33.5
+      ts-error-as-value:
+        specifier: ^0.4.207
+        version: 0.4.207
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
@@ -1128,6 +1131,9 @@ packages:
 
   tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
+
+  ts-error-as-value@0.4.207:
+    resolution: {integrity: sha512-//AQto0Z/WlJZKMcvghEUA4d3beHL2jdv+LDEbbthUUAlmp4JM+YyVABdo9TM2cTzlYwSQkexYuFoYomwyN0aA==}
 
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
@@ -2234,6 +2240,8 @@ snapshots:
   toidentifier@1.0.1: {}
 
   tr46@0.0.3: {}
+
+  ts-error-as-value@0.4.207: {}
 
   tslib@2.8.1:
     optional: true

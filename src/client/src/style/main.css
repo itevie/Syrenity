@@ -31,6 +31,18 @@ body {
   border-color: var(--sy-panel-border-color);
 }
 
+.sy-accountarea {
+  background-color: var(--sy-serverbar-color);
+  border-top-style: solid;
+  border-color: var(--sy-panel-border-color);
+  padding: 5px;
+}
+
+.sy-accountarea-actions {
+  flex-direction: row-reverse;
+  margin-right: 20px;
+}
+
 .sy-serverlist {
   border-right-style: solid;
   overflow: auto;
@@ -97,11 +109,6 @@ body {
   gap: 10px;
 }
 
-.sy-accountarea {
-  border-top-style: solid;
-  border-right-style: solid;
-}
-
 .sy-attachment-image {
   max-width: 600px;
   height: 400px;
@@ -154,4 +161,19 @@ body {
 .sy-user-viewer-main-content {
   padding: 10px;
   padding-top: 0px;
+}
+
+.sy-page-container {
+  background-color: var(--dawn-root-background);
+  background-color: var(--sy-chat-color);
+}
+
+.sy-page-close {
+  margin: 15px;
+  font-size: 2em;
+  cursor: pointer;
+}
+
+.sy-page-sidebar {
+  min-width: 250px;
 }

@@ -20,6 +20,14 @@ import DmBar from "./components/DmBar";
 import { AxiosWrapper } from "./dawn-ui/util";
 import { handleClientError, isErr, wrap } from "./util";
 import { setUserViewerUser } from "./components/UserViewer";
+import Column from "./dawn-ui/components/Column";
+import Icon from "./dawn-ui/components/Icon";
+import File from "./syrenity-client/structures/File";
+import { fallbackImage } from "./config";
+import { useAppSelector } from "./stores/store";
+import { showSelfContextMenu } from "./components/context-menus/selfContextMenu";
+import GoogleMatieralIcon from "./dawn-ui/components/GoogleMaterialIcon";
+import showSettingsPage from "./app-pages/SettingsPage";
 
 export const baseUrl =
   window.location.hostname === "localhost"
@@ -31,6 +39,11 @@ axiosClient.noErrorMessage = true;
 axiosClient.config.headers = {
   Authorization: `Token ${localStorage.getItem("token") as string}`,
 };
+
+document.body.style.setProperty(
+  "--sy-base-color",
+  localStorage.getItem("sy-app-hue") ?? "300"
+);
 
 export let client: Client;
 const logger = new Logger("client");
@@ -62,6 +75,7 @@ export function wrapLoading<T>(x: Promise<T>): Promise<T> {
 
 function App() {
   const dispatch = useDispatch();
+  const users = useAppSelector((x) => x.users);
   const [selectedServer, setSelectedServer] = useState<Server | "@me" | null>(
     null
   );
@@ -214,23 +228,48 @@ function App() {
       <ImageViewer />
       <FullPage>
         <Row style={{ height: "100%" }} util={["no-gap"]}>
-          <ServerBar
-            selected={selectedServer}
-            setSelected={(s) => loadServer(s)}
-          />
-          {selectedServer === "@me" ? (
-            <DmBar
-              selected={selectedChannel}
-              setSelected={loadChannel}
-              selectedServer={null}
-            />
-          ) : (
-            <ChannelBar
-              selected={selectedChannel}
-              setSelected={loadChannel}
-              selectedServer={selectedServer}
-            />
-          )}
+          <Column util={["no-gap"]} style={{ height: "100%" }}>
+            <Row util={["no-gap"]} style={{ height: "100%" }}>
+              <ServerBar
+                selected={selectedServer}
+                setSelected={(s) => loadServer(s)}
+              />
+              {selectedServer === "@me" ? (
+                <DmBar
+                  selected={selectedChannel}
+                  setSelected={loadChannel}
+                  selectedServer={null}
+                />
+              ) : (
+                <ChannelBar
+                  selected={selectedChannel}
+                  setSelected={loadChannel}
+                  selectedServer={selectedServer}
+                />
+              )}
+            </Row>
+            <Row util={["align-center"]} className="sy-accountarea">
+              <Icon
+                src={
+                  client?.user
+                    ? File.check(users[client.user.id as number]?.avatar, 64)
+                    : fallbackImage
+                }
+                size="48px"
+                onContextMenu={showSelfContextMenu}
+              />
+              <div className="flex-grow width-100">
+                {users[client?.user?.id as number]?.username}
+              </div>
+              <Row util={["align-center"]} className="sy-accountarea-actions">
+                <GoogleMatieralIcon
+                  className="clickable"
+                  name="settings"
+                  onClick={showSettingsPage}
+                />
+              </Row>
+            </Row>
+          </Column>
           <ChannelContent channel={selectedChannel} />
         </Row>
       </FullPage>

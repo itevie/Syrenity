@@ -14,6 +14,7 @@ import { FlyoutManager } from "./dawn-ui/components/Flyout";
 import Invite from "./pages/Invite";
 import Showcase from "./dawn-ui/Showcase";
 import UserViewer from "./components/UserViewer";
+import PageManager from "./components/PageManager";
 
 const router = createBrowserRouter(
   [
@@ -60,6 +61,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <Provider store={store}>
+    <PageManager />
     <ContextMenuManager />
     <AlertManager />
     <FlyoutManager />

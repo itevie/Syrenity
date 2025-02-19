@@ -24,6 +24,7 @@ export default function useChannelMessagesHook(channel: Channel | null) {
     setMessages([]);
     setIsDone(false);
     setLast({ message: null, timestamp: 0 });
+    logger.log(`Cleared messages!`);
 
     const listeners: [keyof ClientEvents, ClientEventFunction<any>][] = [];
 
@@ -127,7 +128,7 @@ export default function useChannelMessagesHook(channel: Channel | null) {
         `Messages loaded in channel ${channel.id}. Oldest message is ${newMessages[0]?.id}`
       );
     },
-    [channel, last, isDone]
+    [messages, channel, last, isDone]
   );
 
   return {

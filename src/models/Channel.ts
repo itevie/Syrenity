@@ -43,10 +43,10 @@ export default class SyChannel {
       });
     }
 
-    const newChannel = await queryOne<DatabaseChannel>({
+    const newChannel = (await queryOne<DatabaseChannel>({
       text: "UPDATE channels SET position = $2 WHERE id = $1",
       values: [this.data.id, position],
-    });
+    })) as DatabaseChannel;
 
     const channels = (
       await query<{ id: number }>({
@@ -100,10 +100,10 @@ export default class SyChannel {
 
   public static async createDMChannel(): Promise<SyChannel> {
     return new SyChannel(
-      await queryOne<DatabaseChannel>({
+      (await queryOne<DatabaseChannel>({
         text: "INSERT INTO channels (type) VALUES ('dm') RETURNING *;",
         values: [],
-      })
+      })) as DatabaseChannel
     );
   }
 
@@ -112,10 +112,10 @@ export default class SyChannel {
     options: CreateChannelOptions
   ): Promise<SyChannel> {
     const channel = new SyChannel(
-      await queryOne<DatabaseChannel>({
+      (await queryOne<DatabaseChannel>({
         text: "INSERT INTO channels (type, guild_id, name) VALUES ('channel', $1, $2) RETURNING *;",
         values: [serverId, options.name],
-      })
+      })) as DatabaseChannel
     );
 
     send({

@@ -55,10 +55,10 @@ export default class SyMessage {
   }
 
   public async setPinned(value: boolean): Promise<SyMessage> {
-    const result = await queryOne<DatabaseMessage>({
+    const result = (await queryOne<DatabaseMessage>({
       text: "UPDATE messages SET is_pinned = $2 WHERE id = $1 RETURNING *",
       values: [this.data.id, value],
-    });
+    })) as DatabaseMessage;
 
     this.data = result;
     return this;

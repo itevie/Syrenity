@@ -8,7 +8,7 @@ import Container from "../dawn-ui/components/Container";
 import Icon from "../dawn-ui/components/Icon";
 import { fallbackImage } from "../config";
 import Column from "../dawn-ui/components/Column";
-import Words from "../dawn-ui/components/Words";
+import Words, { TextType } from "../dawn-ui/components/Words";
 import Row from "../dawn-ui/components/Row";
 import Button from "../dawn-ui/components/Button";
 import { MemberAPIData } from "../syrenity-client/structures/Member";
@@ -23,7 +23,7 @@ export default function Invite() {
       const url = window.location.href.match(/invites\/(.+)/);
 
       const result = await wrap(
-        axiosClient.get<InviteAPIData>(baseUrl + `/api/invites/${url?.[1]}`)
+        axiosClient.get<InviteAPIData>(baseUrl + `/api/invites/${url?.[1]}`),
       );
 
       if (isErr(result)) {
@@ -31,7 +31,7 @@ export default function Invite() {
       }
 
       const servers = await wrap(
-        axiosClient.get<ServerAPIData[]>(baseUrl + "/api/users/@me/servers")
+        axiosClient.get<ServerAPIData[]>(baseUrl + "/api/users/@me/servers"),
       );
 
       if (
@@ -50,8 +50,8 @@ export default function Invite() {
     const result = await wrap(
       axiosClient.post<MemberAPIData>(
         baseUrl + `/api/invites/${invite?.id}`,
-        {}
-      )
+        {},
+      ),
     );
 
     if (isErr(result)) {
@@ -73,7 +73,7 @@ export default function Invite() {
               fallback={fallbackImage}
               size="128px"
             />
-            <Words type="heading">{invite?.guild.name}</Words>
+            <Words type={TextType.Heading}>{invite?.guild.name}</Words>
             <label>
               You've been invited to <b>{invite?.guild.name}</b>! How shall you
               respond?

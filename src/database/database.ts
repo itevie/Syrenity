@@ -68,12 +68,12 @@ export async function multiUpadate<T extends pg.QueryResultRow>(
     values: values,
   });
 
-  return result;
+  return result as T;
 }
 
 export async function queryOne<T extends pg.QueryResultRow>(
   options: DatabaseQueryOptions
-): Promise<T> {
+): Promise<T | null> {
   if (!client) {
     console.error(`Database client was not initialised.`);
     process.exit(1);
@@ -84,32 +84,17 @@ export async function queryOne<T extends pg.QueryResultRow>(
     values: options.values,
   });
 
-  if (result.rowCount === 0) {
-    if (options.noRowsError === undefined && options.ignoreErrors) {
-      return null as unknown as T;
-    } else if (options.noRowsError === undefined && !options.ignoreErrors) {
-      console.error(`No rows error not handled`, options);
-      process.exit(1);
-    } else if (options.noRowsError !== undefined) {
-      throw new DatabaseError({
-        message: options.noRowsError.message,
-        safeMessage:
-          options.noRowsError.safeMessage ?? options.noRowsError.message,
-        statusCode: 404,
-        errorCode: options.noRowsError.errorCode ?? "UnknownDatabaseError",
-      });
-    }
-  }
-
-  return result.rows[0];
+  return !result.rows[0] ? null : result.rows[0];
 }
 
 export async function query<T extends pg.QueryResultRow>(
   options: DatabaseQueryOptions
 ): Promise<pg.QueryResult<T>> {
+  if (!client) {
+    console.error(`Database client was not initialised.`);
+    process.exit(1);
+  }
   try {
-    if (!client) throw new Error("Database client was not initialised.");
-
     const result = await client.query<T>({
       text: options.text,
       values: options.values,

@@ -4,7 +4,7 @@ import Column from "../dawn-ui/components/Column";
 import InputWithName from "../dawn-ui/components/InputWithName";
 import Range from "../dawn-ui/components/Range";
 import Row from "../dawn-ui/components/Row";
-import Words from "../dawn-ui/components/Words";
+import Words, { TextType } from "../dawn-ui/components/Words";
 
 export default function showSettingsPage() {
   setPage(
@@ -26,18 +26,18 @@ export default function showSettingsPage() {
             icon: "contrast",
             element: (
               <Column>
-                <Words type="heading">Theme</Words>
+                <Words type={TextType.Heading}>Theme</Words>
                 <Range
                   name="Hue"
                   defaultValue={localStorage.getItem("sy-app-hue") ?? "300"}
                   onChange={(e) => {
                     document.body.style.setProperty(
                       "--sy-base-color",
-                      e.currentTarget.value
+                      e.currentTarget.value,
                     );
                     localStorage.setItem(
                       "sy-app-hue",
-                      e.currentTarget.value.toString()
+                      e.currentTarget.value.toString(),
                     );
                   }}
                   min="0"
@@ -48,6 +48,6 @@ export default function showSettingsPage() {
           },
         ],
       }}
-    />
+    />,
   );
 }

@@ -24,7 +24,7 @@ export function loadRoutes(app: express.Application): void {
         next: express.NextFunction
       ) => {
         try {
-          route.handler(req, res, next);
+          await route.handler(req, res, next);
         } catch (err) {
           next(err);
         }

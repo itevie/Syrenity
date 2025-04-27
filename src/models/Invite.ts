@@ -1,4 +1,5 @@
 import { queryOne } from "../database/database";
+import DatabaseError from "../errors/DatabaseError";
 import { randomID } from "../util/util";
 import SyChannel, { DatabaseChannel } from "./Channel";
 import SyMember from "./Member";
@@ -49,19 +50,26 @@ export default class SyInvite {
   }
 
   public async increaseUsage(): Promise<void> {
-    this.data = await queryOne<DatabaseInvite>({
+    this.data = (await queryOne<DatabaseInvite>({
       text: "UPDATE invites SET uses = uses + 1 WHERE id = $1",
       values: [this.data.id],
-    });
+    })) as DatabaseInvite;
   }
 
   public static async fetch(id: string): Promise<SyInvite> {
-    return new SyInvite(
-      await queryOne<DatabaseInvite>({
-        text: "SELECT * FROM invites WHERE id = $1",
-        values: [id],
-      })
-    );
+    const result = await queryOne<DatabaseInvite>({
+      text: "SELECT * FROM invites WHERE id = $1",
+      values: [id],
+    });
+
+    if (result === null)
+      throw new DatabaseError({
+        message: `Invite with ID ${id} does not exist`,
+        errorCode: "NonexistentResource",
+        statusCode: 404,
+      });
+
+    return new SyInvite(result);
   }
 
   public static async create(
@@ -70,7 +78,7 @@ export default class SyInvite {
     options: CreateInviteOptions
   ): Promise<SyInvite> {
     return new SyInvite(
-      await queryOne<DatabaseInvite>({
+      (await queryOne<DatabaseInvite>({
         text: "INSERT INTO invites(id, guild_id, created_by, channel_id, expires_in, max_uses) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
         values: [
           options.id ?? randomID(6),
@@ -80,7 +88,7 @@ export default class SyInvite {
           options.expires_in,
           options.max_uses,
         ],
-      })
+      })) as DatabaseInvite
     );
   }
 }

@@ -4,6 +4,7 @@ type ErrorType =
   | "UnknownServerError"
   | "UnknownDatabaseError"
   | "Conflict"
+
   // Database
 
   // Body Validation
@@ -16,6 +17,9 @@ type ErrorType =
   | "InvalidFileSize"
   | "InvalidMimeType"
   | "InvalidFileType"
+
+  // Members
+  | "UserNotInServer"
 
   // Emojis
   | "BadEmoji"

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { fallbackImage } from "../config";
 import Column from "../dawn-ui/components/Column";
 import Icon from "../dawn-ui/components/Icon";
-import Words from "../dawn-ui/components/Words";
+import Words, { TextType } from "../dawn-ui/components/Words";
 
 // Most of these were made by chatgpt
 const phrases: string[] = [
@@ -46,7 +46,7 @@ export default function FullscreenLoader() {
       <div className="dawn-page-center">
         <Column util={["justify-center", "align-center"]}>
           <Icon className="dawn-spin" src={fallbackImage} size={"256px"} />
-          <Words type="heading">{phrase}</Words>
+          <Words type={TextType.Heading}>{phrase}</Words>
         </Column>
       </div>
     </div>

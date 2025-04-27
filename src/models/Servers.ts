@@ -1,4 +1,5 @@
 import { multiUpadate, queryOne } from "../database/database";
+import DatabaseError from "../errors/DatabaseError";
 import { query } from "../util/database";
 import { send } from "../ws/websocketUtil";
 import SyChannel from "./Channel";
@@ -88,10 +89,10 @@ export default class SyServer {
     options: CreateServerOptions
   ): Promise<SyServer> {
     const server = new SyServer(
-      await queryOne<DatabaseServer>({
+      (await queryOne<DatabaseServer>({
         text: "INSERT INTO guilds (owner_id, name) VALUES ($1, $2) RETURNING *",
         values: [ownerId, options.name],
-      })
+      })) as DatabaseServer
     );
 
     await SyChannel.createServerChannel(server.data.id, {
@@ -104,11 +105,18 @@ export default class SyServer {
   }
 
   public static async fetch(id: number): Promise<SyServer> {
-    return new SyServer(
-      await queryOne<DatabaseServer>({
-        text: "SELECT * FROM guilds WHERE id = $1;",
-        values: [id],
-      })
-    );
+    const result = await queryOne<DatabaseServer>({
+      text: "SELECT * FROM guilds WHERE id = $1;",
+      values: [id],
+    });
+
+    if (result === null)
+      throw new DatabaseError({
+        message: `Server ${id} does not exist`,
+        statusCode: 404,
+        errorCode: "NonexistentResource",
+      });
+
+    return new SyServer(result);
   }
 }

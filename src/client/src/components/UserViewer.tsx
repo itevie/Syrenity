@@ -3,7 +3,7 @@ import User from "../syrenity-client/structures/User";
 import Fullscreen from "../dawn-ui/components/Fullscreen";
 import Container from "../dawn-ui/components/Container";
 import UserIcon from "./UserIcon";
-import Words from "../dawn-ui/components/Words";
+import Words, { TextType } from "../dawn-ui/components/Words";
 import Column from "../dawn-ui/components/Column";
 import Row from "../dawn-ui/components/Row";
 import Tabbed from "../dawn-ui/components/Tabbed";
@@ -41,7 +41,7 @@ export default function UserViewer() {
               src={fixUrlWithProxy(File.check(users[userId].profile_banner))}
               onClick={() => {
                 setFullscreenImage(
-                  fixUrlWithProxy(File.check(users[userId].profile_banner))
+                  fixUrlWithProxy(File.check(users[userId].profile_banner)),
                 );
               }}
             ></img>
@@ -55,14 +55,14 @@ export default function UserViewer() {
               size="128px"
               onClick={() => {
                 setFullscreenImage(
-                  fixUrlWithProxy(File.check(users[userId].avatar))
+                  fixUrlWithProxy(File.check(users[userId].avatar)),
                 );
               }}
             />
           </Row>
           <Column className="sy-user-viewer-main-content">
             <Row util={["small-gap", "align-center"]}>
-              <Words type="heading" style={{ fontSize: "1.5em" }}>
+              <Words type={TextType.Heading} style={{ fontSize: "1.5em" }}>
                 {users[userId].username}
               </Words>
               <small>#{users[userId].discriminator}</small>
@@ -71,7 +71,7 @@ export default function UserViewer() {
               {{
                 "About Me": (
                   <Column>
-                    <Words type="heading">Joined Syrenity</Words>
+                    <Words type={TextType.Heading}>Joined Syrenity</Words>
                     <Words>
                       {new Date(users[userId].created_at).toDateString()}
                     </Words>

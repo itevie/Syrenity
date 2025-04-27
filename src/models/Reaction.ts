@@ -1,4 +1,5 @@
 import { query, queryOne } from "../database/database";
+import DatabaseError from "../errors/DatabaseError";
 import { send } from "../ws/websocketUtil";
 import SyChannel from "./Channel";
 import SyMessage from "./Message";
@@ -84,19 +85,26 @@ export default class SyReaction {
       })
     ).rows.map((x) => new SyReaction(x));
   }
-
   public static async getSpecific(
     messageId: number,
     userId: number,
     emoji: string
-  ): Promise<SyReaction | null> {
-    return new SyReaction(
-      await queryOne<DatabaseReaction>({
-        text: "SELECT * FROM reactions WHERE message_id = $1 AND user_id = $2 AND emoji = $3",
-        values: [messageId, userId, emoji],
-        ignoreErrors: true,
-      })
-    );
+  ): Promise<SyReaction> {
+    const result = await queryOne<DatabaseReaction>({
+      text: "SELECT * FROM reactions WHERE message_id = $1 AND user_id = $2 AND emoji = $3",
+      values: [messageId, userId, emoji],
+    });
+
+    if (result === null)
+      throw new DatabaseError({
+        message: `The user has not reacted with that emoji`,
+        errorCode: "NonexistentResource",
+        statusCode: 400,
+      });
+
+    console.log(result);
+
+    return new SyReaction(result);
   }
 
   public static async create(
@@ -108,10 +116,10 @@ export default class SyReaction {
     const channel = await message.fetchChannel();
 
     const reaction = new SyReaction(
-      await queryOne<DatabaseReaction>({
+      (await queryOne<DatabaseReaction>({
         text: "INSERT INTO reactions (message_id, user_id, emoji) VALUES ($1, $2, $3) RETURNING *",
         values: [messageId, userId, emoji],
-      })
+      })) as DatabaseReaction
     );
 
     send({

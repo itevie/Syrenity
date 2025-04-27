@@ -17,6 +17,8 @@ const route: RouteDetails = {
       emoji
     );
 
+    console.log(message, reaction, user);
+
     if (!reaction)
       return res.status(400).send(
         new SyrenityError({
@@ -25,6 +27,8 @@ const route: RouteDetails = {
           statusCode: 400,
         })
       );
+
+    console.log(reaction);
 
     await reaction.remove();
 

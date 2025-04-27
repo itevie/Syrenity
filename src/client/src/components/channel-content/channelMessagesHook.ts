@@ -7,30 +7,27 @@ import {
   ClientEvents,
 } from "../../syrenity-client/client/Websocket";
 import { client, wrapLoading } from "../../App";
+import { units } from "../../dawn-ui/time";
 
-const logger = new Logger("channel-messages");
+const logger = new Logger("channel-messagets");
+const lastLoads: Map<number, { last: number | null; timestamp: Date }> =
+  new Map();
 
 export default function useChannelMessagesHook(channel: Channel | null) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isDone, setIsDone] = useState<boolean>(false);
-  const [last, setLast] = useState<{
-    message: number | null;
-    timestamp: number;
-  }>({ message: null, timestamp: 0 });
 
   useEffect(() => {
     if (!client || !channel) return;
 
     setMessages([]);
-    setIsDone(false);
-    setLast({ message: null, timestamp: 0 });
     logger.log(`Cleared messages!`);
 
     const listeners: [keyof ClientEvents, ClientEventFunction<any>][] = [];
 
     function register<T extends keyof ClientEvents>(
       event: T,
-      func: ClientEventFunction<T>
+      func: ClientEventFunction<T>,
     ): void {
       listeners.push([event, func]);
       client.on(event, func);
@@ -88,47 +85,42 @@ export default function useChannelMessagesHook(channel: Channel | null) {
 
   const loadMoreMessages = useCallback(
     async (skip: boolean = false) => {
-      if (
-        isDone ||
-        !channel ||
-        (Date.now() - (last.timestamp || 0) < 500 && !skip)
-      )
-        return;
+      if (!channel) return;
+      let past = lastLoads.get(channel.id);
+      if (past && Date.now() - past.timestamp.getTime() <= units.second) return;
+
+      if (!past) past = { last: null, timestamp: new Date() };
+      past.timestamp = new Date();
+      lastLoads.set(channel.id, past);
 
       logger.log(
         `Loading more messages for channel ${channel.id} starting at`,
-        last,
-        skip
+        skip,
       );
 
       const newMessages = await wrapLoading(
         channel.messages.query(
-          last.message && !skip ? { startAt: last.message } : {}
-        )
+          past.last && !skip ? { startAt: past.last } : {},
+        ),
       );
       newMessages.reverse();
+
+      lastLoads.set(channel.id, { ...past, last: newMessages[0].id });
 
       if (!newMessages.length) {
         setIsDone(true);
         return;
       }
 
-      setLast((old) => {
-        return {
-          message: newMessages[0]?.id ?? old.message,
-          timestamp: Date.now(),
-        };
-      });
-
       setMessages((prev) => {
         return [...newMessages, ...prev];
       });
 
       logger.log(
-        `Messages loaded in channel ${channel.id}. Oldest message is ${newMessages[0]?.id}`
+        `Messages loaded in channel ${channel.id}. Oldest message is ${newMessages[0]?.id}`,
       );
     },
-    [messages, channel, last, isDone]
+    [messages, channel, isDone],
   );
 
   return {

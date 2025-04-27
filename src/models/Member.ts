@@ -1,4 +1,5 @@
 import { queryOne } from "../database/database";
+import DatabaseError from "../errors/DatabaseError";
 import { send } from "../ws/websocketUtil";
 import { DatabaseInvite } from "./Invite";
 
@@ -41,12 +42,19 @@ export default class SyMember {
     serverId: number,
     userId: number
   ): Promise<SyMember> {
-    return new SyMember(
-      await queryOne<DatabaseMember>({
-        text: "SELECT * FROM members WHERE guild_id = $1 AND user_id = $2",
-        values: [serverId, userId],
-      })
-    );
+    const result = await queryOne<DatabaseMember>({
+      text: "SELECT * FROM members WHERE guild_id = $1 AND user_id = $2",
+      values: [serverId, userId],
+    });
+
+    if (result === null)
+      throw new DatabaseError({
+        message: `User ${userId} is not in server ${serverId}`,
+        errorCode: "UserNotInServer",
+        statusCode: 404,
+      });
+
+    return new SyMember(result);
   }
 
   public static async create(
@@ -54,10 +62,10 @@ export default class SyMember {
     userId: number
   ): Promise<SyMember> {
     const member = new SyMember(
-      await queryOne<DatabaseMember>({
+      (await queryOne<DatabaseMember>({
         text: "INSERT INTO members (guild_id, user_id) VALUES ($1, $2) RETURNING *;",
         values: [serverId, userId],
-      })
+      })) as DatabaseMember
     );
 
     send({

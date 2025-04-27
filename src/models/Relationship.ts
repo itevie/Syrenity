@@ -1,4 +1,5 @@
-import { queryOne } from "../database/database";
+import database, { queryOne } from "../database/database";
+import DatabaseError from "../errors/DatabaseError";
 import SyChannel, { DatabaseChannel } from "./Channel";
 import SyUser, { DatabaseUser, StrippedDatabaseUser } from "./User";
 
@@ -32,12 +33,19 @@ export default class SyRelationship {
   }
 
   public static async fetchByChannel(channel: number): Promise<SyRelationship> {
-    return new SyRelationship(
-      await queryOne<DatabaseRelationship>({
-        text: "SELECT * FROM relationships WHERE channel_id = $1",
-        values: [channel],
-      })
-    );
+    const result = await queryOne<DatabaseRelationship>({
+      text: "SELECT * FROM relationships WHERE channel_id = $1",
+      values: [channel],
+    });
+
+    if (result === null)
+      throw new DatabaseError({
+        message: `Failed to fetch relationship by channel ${channel}`,
+        errorCode: "NonexistentResource",
+        statusCode: 404,
+      });
+
+    return new SyRelationship(result);
   }
 
   public static async existsBetween(
@@ -57,11 +65,18 @@ export default class SyRelationship {
     user1: number,
     user2: number
   ): Promise<SyRelationship> {
-    return new SyRelationship(
-      await queryOne<DatabaseRelationship>({
-        text: "SELECT * FROM relationships WHERE user1 = $1 OR user2 = $2",
-        values: [user1, user2],
-      })
-    );
+    const result = await queryOne<DatabaseRelationship>({
+      text: "SELECT * FROM relationships WHERE user1 = $1 OR user2 = $2",
+      values: [user1, user2],
+    });
+
+    if (result === null)
+      throw new DatabaseError({
+        message: "Failed to fetch relationship",
+        statusCode: 404,
+        errorCode: "NonexistentResource",
+      });
+
+    return new SyRelationship(result);
   }
 }

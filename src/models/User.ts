@@ -120,27 +120,35 @@ export default class SyUser {
   }
 
   public static async fetch(id: number): Promise<SyUser> {
-    return new SyUser(
-      await queryOne<DatabaseUser>({
-        text: "SELECT * FROM users WHERE id = $1",
-        values: [id],
-        noRowsError: {
-          message: `User ${id} does not exist`,
-        },
-      })
-    );
+    const result = await queryOne<DatabaseUser>({
+      text: "SELECT * FROM users WHERE id = $1",
+      values: [id],
+    });
+
+    if (result === null)
+      throw new DatabaseError({
+        message: `User ${id} not found`,
+        errorCode: "NonexistentResource",
+        statusCode: 404,
+      });
+
+    return new SyUser(result);
   }
 
   public static async fetchByEmail(email: string): Promise<SyUser> {
-    return new SyUser(
-      await queryOne<DatabaseUser>({
-        text: "SELECT * FROM users WHERE id = $1",
-        values: [email],
-        noRowsError: {
-          message: `Email does not exist`,
-        },
-      })
-    );
+    const result = await queryOne<DatabaseUser>({
+      text: "SELECT * FROM users WHERE email = $1",
+      values: [email],
+    });
+
+    if (result === null)
+      throw new DatabaseError({
+        message: `Email does not exist`,
+        errorCode: "NonexistentResource",
+        statusCode: 404,
+      });
+
+    return new SyUser(result);
   }
 
   public static async fetchByEmailAndPassword(
@@ -198,10 +206,10 @@ export default class SyUser {
 
     const _password = await bcrypt.hash(password, 10);
 
-    const user = await queryOne<DatabaseUser>({
+    const user = (await queryOne<DatabaseUser>({
       text: "INSERT INTO users (username, discriminator, password, email) VALUES ($1, $2, $3, $4) RETURNING *",
       values: [username, discriminator, _password, email],
-    });
+    })) as DatabaseUser;
 
     return new SyUser(user);
   }

@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "rootDir": "./src",
-    "outDir": "build",
+    "outDir": "./build",
     "esModuleInterop": true,
     "noImplicitReturns": false,
     "target": "es2022",

@@ -35,7 +35,7 @@ export default function ChannelContent({
         });
       }, delay);
     },
-    [channel]
+    [channel],
   );
 
   useEffect(() => {
@@ -74,7 +74,7 @@ export default function ChannelContent({
       window.history.pushState(
         null,
         "",
-        `/channels/${channel.guildId}/${channel.id}`
+        `/channels/${channel.guildId}/${channel.id}`,
       );
     }
   }, [channel]);

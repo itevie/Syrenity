@@ -42,7 +42,7 @@ axiosClient.config.headers = {
 
 document.body.style.setProperty(
   "--sy-base-color",
-  localStorage.getItem("sy-app-hue") ?? "300"
+  localStorage.getItem("sy-app-hue") ?? "300",
 );
 
 export let client: Client;
@@ -77,15 +77,15 @@ function App() {
   const dispatch = useDispatch();
   const users = useAppSelector((x) => x.users);
   const [selectedServer, setSelectedServer] = useState<Server | "@me" | null>(
-    null
+    null,
   );
   const [channels, setChannels] = useState<Channel[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   const [selectedChannel2, setSelectedChannel2] = useState<Channel | null>(
-    null
+    null,
   );
   const [channelContent, setChannelContent] = useState<ReactElement | null>(
-    null
+    null,
   );
   const [showLoader, setShowLoader] = useState<boolean>(true);
 
@@ -118,7 +118,7 @@ function App() {
       dispatch(handleServers(["ADD", s.map((x) => x._data)]));
 
       let path = window.location.pathname.match(
-        /channels\/([0-9]+|@me)(\/([0-9]+))?/
+        /channels\/([0-9]+|@me)(\/([0-9]+))?/,
       );
       logger.log(`Path is:`, path);
       if (!path) return;
@@ -212,7 +212,7 @@ function App() {
       handleClientError("load channel", channel.v);
     } else {
       setSelectedChannel(channel.v);
-      setSelectedChannel2(await client.channels.fetch(208));
+      //setSelectedChannel2(await client.channels.fetch(208));
     }
 
     /* if (!channelContentStore.has(channel.id)) {
@@ -228,8 +228,8 @@ function App() {
       <ImageViewer />
       <FullPage>
         <Row style={{ height: "100%" }} util={["no-gap"]}>
-          <Column util={["no-gap"]} style={{ height: "100%" }}>
-            <Row util={["no-gap"]} style={{ height: "100%" }}>
+          <Column util={["no-gap"]} style={{ maxHeight: "100vh" }}>
+            <Row util={["no-gap", "flex-grow", "overflow-y-scroll"]}>
               <ServerBar
                 selected={selectedServer}
                 setSelected={(s) => loadServer(s)}
@@ -248,7 +248,7 @@ function App() {
                 />
               )}
             </Row>
-            <Row util={["align-center"]} className="sy-accountarea">
+            <Row className="sy-accountarea">
               <Icon
                 src={
                   client?.user

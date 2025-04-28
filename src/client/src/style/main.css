@@ -137,9 +137,12 @@ body {
 }
 
 .sy-user-viewer {
-  width: 600px;
+  width: 600px !important;
   height: 80vh;
   padding: 0;
+
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .sy-user-viewer-banner {

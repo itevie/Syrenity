@@ -3,6 +3,7 @@
 A Discord-like web application for chatting with your friends.
 
 > :warning: The project is very bare-bones and not much works/exists. If you have ideas / know how to improve it, please contact me.
+
 > :warning: At the moment, there is no official website for this at the moment.
 
 ## Related projects

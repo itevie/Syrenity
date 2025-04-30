@@ -1,42 +1,52 @@
 const config = {
-  // Settings for the server itself
+  /** Settings for the actual HTTP server */
   server: {
-    // Max size for the body of HTTP requests
-    bodyLimit: "5mb",
-
-    // The port the server should listen on
+    /** The port the HTTP server should listen on */
     port: 3000,
 
+    /** The maximum body size the server will accept */
+    bodyLimit: "5mb",
+
+    /** Settings to do with the routes */
     routes: {
-      // The default version to use for routes
-      // If it is 2, and there is a v1 and v3 of the route, it will pick v2
+      /** The default version to use for routes.
+       * If there is a v1, v2, v3 of a route, and the default is 2, then v2 will be chosen.
+       */
       defaultVersion: 2,
     },
   },
 
-  // Settings for the database
+  /** Database settings */
   database: {
-    // Where the database is stored
+    /** The connection string for the postgres database */
     constring: "postgres://postgres:postgres@127.0.0.1:5432/syrenity",
+
+    /** The connection string for the testing environment */
     testconstring: "postgres://postgres:postgres@127.0.0.1:5432/syrenity-test",
   },
 
-  // Settings for files
+  /** File settings */
   files: {
-    // The allowed sizes for the ?size query
+    /**
+     * Image sizes to allow when accessing files with the ?size parameter.
+     * For example: /files/uuid?size=2048
+     */
     allowedCustomSizes: [32, 64, 128, 256, 512, 1024, 2048],
   },
 
-  // Settings for the proxy where files can be loaded without the client having to load them theirself
+  /**
+   * Proxy settings
+   * The proxy is a safety-net so the user doesn't have to load any URLs.
+   */
   proxy: {
-    // Whether or not to save proxied files to the disk
+    /** Whether or not proxied files should be saved to disk (at ../files/yyyy-mm-dd/file-name.ext) */
     saveLocally: true,
   },
 
-  // Settings for the web socket
+  /** Websocket settings */
   ws: {
-    // How often to check if the client is still responsive
-    heartbeat_interval: 30000,
+    /** How often the server should ask the client if it's still alive */
+    heartbeatInterval: 30000,
   },
 
   // These are all for settings of what is valid for certain pieces ofdata
@@ -51,9 +61,11 @@ const config = {
       minLength: 1,
       maxLength: 4000,
     },
+
     files: {
       nameRegex: "[a-zA-Z0-9]{1,50}(\\.[a-z0-9]{1,7}){1,3}",
     },
+
     roles: {
       name: {
         minLength: 1,

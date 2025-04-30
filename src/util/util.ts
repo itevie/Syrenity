@@ -3,7 +3,7 @@ import * as uuid from "uuid";
 
 export function getAllFiles(
   dirPath: string,
-  arrayOfFiles: string[] = []
+  arrayOfFiles: string[] = [],
 ): string[] {
   const files = fs.readdirSync(dirPath);
   arrayOfFiles = arrayOfFiles || [];
@@ -19,10 +19,21 @@ export function getAllFiles(
   return arrayOfFiles;
 }
 
+/**
+ * Converts a string to number (if it's valid) or null (if it's invalid)
+ * @param value
+ * @returns The corrected value
+ */
 export function fuckYouJs(value: string): number | null {
   return Number.isNaN(parseInt(value)) ? null : parseInt(value);
 }
 
+/**
+ * Generates an application token
+ * TODO: move to the Token.generate model
+ * @param id
+ * @returns
+ */
 export function generateToken(id: number | string) {
   return `${btoa(id.toString())}.${Date.now()}.${uuid.v4()}`;
 }

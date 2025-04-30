@@ -3,7 +3,7 @@ import * as uuid from "uuid";
 import Logger from "../util/Logger";
 import WebsocketHandler from "./WebsocketHandler";
 import { WebsocketDispatchTypes } from "./WebsocketDispatchTypes";
-import database, { query } from "../database/database";
+import { query } from "../database/database";
 
 interface WSConnection {
   uuid: string;
@@ -23,9 +23,13 @@ interface WSSendOptions<T extends keyof WebsocketDispatchTypes> {
 export const wsLogger = new Logger("ws");
 export const connections = new Map<string, WSConnection>();
 
+/**
+ * Sends a message to all connected ws clients
+ * @param data The data to send
+ */
 export async function send<T extends keyof WebsocketDispatchTypes>(
-  data: WSSendOptions<T>
-) {
+  data: WSSendOptions<T>,
+): Promise<void> {
   let recipients: number[] = data.recipients ?? [];
   const connectedIds = Array.from(connections.entries())
     .filter((x) => !!x[1].user)
@@ -53,7 +57,7 @@ export async function send<T extends keyof WebsocketDispatchTypes>(
   }
 
   wsLogger.log(
-    `Sending Dispatch: ${data.type} to ${recipients.length} recipients`
+    `Sending Dispatch: ${data.type} to ${recipients.length} recipients`,
   );
 
   connections.forEach((connection) => {
@@ -86,7 +90,7 @@ export function initialise(app: expressWs.Application) {
           });
         },
       },
-      ws
+      ws,
     );
 
     ws.onclose = () => {

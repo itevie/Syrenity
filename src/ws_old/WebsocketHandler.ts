@@ -77,7 +77,7 @@ export default class WebsocketHandler {
       try {
         // Attempt to fetch the application
         const application = await database.actions.tokens.fetchByToken(
-          data.token
+          data.token,
         );
         const user = await database.actions.users.fetch(application.account);
 
@@ -121,7 +121,7 @@ export default class WebsocketHandler {
       this.send({
         op: "HELLO",
         d: {
-          heartbeat_interval: config.ws.heartbeat_interval,
+          heartbeat_interval: config.ws.heartbeatInterval,
           user: this.data.user ?? null,
           guilds: this.data.user
             ? await database.actions.users.fetchGuilds(this.data.user.id)
@@ -133,7 +133,7 @@ export default class WebsocketHandler {
       this.send({
         op: "AUTHENTICATE",
         d: {
-          heartbeat_interval: config.ws.heartbeat_interval,
+          heartbeat_interval: config.ws.heartbeatInterval,
         },
       });
     }

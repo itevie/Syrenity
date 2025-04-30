@@ -1,3 +1,5 @@
+// TODO: Move to their respective model class file
+
 interface Application {
   id: number;
   token: string;

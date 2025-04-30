@@ -1,8 +1,18 @@
+import { client } from "../../App";
 import showSettingsPage from "../../app-pages/SettingsPage";
+import {
+  addAlert,
+  closeAlert,
+  showInfoAlert,
+} from "../../dawn-ui/components/AlertManager";
+import Button from "../../dawn-ui/components/Button";
+import Column from "../../dawn-ui/components/Column";
 import { showContextMenu } from "../../dawn-ui/components/ContextMenuManager";
+import Row from "../../dawn-ui/components/Row";
+import uploadFile from "../../dawn-ui/uploadFile";
 
 export function showSelfContextMenu(
-  e: React.MouseEvent<HTMLImageElement, MouseEvent>
+  e: React.MouseEvent<HTMLImageElement, MouseEvent>,
 ) {
   showContextMenu({
     event: e,
@@ -15,93 +25,6 @@ export function showSelfContextMenu(
         },
         /*
 
-          onClick() {
-            addAlert({
-              title: "Settings",
-              body: (
-                <Column>
-                  <label>This is temporary</label>
-                  <Row>
-                    <Button
-                      big
-                      onClick={() => {
-                        addAlert({
-                          title: "Change Hue",
-                          body: (
-                            <input
-                              type="range"
-                              min="0"
-                              max="360"
-                              onChange={(e) => {
-                                document.body.style.setProperty(
-                                  "--sy-base-color",
-                                  e.target.value
-                                );
-                              }}
-                            />
-                          ),
-                          buttons: [
-                            {
-                              text: "close",
-                              id: "close",
-                              click(close) {
-                                close();
-                              },
-                            },
-                          ],
-                        });
-                      }}
-                    >
-                      Change app hue
-                    </Button>
-                    <Button
-                      big
-                      onClick={async () => {
-                        const result = await uploadFile("image/*");
-                        const file = await client.files.upload(
-                          result.name,
-                          result.result
-                        );
-                        await client.user?.edit({
-                          avatar: file.id,
-                        });
-                        closeAlert();
-                        showInfoAlert("Updated!");
-                      }}
-                    >
-                      Change PFP
-                    </Button>
-                    <Button
-                      big
-                      onClick={async () => {
-                        const result = await uploadFile("image/*");
-                        const file = await client.files.upload(
-                          result.name,
-                          result.result
-                        );
-                        await client.user?.edit({
-                          profile_banner: file.id,
-                        });
-                        closeAlert();
-                        showInfoAlert("Updated!");
-                      }}
-                    >
-                      Change Banner
-                    </Button>
-                  </Row>
-                </Column>
-              ),
-              buttons: [
-                {
-                  text: "Close",
-                  id: "close",
-                  click(close) {
-                    close();
-                  },
-                },
-              ],
-            });
-          },
           */
       },
       {
@@ -114,6 +37,84 @@ export function showSelfContextMenu(
         onClick: () => {
           localStorage.removeItem("token");
           window.location.href = "/login";
+        },
+      },
+      {
+        type: "button",
+        label: "extra",
+
+        onClick() {
+          addAlert({
+            title: "Settings",
+            body: (
+              <Column>
+                <label>This is temporary</label>
+                <Row>
+                  <Button
+                    big
+                    onClick={() => {
+                      addAlert({
+                        title: "Change Hue",
+                        body: (
+                          <input
+                            type="range"
+                            min="0"
+                            max="360"
+                            onChange={(e) => {
+                              document.body.style.setProperty(
+                                "--sy-base-color",
+                                e.target.value,
+                              );
+                            }}
+                          />
+                        ),
+                        buttons: [
+                          {
+                            text: "close",
+                            id: "close",
+                            click(close) {
+                              close();
+                            },
+                          },
+                        ],
+                      });
+                    }}
+                  >
+                    Change app hue
+                  </Button>
+                  <Button big onClick={async () => {}}>
+                    Change PFP
+                  </Button>
+                  <Button
+                    big
+                    onClick={async () => {
+                      const result = await uploadFile("image/*");
+                      const file = await client.files.upload(
+                        result.name,
+                        result.result,
+                      );
+                      await client.user?.edit({
+                        profile_banner: file.id,
+                      });
+                      closeAlert();
+                      showInfoAlert("Updated!");
+                    }}
+                  >
+                    Change Banner
+                  </Button>
+                </Row>
+              </Column>
+            ),
+            buttons: [
+              {
+                text: "Close",
+                id: "close",
+                click(close) {
+                  close();
+                },
+              },
+            ],
+          });
         },
       },
     ],

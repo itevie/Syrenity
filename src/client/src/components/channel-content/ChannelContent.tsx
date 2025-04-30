@@ -76,11 +76,9 @@ export default function ChannelContent({
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isDone, setIsDone] = useState<boolean>(false);
-
-  /*const { messages, loadMoreMessages, isDone } =
-    useChannelMessagesHook(channel);*/
-  const messageAreaRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState<number | null>(null);
+
+  const messageAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const scrollToBottom = useCallback(

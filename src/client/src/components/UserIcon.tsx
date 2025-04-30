@@ -29,7 +29,15 @@ export default function UserIcon({
       onContextMenu={(e) =>
         showContextMenu({
           event: e,
-          elements: [],
+          elements: [
+            {
+              type: "button",
+              label: "Copy User ID",
+              onClick() {
+                window.navigator.clipboard.writeText(id.toString());
+              },
+            },
+          ],
         })
       }
     />

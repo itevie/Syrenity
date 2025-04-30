@@ -15,8 +15,8 @@ A Discord-like web application for chatting with your friends.
 1. Download the repository
 2. Install [NodeJS](https://nodejs.org/en) and [PostgreSQL](https://www.postgresql.org/) on your system
 3. Initialise the project
-  - Create a database called `syrenity`: `psql -c "CREATE DATABASE syrenity;"`
-  - Load the schema `psql -d syrenity /path/to/project/schema.sql`
+    - Create a database called `syrenity`: `psql -c "CREATE DATABASE syrenity;"`
+    - Load the schema `psql -d syrenity /path/to/project/schema.sql`
 4. Run `npm install`
 5. Start it with `npx ts-node src/index.ts`
 

@@ -95,13 +95,6 @@ interface Server {
   avatar: string;
 }
 
-interface Token {
-  token: string;
-  account: number;
-  created_at: Date;
-  identifier: string | null;
-}
-
 interface User {
   id: number;
   username: string;

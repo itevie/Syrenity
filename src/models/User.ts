@@ -7,6 +7,7 @@ import SyRelationship, {
 } from "./Relationship";
 import DatabaseError from "../errors/DatabaseError";
 import { randomRange } from "../util/util";
+import SyToken from "./Token";
 
 export interface DatabaseUser {
   id: number;
@@ -136,6 +137,11 @@ export default class SyUser {
       });
 
     return new SyUser(result);
+  }
+
+  public static async fetchByToken(tokenString: string): Promise<SyUser> {
+    const token = await SyToken.fetch(tokenString);
+    return await SyUser.fetch(token.data.account);
   }
 
   public static async fetchByEmail(email: string): Promise<SyUser> {

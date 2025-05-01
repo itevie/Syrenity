@@ -4,11 +4,12 @@ import Logger from "../util/Logger";
 import WebsocketHandler from "./WebsocketHandler";
 import { WebsocketDispatchTypes } from "./WebsocketDispatchTypes";
 import { query } from "../database/database";
+import SyUser from "../models/User";
 
 interface WSConnection {
   uuid: string;
   ws: WebsocketHandler;
-  user: User;
+  user: SyUser;
 }
 
 interface WSSendOptions<T extends keyof WebsocketDispatchTypes> {
@@ -33,7 +34,7 @@ export async function send<T extends keyof WebsocketDispatchTypes>(
   let recipients: number[] = data.recipients ?? [];
   const connectedIds = Array.from(connections.entries())
     .filter((x) => !!x[1].user)
-    .map((x) => x[1].user.id);
+    .map((x) => x[1].user.data.id);
 
   if (connectedIds.length === 0) return;
 
@@ -61,7 +62,7 @@ export async function send<T extends keyof WebsocketDispatchTypes>(
   );
 
   connections.forEach((connection) => {
-    if (recipients.includes(connection.user.id)) {
+    if (recipients.includes(connection.user.data.id)) {
       connection.ws.send("Dispatch", {
         guildId: data.guild,
         channelId: data.channel,

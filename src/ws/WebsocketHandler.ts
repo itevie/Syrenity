@@ -5,11 +5,12 @@ import {
   WebsocketType,
 } from "./websocketData";
 import database from "../database/database";
+import SyUser from "../models/User";
 
 interface WSConnectionOptions {
   uuid: string;
-  onceAuthenticated: (user: User) => void;
-  user?: User;
+  onceAuthenticated: (user: SyUser) => void;
+  user?: SyUser;
 }
 
 export default class WebsocketHandler {
@@ -50,11 +51,11 @@ export default class WebsocketHandler {
       if (this.data.user) return this.basicError("Already authenticated");
       if (!data.token || typeof data.token !== "string")
         return this.basicError(
-          "Token was not provided in authentication payload"
+          "Token was not provided in authentication payload",
         );
 
       try {
-        const user = await database.users.fetchByToken(data.token);
+        const user = await SyUser.fetchByToken(data.token);
         this.data.user = user;
         this.data.onceAuthenticated(user);
         this.send("Hello", {
@@ -79,7 +80,7 @@ export default class WebsocketHandler {
         payload: {
           ...data,
         },
-      })
+      }),
     );
   }
 }

@@ -4,7 +4,6 @@ import DatabaseError from "../errors/DatabaseError";
 import Logger from "../util/Logger";
 
 import users from "./users";
-import tokens from "./tokens";
 import files from "./files";
 
 export interface DatabaseQueryOptions {
@@ -34,7 +33,6 @@ export async function initialise(constring: string): Promise<void> {
 }
 
 const database = {
-  tokens,
   users,
   files,
 } as const;

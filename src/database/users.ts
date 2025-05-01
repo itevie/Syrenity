@@ -15,7 +15,7 @@ const _actions = {
             errorCode: "NonexistentResource",
           },
         })
-      ).rows[0]
+      ).rows[0],
     );
   },
 
@@ -47,7 +47,7 @@ const _actions = {
 
   async validateEmailPassword(
     email: string,
-    password: string
+    password: string,
   ): Promise<FullUser> {
     const user = await this.getByEmail(email);
     if (!(await bcrypt.compare(password, user.password))) {
@@ -61,11 +61,6 @@ const _actions = {
     return user;
   },
 
-  async fetchByToken(tokenString: string): Promise<FullUser> {
-    const token = await database.tokens.fetch(tokenString);
-    return await this.getFull(token.account);
-  },
-
   async getServers(id: number | string): Promise<Server[]> {
     return (
       await query<Server>({
@@ -75,12 +70,12 @@ const _actions = {
             FROM members
             WHERE user_id = $1
         )
-        
-        SELECT * 
-            FROM guilds 
+
+        SELECT *
+            FROM guilds
             WHERE (
-                SELECT 1 
-                    FROM guild_ids 
+                SELECT 1
+                    FROM guild_ids
                     WHERE guild_id = guilds.id
             ) = 1`,
         values: [id],

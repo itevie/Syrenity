@@ -5,10 +5,10 @@ import Ajv, { ValidateFunction } from "ajv";
 import ajvFormat from "ajv-formats";
 import ajvErrors from "ajv-errors";
 import validateURLParameters from "./authenticatorValidateParamater";
-import { actions } from "../util/database";
 import validatePermissions from "./authenticatorValidatePermissions";
 import AuthenticationError from "../errors/AuthenticationError";
 import database from "../database/database";
+import SyUser from "../models/User";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvFormat(ajv);
@@ -17,7 +17,7 @@ ajvErrors(ajv);
 export default async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction
+  next: express.NextFunction,
 ) => {
   try {
     // Get the url
@@ -53,13 +53,13 @@ export default async (
             data: {
               expectedFormat: `Token token-here`,
             },
-          }).extract()
+          }).extract(),
         );
       }
 
       // Try fetch the application
       try {
-        const user = await database.users.fetchByToken(token);
+        const user = (await SyUser.fetchByToken(token)).fullData;
         req.login(user, () => {});
         req.user = user;
       } catch {
@@ -68,7 +68,7 @@ export default async (
             message: `Invalid token`,
             errorCode: `InvalidToken`,
             at: `header.authorization`,
-          }).extract()
+          }).extract(),
         );
       }
     }
@@ -82,7 +82,7 @@ export default async (
       try {
         const user = await database.users.validateEmailPassword(
           req.body.email,
-          req.body.password
+          req.body.password,
         );
         req.login(user, () => {});
         req.user = user;
@@ -91,7 +91,7 @@ export default async (
           new AuthenticationError({
             message: "Invalid email and password in body",
             errorCode: "InvalidEmailOrPassword",
-          }).extract()
+          }).extract(),
         );
       }
     }
@@ -105,7 +105,7 @@ export default async (
             new AuthenticationError({
               message: `You need to be logged in to access this resource`,
               errorCode: `NotLoggedIn`,
-            }).extract()
+            }).extract(),
           );
         }
       }
@@ -117,7 +117,7 @@ export default async (
             new AuthenticationError({
               message: `You must be accessing this resource via a browser session`,
               errorCode: "SessionsOnly",
-            }).extract()
+            }).extract(),
           );
       }
     }
@@ -147,7 +147,7 @@ export default async (
             data: {
               errors: generateErrorFromSchemaErrors(validate),
             },
-          }).extract()
+          }).extract(),
         );
       }
     }

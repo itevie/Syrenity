@@ -16,6 +16,11 @@ const config = {
     },
   },
 
+  errors: {
+    /** Whether or not to kill the server when a non BaseError was thrown */
+    killOnNonSyrenityError: true,
+  },
+
   /** Settings to do with the system user account */
   system: {
     id: -1,

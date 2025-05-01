@@ -75,7 +75,7 @@ export default class SyInvite {
   public static async create(
     guildId: number,
     createdBy: number,
-    options: CreateInviteOptions
+    options: CreateInviteOptions,
   ): Promise<SyInvite> {
     return new SyInvite(
       (await queryOne<DatabaseInvite>({
@@ -88,7 +88,11 @@ export default class SyInvite {
           options.expires_in,
           options.max_uses,
         ],
-      })) as DatabaseInvite
+      })) as DatabaseInvite,
     );
+  }
+
+  toJSON() {
+    return this.data;
   }
 }

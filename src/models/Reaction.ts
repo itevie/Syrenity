@@ -56,7 +56,7 @@ export default class SyReaction {
             users: [...(p[c.emoji]?.users ?? []), c.user_id],
           },
         };
-      }, {})
+      }, {}),
     ).map((x) => x[1]);
   }
 
@@ -69,7 +69,7 @@ export default class SyReaction {
 
   public static async removeAllByEmoji(
     messageId: number,
-    emoji: string
+    emoji: string,
   ): Promise<void> {
     await queryOne({
       text: "DELETE FROM reactions WHERE message_id = $1 AND emoji = $2",
@@ -88,7 +88,7 @@ export default class SyReaction {
   public static async getSpecific(
     messageId: number,
     userId: number,
-    emoji: string
+    emoji: string,
   ): Promise<SyReaction> {
     const result = await queryOne<DatabaseReaction>({
       text: "SELECT * FROM reactions WHERE message_id = $1 AND user_id = $2 AND emoji = $3",
@@ -110,7 +110,7 @@ export default class SyReaction {
   public static async create(
     messageId: number,
     userId: number,
-    emoji: string
+    emoji: string,
   ): Promise<SyReaction> {
     const message = await SyMessage.fetch(messageId);
     const channel = await message.fetchChannel();
@@ -119,7 +119,7 @@ export default class SyReaction {
       (await queryOne<DatabaseReaction>({
         text: "INSERT INTO reactions (message_id, user_id, emoji) VALUES ($1, $2, $3) RETURNING *",
         values: [messageId, userId, emoji],
-      })) as DatabaseReaction
+      })) as DatabaseReaction,
     );
 
     send({
@@ -133,5 +133,9 @@ export default class SyReaction {
     });
 
     return reaction;
+  }
+
+  toJSON() {
+    return this.data;
   }
 }

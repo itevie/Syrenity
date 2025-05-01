@@ -28,4 +28,8 @@ export default class SyApplication {
 
     return new SyApplication(result);
   }
+
+  toJSON() {
+    return this.data;
+  }
 }

@@ -38,7 +38,7 @@ export default class SyMessage {
     return {
       ...this.data,
       reactions: SyReaction.makeUseful(
-        (await SyReaction.getFor(this.data.id)).map((x) => x.data)
+        (await SyReaction.getFor(this.data.id)).map((x) => x.data),
       ),
     };
   }
@@ -71,12 +71,12 @@ export default class SyMessage {
           text: "UPDATE messages SET content = $2, is_edited = true WHERE id = $1 RETURNING *",
           values: [this.data.id, update.content],
         })
-      ).rows[0]
+      ).rows[0],
     );
   }
 
   public static async create(
-    options: CreateMessageOptions
+    options: CreateMessageOptions,
   ): Promise<SyMessage> {
     return new SyMessage(
       (
@@ -92,7 +92,7 @@ export default class SyMessage {
             options.systemType || null,
           ],
         })
-      ).rows[0]
+      ).rows[0],
     );
   }
 
@@ -103,7 +103,7 @@ export default class SyMessage {
           text: "SELECT * FROM messages WHERE id = $1",
           values: [id],
         })
-      ).rows[0]
+      ).rows[0],
     );
   }
 
@@ -117,5 +117,9 @@ export default class SyMessage {
         })
       ).rows.length !== 0
     );
+  }
+
+  toJSON() {
+    return this.data;
   }
 }

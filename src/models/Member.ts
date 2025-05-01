@@ -40,7 +40,7 @@ export default class SyMember {
 
   public static async fetch(
     serverId: number,
-    userId: number
+    userId: number,
   ): Promise<SyMember> {
     const result = await queryOne<DatabaseMember>({
       text: "SELECT * FROM members WHERE guild_id = $1 AND user_id = $2",
@@ -59,13 +59,13 @@ export default class SyMember {
 
   public static async create(
     serverId: number,
-    userId: number
+    userId: number,
   ): Promise<SyMember> {
     const member = new SyMember(
       (await queryOne<DatabaseMember>({
         text: "INSERT INTO members (guild_id, user_id) VALUES ($1, $2) RETURNING *;",
         values: [serverId, userId],
-      })) as DatabaseMember
+      })) as DatabaseMember,
     );
 
     send({
@@ -77,5 +77,9 @@ export default class SyMember {
     });
 
     return member;
+  }
+
+  toJSON() {
+    return this.data;
   }
 }

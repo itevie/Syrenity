@@ -37,4 +37,10 @@ export default class Logger {
       return;
     console.log(`\x1b[32m${this.generateDefaultText(contents)}\x1b[0m`);
   }
+
+  public warn(contents: string): void {
+    if (loggerWhitelist !== null && !loggerWhitelist.includes(this.name))
+      return;
+    console.log(`\x1b[33m${this.generateDefaultText(contents)}\x1b[0m`);
+  }
 }

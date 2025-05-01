@@ -73,9 +73,9 @@ export default class SyChannel {
       .join(", ");
 
     const queryText = `
-        UPDATE channels 
-        SET ${setClause} 
-        WHERE id = $1 
+        UPDATE channels
+        SET ${setClause}
+        WHERE id = $1
         RETURNING *;
       `;
 
@@ -103,19 +103,19 @@ export default class SyChannel {
       (await queryOne<DatabaseChannel>({
         text: "INSERT INTO channels (type) VALUES ('dm') RETURNING *;",
         values: [],
-      })) as DatabaseChannel
+      })) as DatabaseChannel,
     );
   }
 
   public static async createServerChannel(
     serverId: number,
-    options: CreateChannelOptions
+    options: CreateChannelOptions,
   ): Promise<SyChannel> {
     const channel = new SyChannel(
       (await queryOne<DatabaseChannel>({
         text: "INSERT INTO channels (type, guild_id, name) VALUES ('channel', $1, $2) RETURNING *;",
         values: [serverId, options.name],
-      })) as DatabaseChannel
+      })) as DatabaseChannel,
     );
 
     send({
@@ -136,7 +136,7 @@ export default class SyChannel {
           text: "SELECT * FROM channels WHERE id = $1",
           values: [id],
         })
-      ).rows[0]
+      ).rows[0],
     );
   }
 
@@ -147,5 +147,9 @@ export default class SyChannel {
         values: [id],
       })) !== null
     );
+  }
+
+  toJSON() {
+    return this.data;
   }
 }

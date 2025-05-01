@@ -50,7 +50,7 @@ export default class SyRelationship {
 
   public static async existsBetween(
     user1: number,
-    user2: number
+    user2: number,
   ): Promise<boolean> {
     return (
       (await queryOne<DatabaseUser>({
@@ -63,7 +63,7 @@ export default class SyRelationship {
 
   public static async fetch(
     user1: number,
-    user2: number
+    user2: number,
   ): Promise<SyRelationship> {
     const result = await queryOne<DatabaseRelationship>({
       text: "SELECT * FROM relationships WHERE user1 = $1 OR user2 = $2",
@@ -78,5 +78,9 @@ export default class SyRelationship {
       });
 
     return new SyRelationship(result);
+  }
+
+  toJSON() {
+    return this.data;
   }
 }

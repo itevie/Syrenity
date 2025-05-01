@@ -1,4 +1,5 @@
 import database from "../../../../database/database";
+import SyServer from "../../../../models/Servers";
 import { RouteDetails } from "../../../../types/route";
 
 const handler: RouteDetails = {
@@ -8,7 +9,9 @@ const handler: RouteDetails = {
     try {
       return res
         .status(200)
-        .send(await database.servers.getChannels(parseInt(req.params.id)));
+        .send(
+          await (await SyServer.fetch(parseInt(req.params.id))).fetchChannels(),
+        );
     } catch (e) {
       next(e);
     }

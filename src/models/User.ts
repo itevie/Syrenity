@@ -48,12 +48,12 @@ export default class SyUser {
             FROM members
             WHERE user_id = $1
         )
-        
-        SELECT * 
-            FROM guilds 
+
+        SELECT *
+            FROM guilds
             WHERE (
-                SELECT 1 
-                    FROM guild_ids 
+                SELECT 1
+                    FROM guild_ids
                     WHERE guild_id = guilds.id
             ) = 1`,
         values: [this.data.id],
@@ -83,9 +83,9 @@ export default class SyUser {
       .join(", ");
 
     const queryText = `
-      UPDATE users 
-      SET ${setClause} 
-      WHERE id = $1 
+      UPDATE users
+      SET ${setClause}
+      WHERE id = $1
       RETURNING *;
     `;
 
@@ -153,7 +153,7 @@ export default class SyUser {
 
   public static async fetchByEmailAndPassword(
     email: string,
-    password: string
+    password: string,
   ): Promise<SyUser> {
     const user = await SyUser.fetchByEmail(email);
     if (!(await bcrypt.compare(password, user.fullData.password))) {
@@ -168,7 +168,7 @@ export default class SyUser {
   }
 
   public static async getDiscriminatorsFor(
-    username: string
+    username: string,
   ): Promise<string[]> {
     return (
       await query<{ discriminator: string }>({
@@ -181,7 +181,7 @@ export default class SyUser {
   public static async create(
     email: string,
     password: string,
-    username: string
+    username: string,
   ): Promise<SyUser> {
     if (await SyUser.emailExists(email))
       throw new DatabaseError({
@@ -212,5 +212,9 @@ export default class SyUser {
     })) as DatabaseUser;
 
     return new SyUser(user);
+  }
+
+  toJSON() {
+    return this.data;
   }
 }

@@ -5,7 +5,6 @@ import Logger from "../util/Logger";
 
 import users from "./users";
 import tokens from "./tokens";
-import servers from "./servers";
 import files from "./files";
 import messages from "./messages";
 
@@ -36,7 +35,6 @@ export async function initialise(constring: string): Promise<void> {
 }
 
 const database = {
-  servers,
   tokens,
   users,
   files,
@@ -48,16 +46,16 @@ export default database;
 export async function multiUpadate<T extends pg.QueryResultRow>(
   tableName: string,
   id: number,
-  data: object
+  data: object,
 ): Promise<T> {
   const setClause = Object.entries(data)
     .map((x, i) => `${x[0]} = $${i + 2}`)
     .join(", ");
 
   const queryText = `
-        UPDATE ${tableName} 
-        SET ${setClause} 
-        WHERE id = $1 
+        UPDATE ${tableName}
+        SET ${setClause}
+        WHERE id = $1
         RETURNING *;
       `;
 
@@ -72,7 +70,7 @@ export async function multiUpadate<T extends pg.QueryResultRow>(
 }
 
 export async function queryOne<T extends pg.QueryResultRow>(
-  options: DatabaseQueryOptions
+  options: DatabaseQueryOptions,
 ): Promise<T | null> {
   if (!client) {
     console.error(`Database client was not initialised.`);
@@ -88,7 +86,7 @@ export async function queryOne<T extends pg.QueryResultRow>(
 }
 
 export async function query<T extends pg.QueryResultRow>(
-  options: DatabaseQueryOptions
+  options: DatabaseQueryOptions,
 ): Promise<pg.QueryResult<T>> {
   if (!client) {
     console.error(`Database client was not initialised.`);

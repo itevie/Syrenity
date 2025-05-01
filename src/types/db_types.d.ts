@@ -1,14 +1,4 @@
 // TODO: Move to their respective model class file
-
-interface Application {
-  id: number;
-  token: string;
-  application_name: string;
-  bot_account: number;
-  owner_id: number;
-  created_at: Date;
-}
-
 interface AssignedRole {
   user_id: number;
   role_id: number;

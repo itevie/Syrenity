@@ -24,7 +24,7 @@ logger.log("Preparing server");
 const pgSession = connectPostgres(session);
 Error.stackTraceLimit = 10_000;
 export const fileStoreLocation = path.resolve(
-  path.join(__dirname, "/../files")
+  path.join(__dirname, "/../files"),
 );
 
 // Create the express app
@@ -34,7 +34,7 @@ app.use(requestLogger);
 // Setup static files
 app.use(
   "/public",
-  express.static(path.resolve(path.join(__dirname, "client/build")))
+  express.static(path.resolve(path.join(__dirname, "client/build"))),
 );
 
 // Setup other middleware
@@ -43,7 +43,7 @@ app.use(bodyParser.urlencoded());
 app.use(
   bodyParser.json({
     limit: config.server.bodyLimit,
-  })
+  }),
 );
 
 // Setup passport
@@ -58,7 +58,7 @@ app.use(
     cookie: {
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     },
-  })
+  }),
 );
 
 // Load auths
@@ -81,7 +81,7 @@ app.use(passport.session());
   // Start express server
   app.listen(config.server.port, async () => {
     logger.log(
-      `Listening on port ${config.server.port} (http://localhost:${config.server.port}/)`
+      `Listening on port ${config.server.port} (http://localhost:${config.server.port}/)`,
     );
   });
 
@@ -103,7 +103,7 @@ app.use(passport.session());
 
     // Reset everyone roles
     await quickQuery(
-      `UPDATE roles SET bitfield_allow = ${defaultBitfield}, bitfield_deny = 0 WHERE is_everyone = true;`
+      `UPDATE roles SET bitfield_allow = ${defaultBitfield}, bitfield_deny = 0 WHERE is_everyone = true;`,
     );
   }
 })();

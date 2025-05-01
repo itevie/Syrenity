@@ -22,6 +22,9 @@ export interface DatabaseUser {
   profile_banner: string | null;
 }
 
+/**
+ * This should only be sent in a context where it is needed
+ */
 export type StrippedDatabaseUser = Omit<DatabaseUser, "password" | "email">;
 
 export interface EditUserOptions {

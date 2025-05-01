@@ -6,7 +6,6 @@ import Logger from "../util/Logger";
 import users from "./users";
 import tokens from "./tokens";
 import files from "./files";
-import messages from "./messages";
 
 export interface DatabaseQueryOptions {
   text: string;
@@ -38,7 +37,6 @@ const database = {
   tokens,
   users,
   files,
-  messages,
 } as const;
 
 export default database;

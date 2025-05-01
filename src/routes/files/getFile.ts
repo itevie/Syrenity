@@ -3,7 +3,6 @@ import {
   createWriteStream,
   exists,
   existsSync,
-  readFileSync,
   ReadStream,
 } from "fs";
 import { fileStoreLocation } from "../..";
@@ -21,48 +20,52 @@ const handler: RouteDetails = {
   method: "GET",
   path: "/files/:id/:file_name?",
   handler: async (req, res) => {
+    // Load details
     const id = req.params.id as string;
     const file = await actions.files.get(id);
     const size = parseInt(req.query.size as string) || null;
 
+    // Check if there is a ?size and if it's allowed
     if (size && !config.files.allowedCustomSizes.includes(size as any))
       return res.status(400).send(
         new SyrenityError({
           message: `Invalid file size, allowed sizes are: ${config.files.allowedCustomSizes.join(", ")}`,
           statusCode: 400,
           errorCode: "InvalidFileSize",
-        })
+        }),
       );
 
+    // Check if the file exists
     if (!file)
       return res.status(404).send(
         new SyrenityError({
           message: "The file does not exist",
           statusCode: 404,
           errorCode: "FileNotOnDisk",
-        })
+        }),
       );
 
+    // Create paths
     const directoryPath = path.join(
       fileStoreLocation,
-      file.created_at.toLocaleDateString().replace(/\//g, "-")
+      file.created_at.toLocaleDateString().replace(/\//g, "-"),
     );
-
     const filePath = path.join(directoryPath, `${file.id}-${file.file_name}`);
 
     let stream: PassThrough | ReadStream;
 
+    // If the file doesn't exist, try to download it
     if (!existsSync(filePath)) {
       if (file.original_url) {
         try {
           const result = await database.files.downloadTo(
             file.original_url,
-            file
+            file,
           );
           res.contentType(
             result[2] ??
               lookup(result[0].file_name) ??
-              "application/octet-stream"
+              "application/octet-stream",
           );
 
           stream = result[1];
@@ -72,7 +75,7 @@ const handler: RouteDetails = {
               message: "Failed to re-download the image",
               statusCode: 500,
               errorCode: "FileNotOnDisk",
-            }).extract()
+            }).extract(),
           );
         }
       } else
@@ -81,7 +84,7 @@ const handler: RouteDetails = {
             message: "The file was not found on disk",
             statusCode: 500,
             errorCode: "FileNotOnDisk",
-          }).extract()
+          }).extract(),
         );
     } else {
       const mimeType = lookup(file.file_name) || "application/octet-stream";
@@ -93,7 +96,7 @@ const handler: RouteDetails = {
     if (size) {
       const newPath = path.join(
         directoryPath,
-        `${size}@${file.id}-${file.file_name}`
+        `${size}@${file.id}-${file.file_name}`,
       );
 
       if (!existsSync(newPath)) {

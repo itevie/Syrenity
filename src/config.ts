@@ -16,6 +16,11 @@ const config = {
     },
   },
 
+  /** Settings to do with the system user account */
+  system: {
+    id: -1,
+  },
+
   /** Database settings */
   database: {
     /** The connection string for the postgres database */

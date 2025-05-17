@@ -28,6 +28,10 @@ import { useAppSelector } from "./stores/store";
 import { showSelfContextMenu } from "./components/context-menus/selfContextMenu";
 import GoogleMatieralIcon from "./dawn-ui/components/GoogleMaterialIcon";
 import showSettingsPage from "./app-pages/SettingsPage";
+import {
+  CommandPaletteProviderManager,
+  fuzzy,
+} from "./dawn-ui/components/CommandPaletteManager";
 
 export const baseUrl =
   window.location.hostname === "localhost"
@@ -116,6 +120,19 @@ function App() {
 
       const s = await wrapLoading(user.fetchServers());
       dispatch(handleServers(["ADD", s.map((x) => x._data)]));
+
+      CommandPaletteProviderManager.register({
+        name: "Syrenity Servers",
+        exec: (query: string) => {
+          return s
+            .filter((x) => fuzzy(x.name).match(query))
+            .map((x) => ({
+              name: `Goto ${x.name}`,
+              icon: x.avatar?.url,
+              callback: () => loadServer(x.id),
+            }));
+        },
+      });
 
       let path = window.location.pathname.match(
         /channels\/([0-9]+|@me)(\/([0-9]+))?/,

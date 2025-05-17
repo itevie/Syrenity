@@ -50,36 +50,7 @@ export function showSelfContextMenu(
               <Column>
                 <label>This is temporary</label>
                 <Row>
-                  <Button
-                    big
-                    onClick={() => {
-                      addAlert({
-                        title: "Change Hue",
-                        body: (
-                          <input
-                            type="range"
-                            min="0"
-                            max="360"
-                            onChange={(e) => {
-                              document.body.style.setProperty(
-                                "--sy-base-color",
-                                e.target.value,
-                              );
-                            }}
-                          />
-                        ),
-                        buttons: [
-                          {
-                            text: "close",
-                            id: "close",
-                            click(close) {
-                              close();
-                            },
-                          },
-                        ],
-                      });
-                    }}
-                  >
+                  <Button big onClick={() => {}}>
                     Change app hue
                   </Button>
                   <Button big onClick={async () => {}}>

@@ -15,6 +15,7 @@ import Invite from "./pages/Invite";
 import Showcase from "./dawn-ui/Showcase";
 import UserViewer from "./components/UserViewer";
 import PageManager from "./components/PageManager";
+import AllUtilities from "./dawn-ui/AllUtilities";
 
 const router = createBrowserRouter(
   [
@@ -53,19 +54,16 @@ const router = createBrowserRouter(
       // @ts-ignore
       v7_startTransition: true,
     },
-  }
+  },
 );
 
 const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
+  document.getElementById("root") as HTMLElement,
 );
 root.render(
   <Provider store={store}>
     <PageManager />
-    <ContextMenuManager />
-    <AlertManager />
-    <FlyoutManager />
-    <UserViewer />
+    <AllUtilities />
     <RouterProvider router={router} />
-  </Provider>
+  </Provider>,
 );

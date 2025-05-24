@@ -1,24 +1,21 @@
-import { useEffect, useState } from "react";
-import { addLoading, baseUrl, client, wrapLoading } from "../../App";
 import Column from "../../dawn-ui/components/Column";
 import Row from "../../dawn-ui/components/Row";
 import { useAppSelector } from "../../stores/store";
 import Message from "../../syrenity-client/structures/Message";
 import UserIcon from "../UserIcon";
-import { AxiosResponse } from "axios";
-import MessageImageAttachment from "../MessageImageAttachment";
-import { setFullscreenImage } from "../ImageViewer";
-
 import Link from "../../dawn-ui/components/Link";
-import File from "../../syrenity-client/structures/File";
-import { defaultLogger } from "../../dawn-ui/Logger";
 import MessageContent from "./MessageContent";
 import MessageReactions from "./MessageReactions";
 import { showMessageContextMenu } from "../context-menus/messageContextMenu";
 import MessageAttachments from "./MessageAttachments";
+import "./message.css";
+import Timestamp from "./Timestamp";
+import SystemMessage from "./SystemMessage";
+import { ExtraMessage } from "../channel-content/ChannelContent";
+import Words, { TextType } from "../../dawn-ui/components/Words";
 
 interface MessageProps {
-  message: Message;
+  message: ExtraMessage;
   editing: boolean;
   // string = confirmed update
   // null = editing but pressed escape
@@ -35,15 +32,18 @@ export default function MessageC({
 }: MessageProps) {
   const users = useAppSelector((x) => x.users);
 
-  return (
+  return message.isSystem ? (
+    <SystemMessage message={message} />
+  ) : (
     <Row
+      className={`sy-message ${message.shouldInline ? "sy-message-inline" : ""}`}
       style={{
         gap: "10px",
       }}
     >
-      <UserIcon id={message.authorId} />
+      {!message.shouldInline && <UserIcon id={message.authorId} />}
       <Column
-        style={{ gap: "5px", overflowX: "scroll", width: "100%" }}
+        style={{ gap: "4px", overflowX: "scroll", width: "100%" }}
         onContextMenu={(e) =>
           showMessageContextMenu({
             message,
@@ -54,14 +54,16 @@ export default function MessageC({
           })
         }
       >
-        <Row util={["align-center"]} style={{ gap: "10px" }}>
-          <b>
-            {users[message.authorId]?.username ??
-              `Loading... (ID ${message.authorId})`}
-            ({message.id})
-          </b>
-          <small>{message.createdAt.toLocaleString()}</small>
-        </Row>
+        {!message.shouldInline && (
+          <Row util={["align-center"]} style={{ gap: "10px" }}>
+            <b>
+              {users[message.authorId]?.username ??
+                `Loading... (ID ${message.authorId})`}
+              ({message.id})
+            </b>
+            <Timestamp date={message.createdAt} />
+          </Row>
+        )}
         {editing ? (
           <Column util={["no-gap"]} style={{ overflow: "hidden" }}>
             <textarea
@@ -71,7 +73,7 @@ export default function MessageC({
                   textarea.focus();
                   textarea.setSelectionRange(
                     textarea.value.length,
-                    textarea.value.length
+                    textarea.value.length,
                   );
                 }
               }}

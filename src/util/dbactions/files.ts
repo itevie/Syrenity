@@ -1,11 +1,15 @@
 import { query } from "../database";
 
 export default {
-  create: async (name: string, mime: string | null = null): Promise<SyFile> => {
+  create: async (
+    name: string,
+    mime: string | null = null,
+    original_url: string | null = null,
+  ): Promise<SyFile> => {
     return (
       await query({
-        text: `INSERT INTO files(file_name, mime) VALUES ($1, $2) RETURNING *`,
-        values: [name, mime],
+        text: `INSERT INTO files(file_name, mime, original_url) VALUES ($1, $2, $3) RETURNING *`,
+        values: [name, mime, original_url],
       })
     ).rows[0] as SyFile;
   },

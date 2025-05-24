@@ -53,26 +53,6 @@ export function showSelfContextMenu(
                   <Button big onClick={() => {}}>
                     Change app hue
                   </Button>
-                  <Button big onClick={async () => {}}>
-                    Change PFP
-                  </Button>
-                  <Button
-                    big
-                    onClick={async () => {
-                      const result = await uploadFile("image/*");
-                      const file = await client.files.upload(
-                        result.name,
-                        result.result,
-                      );
-                      await client.user?.edit({
-                        profile_banner: file.id,
-                      });
-                      closeAlert();
-                      showInfoAlert("Updated!");
-                    }}
-                  >
-                    Change Banner
-                  </Button>
                 </Row>
               </Column>
             ),

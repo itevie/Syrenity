@@ -1,21 +1,19 @@
+import "./i18n";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./dawn-ui/index";
 import "./style/main.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "./pages/Login";
-import AlertManager from "./dawn-ui/components/AlertManager";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import { Provider } from "react-redux";
 import store from "./stores/store";
-import ContextMenuManager from "./dawn-ui/components/ContextMenuManager";
-import { FlyoutManager } from "./dawn-ui/components/Flyout";
 import Invite from "./pages/Invite";
 import Showcase from "./dawn-ui/Showcase";
-import UserViewer from "./components/UserViewer";
 import PageManager from "./components/PageManager";
 import AllUtilities from "./dawn-ui/AllUtilities";
+import UserViewerManager from "./components/UserViewerManager";
 
 const router = createBrowserRouter(
   [
@@ -64,6 +62,7 @@ root.render(
   <Provider store={store}>
     <PageManager />
     <AllUtilities />
+    <UserViewerManager />
     <RouterProvider router={router} />
   </Provider>,
 );

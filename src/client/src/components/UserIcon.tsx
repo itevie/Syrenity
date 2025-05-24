@@ -4,7 +4,8 @@ import Icon from "../dawn-ui/components/Icon";
 import { useAppSelector } from "../stores/store";
 import File from "../syrenity-client/structures/File";
 import User from "../syrenity-client/structures/User";
-import { setUserViewerUser } from "./UserViewer";
+import showUserContextMenu from "./context-menus/userContextMenu";
+import { setUserViewerUser } from "./UserViewerManager";
 
 export default function UserIcon({
   id,
@@ -26,20 +27,7 @@ export default function UserIcon({
       onClick={() =>
         onClick ? onClick() : setUserViewerUser(new User(client, users[id]))
       }
-      onContextMenu={(e) =>
-        showContextMenu({
-          event: e,
-          elements: [
-            {
-              type: "button",
-              label: "Copy User ID",
-              onClick() {
-                window.navigator.clipboard.writeText(id.toString());
-              },
-            },
-          ],
-        })
-      }
+      onContextMenu={(e) => showUserContextMenu(e, users[id])}
     />
   );
 }

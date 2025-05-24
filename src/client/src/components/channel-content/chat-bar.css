@@ -1,0 +1,27 @@
+.sy-messageinput-container {
+  margin: 10px;
+  box-sizing: border-box;
+}
+
+.sy-messageinput {
+  box-sizing: border-box;
+  border-radius: 10px;
+  padding: 7px 10px;
+  background-color: var(--sy-messageinput-color);
+}
+
+.sy-messageinput > * {
+  padding: 5px;
+}
+
+.sy-messageinput-input,
+.sy-messageinput-input:focus,
+.sy-messageinput-input:hover {
+  background-color: inherit;
+  border-style: none;
+}
+
+.sy-chatarea {
+  background-color: var(--sy-chat-color);
+  gap: 10px;
+}

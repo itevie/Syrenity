@@ -19,7 +19,7 @@ import FullscreenLoader from "./components/FullscreenLoader";
 import DmBar from "./components/DmBar";
 import { AxiosWrapper } from "./dawn-ui/util";
 import { handleClientError, isErr, wrap } from "./util";
-import { setUserViewerUser } from "./components/UserViewer";
+import { setUserViewerUser } from "./components/UserViewerManager";
 import Column from "./dawn-ui/components/Column";
 import Icon from "./dawn-ui/components/Icon";
 import File from "./syrenity-client/structures/File";
@@ -85,12 +85,7 @@ function App() {
   );
   const [channels, setChannels] = useState<Channel[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
-  const [selectedChannel2, setSelectedChannel2] = useState<Channel | null>(
-    null,
-  );
-  const [channelContent, setChannelContent] = useState<ReactElement | null>(
-    null,
-  );
+
   const [showLoader, setShowLoader] = useState<boolean>(true);
 
   useEffect(() => {

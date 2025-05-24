@@ -1,6 +1,7 @@
 import { client } from "../App";
 import {
   showConfirmModel,
+  showErrorAlert,
   showInputAlert,
 } from "../dawn-ui/components/AlertManager";
 import Button from "../dawn-ui/components/Button";
@@ -9,6 +10,7 @@ import { showContextMenu } from "../dawn-ui/components/ContextMenuManager";
 import { useAppSelector } from "../stores/store";
 import Channel from "../syrenity-client/structures/Channel";
 import Server from "../syrenity-client/structures/Server";
+import { handleClientError, isErr, isOk, wrap } from "../util";
 
 export default function ChannelBar(props: {
   selected: Channel | null;
@@ -32,9 +34,19 @@ export default function ChannelBar(props: {
                   label: "Create Channel",
                   async onClick() {
                     if (!props.selectedServer) return;
+
                     const name = await showInputAlert("Enter channel name");
                     if (!name) return;
-                    await props.selectedServer.channels.create(name);
+
+                    let result = await wrap(
+                      props.selectedServer.channels.create(name),
+                    );
+
+                    if (isErr(result)) {
+                      handleClientError("create a channel", result.v);
+                    } else {
+                      props.setSelected(result.v.id);
+                    }
                   },
                 },
               ],

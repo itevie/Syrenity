@@ -17,6 +17,8 @@ type ErrorType =
   | "InvalidFileSize"
   | "InvalidMimeType"
   | "InvalidFileType"
+  | "DownloadFailed"
+  | "InvalidBase64"
 
   // Members
   | "UserNotInServer"

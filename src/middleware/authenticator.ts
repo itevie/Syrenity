@@ -41,7 +41,19 @@ export default async (
     // Check for token authentication
     if (req.headers.authorization) {
       // Extract the token
-      const token = req.headers.authorization.split(" ")[1];
+      const authHeader = req.headers.authorization;
+      if (!authHeader?.startsWith("Token ")) {
+        return res.status(400).send(
+          new AuthenticationError({
+            message: `Invalid authorization format`,
+            errorCode: "InvalidAuthorizationFormat",
+            data: {
+              expectedFormat: `Token token-here`,
+            },
+          }).extract(),
+        );
+      }
+      const token = authHeader.split(" ")[1];
 
       // Check if existent
       if (!token) {

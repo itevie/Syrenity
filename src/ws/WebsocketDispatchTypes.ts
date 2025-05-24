@@ -7,7 +7,7 @@ import { DatabaseUser, StrippedDatabaseUser } from "../models/User";
 
 export interface WebsocketDispatchTypes {
   MessageCreate: {
-    message: Message;
+    message: ExpandedMessage;
   };
 
   MessageDelete: {
@@ -15,7 +15,7 @@ export interface WebsocketDispatchTypes {
   };
 
   MessageUpdate: {
-    message: Message;
+    message: ExpandedMessage;
   };
 
   ServerMemberAdd: {

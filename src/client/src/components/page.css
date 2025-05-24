@@ -1,0 +1,14 @@
+.sy-page-container {
+  background-color: var(--dawn-root-base) !important;
+  background-color: var(--sy-chat-color);
+}
+
+.sy-page-close {
+  margin: 15px;
+  font-size: 2em;
+  cursor: pointer;
+}
+
+.sy-page-sidebar {
+  min-width: 250px;
+}

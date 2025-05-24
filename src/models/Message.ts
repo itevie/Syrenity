@@ -1,3 +1,4 @@
+import { createSystemMessage } from "../broadcasting/systemMessageManager";
 import { SystemMessageTypes } from "../broadcasting/SystemMessageTypes";
 import { query, queryOne } from "../database/database";
 import SyChannel from "./Channel";
@@ -54,11 +55,17 @@ export default class SyMessage {
     });
   }
 
-  public async setPinned(value: boolean): Promise<SyMessage> {
+  public async setPinned(value: boolean, pinner: number): Promise<SyMessage> {
     const result = (await queryOne<DatabaseMessage>({
       text: "UPDATE messages SET is_pinned = $2 WHERE id = $1 RETURNING *",
       values: [this.data.id, value],
     })) as DatabaseMessage;
+
+    if (value)
+      createSystemMessage(this.data.channel_id, "MessagePinned", {
+        message_id: this.data.id,
+        pinned_by: pinner,
+      });
 
     this.data = result;
     return this;

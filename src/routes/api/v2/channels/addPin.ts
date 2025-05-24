@@ -15,10 +15,12 @@ const route: RouteDetails = {
           message: "The message is already pinned",
           errorCode: "Conflict",
           statusCode: 400,
-        }).extract()
+        }).extract(),
       );
 
-    return res.status(200).send(await message.setPinned(true));
+    return res
+      .status(200)
+      .send(await message.setPinned(true, (req.user as User).id));
   },
 
   auth: {

@@ -5,6 +5,7 @@ import Row from "../dawn-ui/components/Row";
 import Sidebar from "../dawn-ui/components/Sidebar";
 import SidebarButton from "../dawn-ui/components/SidebarButton";
 import Words, { TextType } from "../dawn-ui/components/Words";
+import "./page.css";
 
 export interface PageButtonSection {
   type: "button";

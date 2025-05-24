@@ -8,6 +8,7 @@ import Relationship from "../syrenity-client/structures/Relationship";
 import { client } from "../App";
 import Row from "../dawn-ui/components/Row";
 import UserIcon from "./UserIcon";
+import showUserContextMenu from "./context-menus/userContextMenu";
 
 export default function DmBar(props: {
   selected: Channel | null;
@@ -36,6 +37,7 @@ export default function DmBar(props: {
             .sort((a, b) => a.lastMessage.getTime() - b.lastMessage.getTime())
             .map((r) => (
               <Button
+                onContextMenu={(e) => showUserContextMenu(e, r.recipient.data)}
                 key={r.recipient.id}
                 type="inherit"
                 util={[

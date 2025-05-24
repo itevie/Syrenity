@@ -1,0 +1,34 @@
+.sy-user-viewer {
+  width: 600px !important;
+  height: 80vh;
+  padding: 0 !important;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sy-user-viewer-banner {
+  width: 600px;
+  height: calc(600px * 1 / 2.5);
+  object-fit: cover;
+
+  border-top-left-radius: var(--dawn-border-radius);
+  border-top-right-radius: var(--dawn-border-radius);
+
+  background-color: black;
+}
+
+.sy-user-viewer-below-banner {
+  margin-top: -90px;
+  margin-left: 20px;
+}
+
+.sy-user-viewer-main-content {
+  padding: 10px;
+  padding-top: 0px;
+}
+
+.sy-user-viewer-username {
+  align-self: flex-end;
+  margin-bottom: 20px;
+}

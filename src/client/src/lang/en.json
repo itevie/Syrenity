@@ -1,0 +1,30 @@
+{
+  "errors": {
+    "noPermission": "Hey! You don't have permission to {{what}}"
+  },
+  "chatbar": {
+    "placeholder": "Type your message here..."
+  },
+  "alert": {
+    "buttons": {
+      "ok": "Ok!",
+      "cancel": "Cancel"
+    }
+  },
+  "userViewer": {
+    "aboutMe": {
+      "name": "About Me",
+      "joined": "Joined Syrenity"
+    }
+  },
+  "settings": {
+    "account": {
+      "name": "Account",
+      "changePfp": "Change PFP",
+      "changeBanner": "Change Banner"
+    },
+    "appApearance": {
+      "name": "App Appearance"
+    }
+  }
+}

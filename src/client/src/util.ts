@@ -2,11 +2,14 @@ import { isAxiosError } from "axios";
 import { showErrorAlert } from "./dawn-ui/components/AlertManager";
 import { defaultLogger } from "./dawn-ui/Logger";
 import { baseUrl, client } from "./App";
+import { fallbackImage } from "./config";
+import { trans } from "./i18n";
+import { TFunction } from "i18next/typescript/t";
 
 export function generateAvatar(
   text: string,
   foregroundColor = "white",
-  backgroundColor = "#00000000"
+  backgroundColor = "#00000000",
 ) {
   // Check length
   if (text.length > 2) {
@@ -38,9 +41,7 @@ export function handleClientError(what: string, error: any) {
   if (isAxiosError(error)) {
     switch (error.response?.status) {
       case 401:
-        showErrorAlert(
-          `Hey! You can't do that. You do not have permission to "${what}"`
-        );
+        showErrorAlert(trans("errors.noPermission", { what }));
         break;
       default:
         const message = error.response?.data?.error?.message ?? "Unknown Error";
@@ -50,6 +51,7 @@ export function handleClientError(what: string, error: any) {
 }
 
 export function fixUrlWithProxy(_url: string): string {
+  if (!_url) return fallbackImage;
   const base = new URL(client.options.baseUrl || baseUrl);
 
   if (_url.startsWith("/")) return `${base.protocol}//${base.host}${_url}`;
@@ -72,7 +74,7 @@ export type Ok<T> = {
 export type Result<T, E> = Ok<T> | Err<E>;
 
 export async function wrap<T, E = any>(
-  promise: Promise<T>
+  promise: Promise<T>,
 ): Promise<Result<T, E>> {
   try {
     return {
@@ -93,4 +95,13 @@ export function isErr<T, E>(value: Result<T, E>): value is Err<E> {
 
 export function isOk<T, E>(value: Result<T, E>): value is Ok<T> {
   return value.type === "ok";
+}
+
+export function match<T, E>(
+  val: Result<T, E>,
+  ok: (res: T) => void,
+  err: (err: E) => void,
+): void {
+  if (isOk(val)) ok(val.v);
+  else err(val.v);
 }

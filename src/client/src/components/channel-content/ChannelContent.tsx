@@ -7,10 +7,14 @@ import Logger from "../../dawn-ui/Logger";
 import ChatBar from "./ChatBar";
 import { client, wrapLoading } from "../../App";
 import { units } from "../../dawn-ui/time";
+import { makeListener } from "../../dawn-ui/util";
+import ChannelName from "./ChannelName";
+
+export type ExtraMessage = Message & { shouldInline?: boolean };
 
 interface ChannelCache {
   done: boolean;
-  messages: Message[];
+  messages: ExtraMessage[];
   timestamp: number | null;
   last: number | null;
 }
@@ -19,6 +23,25 @@ const logger = new Logger("channel-messages");
 const channelCache = new Map<number, ChannelCache>();
 
 const SCROLL_THRESHOLD = 100;
+
+function fixMessageInlination(messages: Message[]): ExtraMessage[] {
+  return messages.map<ExtraMessage>((v, i, a) => {
+    let shouldInline = false;
+
+    if (i !== 0) {
+      if (
+        v.createdAt.getTime() - a[i - 1].createdAt.getTime() <
+          units.minute * 5 &&
+        a[i - 1].authorId === v.authorId
+      ) {
+        shouldInline = true;
+      }
+    }
+
+    (v as any).shouldInline = shouldInline;
+    return v as ExtraMessage;
+  });
+}
 
 async function loadMoreMessages(channel: Channel): Promise<ChannelCache> {
   const cache = channelCache.get(channel.id);
@@ -56,7 +79,7 @@ async function loadMoreMessages(channel: Channel): Promise<ChannelCache> {
   logger.log(`Loaded ${newMessages.length} messages for channel ${channel.id}`);
 
   // Update
-  cache.messages = [...newMessages, ...cache.messages];
+  cache.messages = fixMessageInlination([...newMessages, ...cache.messages]);
 
   if (!newMessages.length) {
     cache.done = true;
@@ -86,12 +109,13 @@ export default function ChannelContent({
       setTimeout(() => {
         if (
           !force &&
-          (messageAreaRef.current?.scrollTop ?? 0 < SCROLL_THRESHOLD)
+          (messageAreaRef.current?.scrollTop ?? 0) < SCROLL_THRESHOLD
         )
           return;
+        console.log("scrolling");
+
         messageAreaRef.current?.scrollTo({
           top: messageAreaRef.current.scrollHeight,
-          behavior: "smooth",
         });
       }, delay);
     },
@@ -111,17 +135,17 @@ export default function ChannelContent({
   // For initial load of the channel
   useEffect(() => {
     if (!channel) return;
-
     logger.log(`Loading channel ${channel.id}`);
 
-    const cache = channelCache.get(channel.id);
-    if (!cache) {
-      channelCache.set(channel.id, {
+    let cache: ChannelCache = channelCache.get(channel.id) as ChannelCache;
+    if (cache === undefined) {
+      cache = {
         done: false,
         messages: [],
         timestamp: null,
         last: null,
-      });
+      };
+      channelCache.set(channel.id, cache as ChannelCache);
       _loadMoreMessages(channel).then(() => {
         scrollToBottom(100, true);
       });
@@ -129,6 +153,52 @@ export default function ChannelContent({
       setData(cache);
     }
     scrollToBottom(100, true);
+
+    const messageCreate = makeListener(
+      client,
+      "messageCreate",
+      (m: Message) => {
+        cache.messages.push(m);
+        setMessages([...cache.messages]);
+        scrollToBottom();
+      },
+    );
+
+    function makeUpdate(m: Message) {
+      const index = cache.messages.findIndex((x) => x.id === m.id);
+      if (index) {
+        cache.messages[index] = m as ExtraMessage;
+      }
+      setMessages([...cache.messages]);
+      scrollToBottom();
+    }
+
+    const messageEdit = makeListener(client, "messageUpdate", (m: Message) => {
+      makeUpdate(m);
+    });
+
+    const messageReactionAdd = makeListener(
+      client,
+      "messageReactionAdd",
+      (_, m: Message) => {
+        makeUpdate(m);
+      },
+    );
+
+    const messageReactionRemove = makeListener(
+      client,
+      "messageReactionRemove",
+      (_, m: Message) => {
+        makeUpdate(m);
+      },
+    );
+
+    return () => {
+      client.removeListener("messageCreate", messageCreate);
+      client.removeListener("messageUpdate", messageEdit);
+      client.removeListener("messageReactionAdd", messageReactionAdd);
+      client.removeListener("messageReactionRemove", messageReactionRemove);
+    };
   }, [channel]);
 
   // For detecting scrolls
@@ -190,15 +260,20 @@ export default function ChannelContent({
       className="sy-chat-content"
     >
       <Column util={["no-shrink", "justify-center"]} className="sy-topbar">
-        {channel?.name}
+        {!channel ? "Loading..." : <ChannelName channel={channel} />}
       </Column>
       <div
         ref={messageAreaRef}
         className="sy-chatarea dawn-column flex-grow"
-        style={{ padding: "10px", overflowX: "hidden", overflowY: "auto" }}
+        style={{
+          padding: "10px",
+          overflowX: "hidden",
+          overflowY: "auto",
+          gap: "0px",
+        }}
       >
         {isDone && <label>You've reached the end - go away.</label>}
-        {(messages || []).map((x) => (
+        {fixMessageInlination(messages || []).map((x) => (
           <MessageC
             scrollDown={(amount) => {
               if (messageAreaRef.current) {

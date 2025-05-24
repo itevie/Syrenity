@@ -81,34 +81,6 @@ body {
   background-color: var(--sy-chat-color);
 }
 
-.sy-messageinput-container {
-  margin: 10px;
-  box-sizing: border-box;
-}
-
-.sy-messageinput {
-  box-sizing: border-box;
-  border-radius: 10px;
-  padding: 5px;
-  background-color: var(--sy-messageinput-color);
-}
-
-.sy-messageinput > * {
-  padding: 5px;
-}
-
-.sy-messageinput-input,
-.sy-messageinput-input:focus,
-.sy-messageinput-input:hover {
-  background-color: inherit;
-  border-style: none;
-}
-
-.sy-chatarea {
-  background-color: var(--sy-chat-color);
-  gap: 10px;
-}
-
 .sy-attachment-image {
   max-width: 600px;
   height: 400px;
@@ -134,49 +106,4 @@ body {
 .sy-message-content > p {
   margin: 0;
   word-break: break-word;
-}
-
-.sy-user-viewer {
-  width: 600px !important;
-  height: 80vh;
-  padding: 0;
-
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.sy-user-viewer-banner {
-  width: 600px;
-  height: calc(600px * 1 / 2.5);
-  object-fit: cover;
-
-  border-top-left-radius: var(--dawn-border-radius);
-  border-top-right-radius: var(--dawn-border-radius);
-
-  background-color: black;
-}
-
-.sy-user-viewer-below-banner {
-  margin-top: -90px;
-  margin-left: 20px;
-}
-
-.sy-user-viewer-main-content {
-  padding: 10px;
-  padding-top: 0px;
-}
-
-.sy-page-container {
-  background-color: var(--dawn-root-background);
-  background-color: var(--sy-chat-color);
-}
-
-.sy-page-close {
-  margin: 15px;
-  font-size: 2em;
-  cursor: pointer;
-}
-
-.sy-page-sidebar {
-  min-width: 250px;
 }

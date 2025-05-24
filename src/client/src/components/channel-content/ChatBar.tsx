@@ -8,6 +8,9 @@ import GoogleMatieralIcon from "../../dawn-ui/components/GoogleMaterialIcon";
 import Row from "../../dawn-ui/components/Row";
 import uploadFile from "../../dawn-ui/uploadFile";
 import { isErr, handleClientError, wrap } from "../../util";
+import showEmojiPickerAlert from "../alerts/emojiPickerAlert";
+import "./chat-bar.css";
+import { useTranslation } from "react-i18next";
 
 export default function ChatBar({
   inputRef,
@@ -16,6 +19,8 @@ export default function ChatBar({
   inputRef: React.RefObject<HTMLTextAreaElement>;
   onKey: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="sy-messageinput-container">
       <Row
@@ -33,7 +38,7 @@ export default function ChatBar({
             if (!data) return;
 
             const file = await wrap(
-              client.files.upload(data.name, data.result)
+              client.files.upload(data.name, data.result),
             );
 
             if (isErr(file)) {
@@ -44,6 +49,8 @@ export default function ChatBar({
           }}
         />
         <textarea
+          placeholder={t("chatbar.placeholder")}
+          autoFocus
           ref={inputRef}
           style={{ resize: "none" }}
           className="sy-messageinput-input"
@@ -53,27 +60,10 @@ export default function ChatBar({
           name="mood"
           util={["clickable"]}
           onClick={() => {
-            addAlert({
-              title: "Emoji",
-              body: (
-                <Row util={["align-center", "justify-center"]}>
-                  <EmojiPicker
-                    onEmojiClick={(emoji) => {
-                      if (inputRef.current)
-                        inputRef.current.value += emoji.emoji;
-                    }}
-                  />
-                </Row>
-              ),
-              buttons: [
-                {
-                  id: "close",
-                  text: "Close",
-                  click(close) {
-                    close();
-                  },
-                },
-              ],
+            showEmojiPickerAlert({
+              select: (emoji) => {
+                if (inputRef.current) inputRef.current.value += emoji.emoji;
+              },
             });
           }}
         />

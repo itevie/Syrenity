@@ -1,0 +1,12 @@
+{
+  "settings": {
+    "account": {
+      "name": "Účet",
+      "changePfp": "Zmeniť obrázok",
+      "changeBanner": "Zmeniť pozadie"
+    },
+    "appAppearance": {
+      "name": "Vzhľad aplikácie"
+    }
+  }
+}

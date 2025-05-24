@@ -24,7 +24,7 @@ export async function createSystemMessage<T extends keyof SystemMessageTypes>(
     guild: (await actions.channels.fetch(channel)).guild_id,
     type: "MessageCreate",
     payload: {
-      message: message.data,
+      message: await message.expand(),
     },
   });
 }

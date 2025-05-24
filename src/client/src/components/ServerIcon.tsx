@@ -24,7 +24,7 @@ export default function ServerIcon({
   const server = new Server(client, servers[_server.id]);
 
   return (
-    <Flyout text={_server.name}>
+    <Flyout text={_server.name} direction="right">
       <Icon
         key={`pfp-${_server.id}`}
         onClick={() => onClick(_server)}
@@ -51,21 +51,22 @@ export default function ServerIcon({
                           big
                           onClick={async () => {
                             const file = await uploadFile("image/*");
+                            if (!file) return;
                             const uploaded = await wrap(
-                              client.files.upload(file.name, file.result)
+                              client.files.upload(file.name, file.result),
                             );
 
                             if (isErr(uploaded)) {
                               return handleClientError(
                                 "upload file",
-                                uploaded.v
+                                uploaded.v,
                               );
                             }
 
                             const result = await wrap(
                               server.edit({
                                 avatar: uploaded.v.id,
-                              })
+                              }),
                             );
 
                             if (isErr(result)) {

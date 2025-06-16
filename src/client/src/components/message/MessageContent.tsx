@@ -2,11 +2,12 @@ import Markdown from "react-markdown";
 import Message from "../../syrenity-client/structures/Message";
 import remarkGfm from "remark-gfm";
 import { showConfirmModel } from "../../dawn-ui/components/AlertManager";
+import emoji from "remark-emoji";
 
 export default function MessageContent({ message }: { message: Message }) {
   return (
     <Markdown
-      remarkPlugins={[remarkGfm]}
+      remarkPlugins={[remarkGfm, emoji]}
       components={{
         a: ({ node, ...props }) => (
           <a
@@ -20,7 +21,7 @@ export default function MessageContent({ message }: { message: Message }) {
                   a.target = "_blank";
                   a.href = (e.target as HTMLAnchorElement).href;
                   a.click();
-                }
+                },
               );
             }}
           />

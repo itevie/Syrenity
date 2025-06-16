@@ -43,7 +43,7 @@ export default function MessageC({
     >
       {!message.shouldInline && <UserIcon id={message.authorId} />}
       <Column
-        style={{ gap: "4px", overflowX: "scroll", width: "100%" }}
+        style={{ gap: "4px", overflowX: "auto", width: "100%" }}
         onContextMenu={(e) =>
           showMessageContextMenu({
             message,

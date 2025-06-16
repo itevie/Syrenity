@@ -4,6 +4,7 @@ import { showContextMenu } from "../../dawn-ui/components/ContextMenuManager";
 import Row from "../../dawn-ui/components/Row";
 import { isErr, handleClientError, wrap } from "../../util";
 import Message from "../../syrenity-client/structures/Message";
+import { trans } from "../../i18n";
 
 export interface MessageContextMenuOptions {
   event: React.MouseEvent<HTMLDivElement, MouseEvent>;
@@ -18,31 +19,35 @@ export function showMessageContextMenu(options: MessageContextMenuOptions) {
     elements: [
       {
         type: "button",
-        label: "Edit Message",
+        label: trans("message.action.edit"),
         onClick() {
           options.edit();
         },
       },
       {
         type: "button",
-        label: options.message.isPinned ? "Unpin" : "Pin",
+        label: trans(
+          options.message.isPinned
+            ? "message.action.unpin"
+            : "message.action.pin",
+        ),
         async onClick() {
           const result = await wrap(
             options.message.isPinned
               ? options.message.unpin()
-              : options.message.pin()
+              : options.message.pin(),
           );
           if (isErr(result)) {
             return handleClientError(
               options.message.isPinned ? "unpin" : "pin",
-              result.v
+              result.v,
             );
           }
         },
       },
       {
         type: "button",
-        label: "Delete Message",
+        label: trans("message.action.delete"),
         scheme: "danger",
         onClick: async () => {
           const result = await wrap(options.message.delete());
@@ -53,7 +58,7 @@ export function showMessageContextMenu(options: MessageContextMenuOptions) {
       },
       {
         type: "button",
-        label: "React",
+        label: trans("message.action.react"),
         onClick: async () => {
           addAlert({
             id: "emoji-picker",
@@ -68,7 +73,7 @@ export function showMessageContextMenu(options: MessageContextMenuOptions) {
                     if (!emoji) return;
 
                     const result = await wrap(
-                      options.message.react(emoji.emoji)
+                      options.message.react(emoji.emoji),
                     );
                     if (isErr(result)) {
                       handleClientError("react", result.v);
@@ -94,7 +99,7 @@ export function showMessageContextMenu(options: MessageContextMenuOptions) {
       },
       {
         type: "button",
-        label: "Copy Text",
+        label: trans("message.action.copyText"),
         onClick: () => {
           window.navigator.clipboard.writeText(options.message.content);
         },

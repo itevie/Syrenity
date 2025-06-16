@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 17.4
--- Dumped by pg_dump version 17.4
+-- Dumped from database version 17.5
+-- Dumped by pg_dump version 17.5
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -578,7 +578,8 @@ CREATE TABLE public.relationships (
     user1 integer NOT NULL,
     user2 integer NOT NULL,
     last_message timestamp without time zone NOT NULL,
-    active boolean DEFAULT true NOT NULL
+    active boolean DEFAULT true NOT NULL,
+    created_at timestamp without time zone
 );
 
 

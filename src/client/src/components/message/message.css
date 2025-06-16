@@ -4,7 +4,7 @@
 
 .sy-message:not(.sy-message-inline) {
   margin-top: 20px;
-  align-items: center;
+  /* align-items: center; */
 }
 
 .sy-message:hover {

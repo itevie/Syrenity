@@ -18,7 +18,12 @@ export interface PageBrSection {
   type: "br";
 }
 
-export type PageSection = PageButtonSection | PageBrSection;
+export interface PageLabelSection {
+  type: "label";
+  label: string;
+}
+
+export type PageSection = PageButtonSection | PageBrSection | PageLabelSection;
 
 export interface PageOptions {
   sections: PageSection[];
@@ -46,12 +51,17 @@ export default function Page({ options }: { options: PageOptions }) {
               }
               onClick={() => setSelectedSection(section)}
             />
+          ) : section.type === "label" ? (
+            <Words type={TextType.Small}>{section.label}</Words>
           ) : (
             <br />
           ),
         )}
       </Sidebar>
-      <Content className="sy-page-content flex-grow width-100">
+      <Content
+        className="sy-page-content flex-grow width-100"
+        style={{ overflowY: "auto" }}
+      >
         <Words type={TextType.PageTitle}>{selectedSection.label}</Words>
         {selectedSection.element}
       </Content>

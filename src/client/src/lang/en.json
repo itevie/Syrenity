@@ -17,14 +17,50 @@
       "joined": "Joined Syrenity"
     }
   },
+  "invites": {
+    "invitation": "You've been invited too...",
+    "join": "Join Server",
+    "joined": "You're already in here!"
+  },
+  "file": {
+    "action": {
+      "copyMediaLink": "Copy Media Link",
+      "copyOriginalUrl": "Copy Original URL",
+      "openInNewTab": "Open In New Tab"
+    }
+  },
+  "server": {
+    "action": {
+      "createChannel": "Create Channel"
+    }
+  },
+  "channel": {
+    "action": {
+      "setPosition": "Set Position",
+      "delete": "Delete",
+      "deleteConfirm": "Are you sure you want to delete {{name}}?"
+    }
+  },
+  "message": {
+    "action": {
+      "edit": "Edit",
+      "unpin": "Unpin",
+      "pin": "Pin",
+      "delete": "Delete",
+      "react": "React",
+      "copyText": "Copy Text"
+    }
+  },
   "settings": {
     "account": {
       "name": "Account",
       "changePfp": "Change PFP",
       "changeBanner": "Change Banner"
     },
-    "appApearance": {
-      "name": "App Appearance"
+    "appAppearance": {
+      "name": "App Appearance",
+      "theme": "Theme",
+      "hue": "Hue"
     }
   }
 }

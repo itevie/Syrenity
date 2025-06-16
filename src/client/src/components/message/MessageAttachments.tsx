@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Message from "../../syrenity-client/structures/Message";
 import Row from "../../dawn-ui/components/Row";
 import { baseUrl, client } from "../../App";
@@ -19,6 +19,7 @@ import Column from "../../dawn-ui/components/Column";
 import Words from "../../dawn-ui/components/Words";
 import Icon from "../../dawn-ui/components/Icon";
 import Button from "../../dawn-ui/components/Button";
+import { trans } from "../../i18n";
 
 const logger = new Logger("attachment-loader");
 
@@ -94,7 +95,7 @@ export default function MessageAttachments({ message }: { message: Message }) {
             specialNodes.push(
               <Container style={{ width: "350px" }}>
                 <Column>
-                  <Words>You have been invited to...</Words>
+                  <Words>{trans("invites.invitation")}</Words>
                   <Row util={["align-center"]}>
                     <Icon size="64px" src={guild.avatar?.url ?? ""}></Icon>
                     <Words>{guild.name}</Words>
@@ -111,7 +112,7 @@ export default function MessageAttachments({ message }: { message: Message }) {
                       }
                     }}
                   >
-                    {inServer ? "You're in here!" : "Join!"}
+                    {trans(inServer ? "invites.joined" : "invites.join")}
                   </Button>
                 </Column>
               </Container>,

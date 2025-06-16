@@ -1,14 +1,11 @@
-import EmojiPicker from "emoji-picker-react";
 import { client } from "../../App";
-import {
-  showLoadingAlert,
-  addAlert,
-} from "../../dawn-ui/components/AlertManager";
+import { showLoadingAlert } from "../../dawn-ui/components/AlertManager";
 import GoogleMatieralIcon from "../../dawn-ui/components/GoogleMaterialIcon";
 import Row from "../../dawn-ui/components/Row";
 import uploadFile from "../../dawn-ui/uploadFile";
 import { isErr, handleClientError, wrap } from "../../util";
 import showEmojiPickerAlert from "../alerts/emojiPickerAlert";
+import { uploadImageAlert } from "../alerts/uploadImage";
 import "./chat-bar.css";
 import { useTranslation } from "react-i18next";
 
@@ -31,11 +28,9 @@ export default function ChatBar({
           name="add"
           util={["clickable"]}
           onClick={async () => {
-            const loader = showLoadingAlert();
-            const data = await uploadFile();
-            loader.stop();
-
+            const data = await uploadImageAlert();
             if (!data) return;
+            const loader = showLoadingAlert();
 
             const file = await wrap(
               client.files.upload(data.name, data.result),
@@ -46,6 +41,8 @@ export default function ChatBar({
             }
 
             if (inputRef.current) inputRef.current.value += `<f:${file.v.id}>`;
+
+            loader.stop();
           }}
         />
         <textarea

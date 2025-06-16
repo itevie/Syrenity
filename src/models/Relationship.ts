@@ -9,6 +9,7 @@ export interface DatabaseRelationship {
   user2: number;
   last_message: Date;
   active: boolean;
+  created_at: Date;
 }
 
 export type ExpandedRelationship = Omit<

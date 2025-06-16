@@ -177,6 +177,18 @@ export default function ChannelContent({
       makeUpdate(m);
     });
 
+    const messageDelete = makeListener(
+      client,
+      "messageDelete",
+      (messageId: number, channelId: number) => {
+        const index = cache.messages.findIndex((x) => x.id === messageId);
+        if (index) {
+          cache.messages.splice(index, 1);
+          setMessages([...cache.messages]);
+        }
+      },
+    );
+
     const messageReactionAdd = makeListener(
       client,
       "messageReactionAdd",
@@ -196,6 +208,7 @@ export default function ChannelContent({
     return () => {
       client.removeListener("messageCreate", messageCreate);
       client.removeListener("messageUpdate", messageEdit);
+      client.removeListener("messageDelete", messageDelete);
       client.removeListener("messageReactionAdd", messageReactionAdd);
       client.removeListener("messageReactionRemove", messageReactionRemove);
     };

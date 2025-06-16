@@ -1,13 +1,6 @@
-import axios from "axios";
 import { RouteDetails } from "../../../types/route";
-import config from "../../../config";
-import { PassThrough } from "stream";
 import database from "../../../database/database";
-import { randomID } from "../../../util/util";
-import path from "path";
-import { fileStoreLocation } from "../../..";
-import { createWriteStream, fstat, mkdirSync } from "fs";
-import { extension, lookup } from "mime-types";
+import { lookup } from "mime-types";
 
 const route: RouteDetails = {
   method: "GET",
@@ -25,14 +18,14 @@ const route: RouteDetails = {
     const storedFileObject = await database.files.getByUrl(url);
     if (storedFileObject) {
       return res.redirect(
-        `/files/${storedFileObject.id}/${storedFileObject.file_name}`
+        `/files/${storedFileObject.id}/${storedFileObject.file_name}`,
       );
     }
 
     try {
       const result = await database.files.downloadTo(url);
       res.contentType(
-        result[2] ?? lookup(result[0].file_name) ?? "application/octet-stream"
+        result[2] ?? lookup(result[0].file_name) ?? "application/octet-stream",
       );
 
       result[1].pipe(res);

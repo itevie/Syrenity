@@ -9,7 +9,7 @@ import { setFullscreenImage } from "./ImageViewer";
 import UserIcon from "./UserIcon";
 import File from "../syrenity-client/structures/File";
 import { useTranslation } from "react-i18next";
-import { trans } from "../i18n";
+import DateText from "./DateText";
 
 export default function UserViewer({ userId }: { userId: number }) {
   const users = useAppSelector((x) => x.users);
@@ -61,7 +61,7 @@ export default function UserViewer({ userId }: { userId: number }) {
                     {t("userViewer.aboutMe.joined")}
                   </Words>
                   <Words>
-                    {new Date(users[userId].created_at).toDateString()}
+                    <DateText date={new Date(users[userId].created_at)} />
                   </Words>
                 </Column>
               ),

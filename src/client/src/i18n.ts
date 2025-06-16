@@ -41,7 +41,7 @@ CommandPaletteProviderManager.register({
   },
 });
 
-i18n.changeLanguage("sk");
+// i18n.changeLanguage("sk");
 
 export default i18n;
 

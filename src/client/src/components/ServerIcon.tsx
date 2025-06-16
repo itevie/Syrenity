@@ -12,6 +12,7 @@ import Row from "../dawn-ui/components/Row";
 import Button from "../dawn-ui/components/Button";
 import uploadFile from "../dawn-ui/uploadFile";
 import { useAppSelector } from "../stores/store";
+import showServerContextMenu from "./context-menus/serverContextMenu";
 
 export default function ServerIcon({
   server: _server,
@@ -35,86 +36,7 @@ export default function ServerIcon({
           fallbackImage
         }
         fallback={fallbackImage}
-        onContextMenu={(e) =>
-          showContextMenu({
-            event: e,
-            elements: [
-              {
-                type: "button",
-                label: "Edit",
-                async onClick() {
-                  addAlert({
-                    title: "Edit server",
-                    body: (
-                      <Row>
-                        <Button
-                          big
-                          onClick={async () => {
-                            const file = await uploadFile("image/*");
-                            if (!file) return;
-                            const uploaded = await wrap(
-                              client.files.upload(file.name, file.result),
-                            );
-
-                            if (isErr(uploaded)) {
-                              return handleClientError(
-                                "upload file",
-                                uploaded.v,
-                              );
-                            }
-
-                            const result = await wrap(
-                              server.edit({
-                                avatar: uploaded.v.id,
-                              }),
-                            );
-
-                            if (isErr(result)) {
-                              return handleClientError("edit avatar", result.v);
-                            }
-                          }}
-                        >
-                          Change avatar
-                        </Button>
-                      </Row>
-                    ),
-                    buttons: [
-                      {
-                        id: "done",
-                        text: "Close",
-                        click(close) {
-                          close();
-                        },
-                      },
-                    ],
-                  });
-                },
-              },
-              {
-                type: "button",
-                label: "Leave Server",
-                async onClick() {
-                  const result = await wrap(server.leave());
-                  if (isErr(result)) {
-                    return handleClientError("leave server", result.v);
-                  }
-                },
-              },
-              {
-                type: "button",
-                label: "Create Invite",
-                onClick: async () => {
-                  const invite = await wrap(server.invites.create());
-                  if (isErr(invite)) {
-                    return handleClientError("create invite", invite.v);
-                  } else {
-                    showInfoAlert(`Your invite code is: ${invite.v.id}`);
-                  }
-                },
-              },
-            ],
-          })
-        }
+        onContextMenu={(e) => showServerContextMenu(e, server)}
       />
     </Flyout>
   );

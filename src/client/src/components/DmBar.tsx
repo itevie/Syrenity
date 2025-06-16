@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import Button from "../dawn-ui/components/Button";
 import Column from "../dawn-ui/components/Column";
-import { useAppSelector } from "../stores/store";
 import Channel from "../syrenity-client/structures/Channel";
 import Server from "../syrenity-client/structures/Server";
 import Relationship from "../syrenity-client/structures/Relationship";
@@ -9,12 +8,15 @@ import { client } from "../App";
 import Row from "../dawn-ui/components/Row";
 import UserIcon from "./UserIcon";
 import showUserContextMenu from "./context-menus/userContextMenu";
+import { useTranslation } from "react-i18next";
+import showFriendsPage from "../app-pages/FriendsPage";
 
 export default function DmBar(props: {
   selected: Channel | null;
   selectedServer: Server | null;
   setSelected: (channelID: number) => void;
 }) {
+  const { i18n } = useTranslation();
   const [relationships, setRelationships] = useState<Relationship[]>([]);
 
   useEffect(() => {
@@ -33,6 +35,9 @@ export default function DmBar(props: {
           DMs
         </Column>
         <Column util={["flex-grow", "small-gap"]} className="sy-channellist">
+          <Button type="inherit" onClick={showFriendsPage}>
+            {i18n.t("dms.manage")}
+          </Button>
           {relationships
             .sort((a, b) => a.lastMessage.getTime() - b.lastMessage.getTime())
             .map((r) => (

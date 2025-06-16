@@ -11,6 +11,10 @@ const route: RouteDetails = {
       .send(await (await SyInvite.fetch(req.params.invite)).expand());
   },
 
+  auth: {
+    loggedIn: false,
+  },
+
   params: {
     invite: {
       is: "invite",

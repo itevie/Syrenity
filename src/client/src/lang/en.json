@@ -29,16 +29,21 @@
       "openInNewTab": "Open In New Tab"
     }
   },
-  "server": {
-    "action": {
-      "createChannel": "Create Channel"
-    }
-  },
   "channel": {
     "action": {
       "setPosition": "Set Position",
       "delete": "Delete",
+      "settings": "Settings",
       "deleteConfirm": "Are you sure you want to delete {{name}}?"
+    }
+  },
+  "server": {
+    "action": {
+      "edit": "Edit",
+      "createInvite": "Create Invite",
+      "createChannel": "Create Channel",
+      "showDetails": "Show Details",
+      "leave": "Leave"
     }
   },
   "message": {
@@ -51,6 +56,30 @@
       "copyText": "Copy Text"
     }
   },
+  "dms": {
+    "manage": "Manage Friends"
+  },
+  "friends": {
+    "list": {
+      "name": "Friends List",
+      "revoke": "Unfriend",
+      "message": "Message"
+    },
+    "blocked": {
+      "name": "Blocked Users"
+    },
+    "requests": {
+      "name": "Friend Requests",
+      "decline": "Decline",
+      "accept": "Accept"
+    },
+    "add": {
+      "name": "Add Friend"
+    },
+    "historic": {
+      "name": "Old Friends"
+    }
+  },
   "settings": {
     "account": {
       "name": "Account",
@@ -61,6 +90,9 @@
       "name": "App Appearance",
       "theme": "Theme",
       "hue": "Hue"
+    },
+    "developerBots": {
+      "name": "Your Bots"
     }
   }
 }

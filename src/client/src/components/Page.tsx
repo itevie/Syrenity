@@ -11,7 +11,7 @@ export interface PageButtonSection {
   type: "button";
   icon: string;
   label: string;
-  element: JSX.Element;
+  element: JSX.Element | (() => any);
 }
 
 export interface PageBrSection {
@@ -49,7 +49,11 @@ export default function Page({ options }: { options: PageOptions }) {
                     (x as PageButtonSection)?.label === selectedSection.label,
                 )
               }
-              onClick={() => setSelectedSection(section)}
+              onClick={() =>
+                typeof section.element === "function"
+                  ? section.element()
+                  : setSelectedSection(section)
+              }
             />
           ) : section.type === "label" ? (
             <Words type={TextType.Small}>{section.label}</Words>
@@ -63,7 +67,7 @@ export default function Page({ options }: { options: PageOptions }) {
         style={{ overflowY: "auto" }}
       >
         <Words type={TextType.PageTitle}>{selectedSection.label}</Words>
-        {selectedSection.element}
+        {selectedSection.element as JSX.Element}
       </Content>
     </>
   );

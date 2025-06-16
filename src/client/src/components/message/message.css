@@ -22,3 +22,14 @@
   display: flex;
   align-items: center;
 }
+
+.sy-mention {
+  background-color: var(--dawn-container-background-trans);
+  border-radius: var(--dawn-border-radius);
+  padding: 2px;
+}
+
+.sy-mention:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}

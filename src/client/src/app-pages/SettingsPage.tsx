@@ -7,6 +7,8 @@ import AppearanceSettings from "./SettingsSections/AppearanceSettings";
 import DeveloperApps from "./SettingsSections/DeveloperApps";
 import { ServerSettings } from "../syrenity-client/client/Client";
 import { client } from "../App";
+import { todo } from "../dawn-ui/util";
+import { showConfirmModel } from "../dawn-ui/components/AlertManager";
 
 function SettingsPage() {
   const [settings, setSettings] = useState<ServerSettings | null>(null);
@@ -47,6 +49,16 @@ function SettingsPage() {
           },
           {
             type: "br",
+          },
+          {
+            type: "button",
+            label: trans("settings.logout.name"),
+            icon: "logout",
+            element: () =>
+              showConfirmModel(trans("settings.logout.confirm"), () => {
+                localStorage.removeItem("token");
+                window.location.href = "/login";
+              }),
           },
           {
             type: "label",

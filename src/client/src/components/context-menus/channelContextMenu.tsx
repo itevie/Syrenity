@@ -12,6 +12,7 @@ import { ChannelAPIData } from "../../syrenity-client/structures/Channel";
 import { setPage } from "../PageManager";
 import ChannelSettings from "../../app-pages/ChannelSettings";
 import { todo } from "../../dawn-ui/util";
+import showChannelDetails from "../alerts/channelDetails";
 
 export default function showChannelContextMenu(
   e: ContextMenuEvent,
@@ -36,6 +37,16 @@ export default function showChannelContextMenu(
         label: trans("channel.action.settings"),
         onClick() {
           setPage(<ChannelSettings channel={channel} />);
+        },
+      },
+      {
+        type: "seperator",
+      },
+      {
+        type: "button",
+        label: trans("server.action.showDetails"),
+        onClick() {
+          showChannelDetails(channel);
         },
       },
       {

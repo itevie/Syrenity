@@ -25,7 +25,7 @@ export default function showServerContextMenu(
     elements: [
       {
         type: "button",
-        label: trans("server.actions.edit"),
+        label: trans("server.action.edit"),
         async onClick() {
           addAlert({
             title: "Edit server",
@@ -73,7 +73,7 @@ export default function showServerContextMenu(
       },
       {
         type: "button",
-        label: trans("server.actions.createInvite"),
+        label: trans("server.action.createInvite"),
         onClick: async () => {
           const invite = await wrap(server.invites.create());
           if (isErr(invite)) {
@@ -85,7 +85,7 @@ export default function showServerContextMenu(
       },
       {
         type: "button",
-        label: trans("server.actions.createChannel"),
+        label: trans("server.action.createChannel"),
         async onClick() {
           const name = await showInputAlert("Enter channel name");
           if (!name) return;
@@ -105,7 +105,7 @@ export default function showServerContextMenu(
       },
       {
         type: "button",
-        label: trans("server.actions.showDetails"),
+        label: trans("server.action.showDetails"),
         onClick() {
           showServerDetails(server);
         },
@@ -116,7 +116,7 @@ export default function showServerContextMenu(
       {
         type: "button",
         scheme: "danger",
-        label: trans("server.actions.leave"),
+        label: trans("server.action.leave"),
         async onClick() {
           const result = await wrap(server.leave());
           if (isErr(result)) {

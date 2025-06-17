@@ -13,6 +13,7 @@ const handler: RouteDetails = {
       channelId: 203,
       content,
       authorId: -1,
+      withSend: true,
     });
     return res.status(204);
   },

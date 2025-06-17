@@ -1,6 +1,7 @@
 import { createSystemMessage } from "../broadcasting/systemMessageManager";
 import { SystemMessageTypes } from "../broadcasting/SystemMessageTypes";
 import { query, queryOne } from "../database/database";
+import { send } from "../ws/websocketUtil";
 import SyChannel from "./Channel";
 import SyReaction, { DatabaseReaction, UsefulReaction } from "./Reaction";
 
@@ -26,6 +27,7 @@ export interface CreateMessageOptions {
   channelId: number;
   isSystem?: boolean;
   systemType?: keyof SystemMessageTypes;
+  withSend?: boolean;
 }
 
 export interface EditMessageOptions {
@@ -85,7 +87,7 @@ export default class SyMessage {
   public static async create(
     options: CreateMessageOptions,
   ): Promise<SyMessage> {
-    return new SyMessage(
+    let message = new SyMessage(
       (
         await query<DatabaseMessage>({
           text: `
@@ -101,6 +103,20 @@ export default class SyMessage {
         })
       ).rows[0],
     );
+
+    if (options.withSend) {
+      let channel = await message.fetchChannel();
+      send({
+        guild: channel.data.guild_id,
+        channel: channel.data.id,
+        type: "MessageCreate",
+        payload: {
+          message: await message.expand(),
+        },
+      });
+    }
+
+    return message;
   }
 
   public static async fetch(id: number): Promise<SyMessage> {

@@ -103,7 +103,7 @@ export default function MessageC({
             </Column>
           ) : (
             <Row util={["small-gap", "align-center"]}>
-              {parsedMessage.element}
+              <label>{parsedMessage.element}</label>
               {message.isEdited && (
                 <small style={{ marginLeft: "3px" }}>(edited)</small>
               )}

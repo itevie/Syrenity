@@ -3,6 +3,10 @@
   background-color: var(--sy-chat-color);
 }
 
+.sy-page-container-transparent {
+  background-color: transparent !important;
+}
+
 .sy-page-close {
   margin: 15px;
   font-size: 2em;

@@ -12,6 +12,8 @@ function getElementFor(token: Token | undefined, data?: any): JSX.Element {
     {
       [TokenType.Bold]: <b>{data ?? token?.data}</b>,
       [TokenType.Italic]: <i>{data ?? token?.data}</i>,
+      [TokenType.Underscore]: <u>{data ?? token?.data}</u>,
+      [TokenType.Strikethrough]: <del>{data ?? token?.data}</del>,
     }[token?.type.toString() ?? "none"] ?? <label>{data ?? token!.data}</label>
   );
 }
@@ -86,7 +88,14 @@ export default function parse(tokens: Token[]): JSX.Element {
    * Base things like bold, italic
    */
   function base(): JSX.Element {
-    if ([TokenType.Bold, TokenType.Italic].includes(at().type)) {
+    if (
+      [
+        TokenType.Bold,
+        TokenType.Italic,
+        TokenType.Underscore,
+        TokenType.Strikethrough,
+      ].includes(at().type)
+    ) {
       let t = eat();
       let inner: JSX.Element[] = [];
 

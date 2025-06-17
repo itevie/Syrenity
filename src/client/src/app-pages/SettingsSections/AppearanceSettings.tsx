@@ -1,3 +1,4 @@
+import { setTransparency } from "../../components/PageManager";
 import Column from "../../dawn-ui/components/Column";
 import Range from "../../dawn-ui/components/Range";
 import Words, { TextType } from "../../dawn-ui/components/Words";
@@ -13,6 +14,7 @@ export default function AppearanceSettings() {
         name={trans("settings.appAppearance.hue")}
         defaultValue={localStorage.getItem("sy-app-hue") ?? "300"}
         onChange={(e) => {
+          setTransparency();
           document.body.style.setProperty(
             "--sy-base-color",
             e.currentTarget.value,

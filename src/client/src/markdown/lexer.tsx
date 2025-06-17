@@ -6,6 +6,9 @@ export enum TokenType {
   OpenAngle,
   CloseAngle,
   At,
+  Hashtag,
+  File,
+  Server,
   Strikethrough,
 }
 
@@ -94,6 +97,43 @@ export default function lex(contents: string): Token[] {
           data: "@",
         });
         index++;
+        break;
+      case "#":
+        tokens.push({
+          type: TokenType.Hashtag,
+          data: "#",
+        });
+        index++;
+        break;
+      case "f":
+        if (contents[index + 1] === ":") {
+          tokens.push({
+            type: TokenType.File,
+            data: "f:",
+          });
+          index += 2;
+        } else {
+          tokens.push({
+            type: TokenType.Text,
+            data: "f",
+          });
+          index++;
+        }
+        break;
+      case "s":
+        if (contents[index + 1] === ":") {
+          tokens.push({
+            type: TokenType.Server,
+            data: "s:",
+          });
+          index += 2;
+        } else {
+          tokens.push({
+            type: TokenType.Text,
+            data: "s",
+          });
+          index++;
+        }
         break;
       default:
         if (tokens[tokens.length - 1]?.type === TokenType.Text) {

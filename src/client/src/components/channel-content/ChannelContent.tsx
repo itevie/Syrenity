@@ -269,7 +269,7 @@ export default function ChannelContent({
   return (
     <Column
       util={["flex-grow", "no-gap"]}
-      style={{ overflowX: "hidden" }}
+      style={{ overflow: "hidden", maxHeight: "100vh" }}
       className="sy-chat-content"
     >
       <Column util={["no-shrink", "justify-center"]} className="sy-topbar">

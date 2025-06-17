@@ -7,5 +7,5 @@ export default function Markdown({
   ...rest
 }: { children: string } & HTMLAttributes<HTMLLabelElement>) {
   // TODO: Make it also return a list of embeds that the parser found.
-  return <label {...rest}>{parse(lex(children))}</label>;
+  return <label {...rest}>{parse(lex(children)).element}</label>;
 }

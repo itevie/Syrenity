@@ -1,5 +1,11 @@
 import Mention from "../components/message/Mention";
 import { TokenType, Token } from "./lexer";
+import MessageObject from "./objects";
+
+export interface MarkdownParseResult {
+  element: JSX.Element;
+  objects: MessageObject[];
+}
 
 /**
  * Returns a JSX element based off a token
@@ -23,7 +29,9 @@ function getElementFor(token: Token | undefined, data?: any): JSX.Element {
  * @param tokens The tokens to create the tree off of
  * @returns The resulting JSX element
  */
-export default function parse(tokens: Token[]): JSX.Element {
+export default function parse(tokens: Token[]): MarkdownParseResult {
+  let objects: MessageObject[] = [];
+
   /**
    * @returns The current token
    */
@@ -117,7 +125,7 @@ export default function parse(tokens: Token[]): JSX.Element {
     if (at()?.type === TokenType.OpenAngle) {
       // Get mention type [@]
       let _1 = eat()!;
-      let mentionType = expect([TokenType.At], [_1]);
+      let mentionType = expect([TokenType.At, TokenType.Hashtag], [_1]);
       if (!mentionType[0]) return mentionType[1];
 
       // Get ID
@@ -134,6 +142,13 @@ export default function parse(tokens: Token[]): JSX.Element {
       );
       if (!closing[0]) return closing[1];
 
+      if (mentionType[1].type === TokenType.At)
+        objects.push({
+          type: "mention",
+          userId: id,
+          isEveryone: false,
+        });
+
       return <Mention data={`${mentionType[1].data}${id}`} />;
     } else {
       return last();
@@ -147,5 +162,8 @@ export default function parse(tokens: Token[]): JSX.Element {
     return <label>{eat()?.data}</label>;
   }
 
-  return pre();
+  return {
+    element: pre(),
+    objects,
+  };
 }

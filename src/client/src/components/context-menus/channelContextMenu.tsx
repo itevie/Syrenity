@@ -44,9 +44,16 @@ export default function showChannelContextMenu(
       },
       {
         type: "button",
-        label: trans("server.action.showDetails"),
+        label: trans("channel.action.showDetails"),
         onClick() {
           showChannelDetails(channel);
+        },
+      },
+      {
+        type: "button",
+        label: trans("channel.action.copyId"),
+        onClick() {
+          window.navigator.clipboard.writeText(channel.id.toString());
         },
       },
       {

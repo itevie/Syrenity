@@ -15,7 +15,7 @@ export interface MessageContextMenuOptions {
 export function showMessageContextMenu(options: MessageContextMenuOptions) {
   showContextMenu({
     event: options.event,
-    ignoreClasses: [".dawn-icon", ".sy-attachment-image"],
+    ignoreClasses: [".dawn-icon", ".sy-attachment-image", ".sy-mention"],
     elements: [
       {
         type: "button",

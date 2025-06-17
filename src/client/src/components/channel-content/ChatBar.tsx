@@ -21,7 +21,12 @@ export default function ChatBar({
   return (
     <div className="sy-messageinput-container">
       <Row
-        util={["no-shrink", "small-gap", "align-center"]}
+        util={[
+          "no-shrink",
+          "small-gap",
+          "align-center",
+          "ignore-responsive-mobile",
+        ]}
         className="sy-messageinput"
       >
         <GoogleMatieralIcon

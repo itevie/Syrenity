@@ -1,3 +1,4 @@
+import { DatabaseMessage } from "../../models/Message";
 import { actions, query } from "../database";
 
 export interface FetchMessageOptions {
@@ -42,7 +43,7 @@ export default {
 
   fetchRoleOverride: async (
     channelId: number,
-    roleId: number
+    roleId: number,
   ): Promise<ChannelRoleOverride | null> => {
     return (
       ((
@@ -56,8 +57,8 @@ export default {
 
   fetchMessages: async (
     channelId: number,
-    options: FetchMessageOptions
-  ): Promise<Message[]> => {
+    options: FetchMessageOptions,
+  ): Promise<DatabaseMessage[]> => {
     const q = `
             SELECT * FROM messages
                 WHERE channel_id = ${channelId}
@@ -73,7 +74,7 @@ export default {
         text: q,
         values: [],
       })
-    ).rows as Message[];
+    ).rows as DatabaseMessage[];
   },
 
   setName: async (channelId: number, newName: string): Promise<Channel> => {

@@ -14,6 +14,7 @@ const handler: RouteDetails = {
       content,
       authorId: -1,
       withSend: true,
+      webhookId: "d5be3501-e6a4-4e0a-89e2-0beab80e7ae0",
     });
     return res.status(204);
   },

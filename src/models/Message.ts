@@ -3,7 +3,8 @@ import { SystemMessageTypes } from "../broadcasting/SystemMessageTypes";
 import { query, queryOne } from "../database/database";
 import { send } from "../ws/websocketUtil";
 import SyChannel from "./Channel";
-import SyReaction, { DatabaseReaction, UsefulReaction } from "./Reaction";
+import SyReaction, { UsefulReaction } from "./Reaction";
+import SyWebhook from "./Webhook";
 
 export interface DatabaseMessage {
   id: number;
@@ -15,10 +16,13 @@ export interface DatabaseMessage {
   is_edited: number;
   is_system: boolean;
   sys_type: string | null;
+  webhook_id: string | null;
+  proxy_id: string | null;
 }
 
 export type ExpandedMessage = DatabaseMessage & {
   reactions: UsefulReaction[];
+  webhook: SyWebhook | null;
 };
 
 export interface CreateMessageOptions {
@@ -28,6 +32,7 @@ export interface CreateMessageOptions {
   isSystem?: boolean;
   systemType?: keyof SystemMessageTypes;
   withSend?: boolean;
+  webhookId?: string;
 }
 
 export interface EditMessageOptions {
@@ -43,6 +48,9 @@ export default class SyMessage {
       reactions: SyReaction.makeUseful(
         (await SyReaction.getFor(this.data.id)).map((x) => x.data),
       ),
+      webhook: !this.data.webhook_id
+        ? null
+        : await SyWebhook.fetch(this.data.webhook_id),
     };
   }
 
@@ -91,14 +99,15 @@ export default class SyMessage {
       (
         await query<DatabaseMessage>({
           text: `
-                INSERT INTO messages(channel_id, content, author_id, created_at, is_system, sys_type)
-                    VALUES(${options.channelId}, $1, ${options.authorId}, CURRENT_TIMESTAMP, $2, $3)
+                INSERT INTO messages(channel_id, content, author_id, created_at, is_system, sys_type, webhook_id)
+                    VALUES(${options.channelId}, $1, ${options.authorId}, CURRENT_TIMESTAMP, $2, $3, $4)
                     RETURNING *
             `,
           values: [
             options.content,
             options.isSystem || false,
             options.systemType || null,
+            options.webhookId || null,
           ],
         })
       ).rows[0],

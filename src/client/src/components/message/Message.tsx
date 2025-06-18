@@ -112,14 +112,19 @@ export default function MessageC({
             </Column>
           ) : (
             <Row util={["small-gap", "align-center"]}>
-              <label>{parsedMessage.element}</label>
+              <label style={{ wordWrap: "break-word", maxWidth: "100%" }}>
+                {parsedMessage.element}
+              </label>
               {message.isEdited && (
                 <small style={{ marginLeft: "3px" }}>(edited)</small>
               )}
             </Row>
           )}
 
-          <MessageAttachments message={message} />
+          <MessageAttachments
+            message={message}
+            objects={parsedMessage.objects}
+          />
           <MessageReactions message={message} />
         </Column>
       </Row>

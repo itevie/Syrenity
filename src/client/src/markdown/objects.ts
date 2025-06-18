@@ -1,4 +1,4 @@
-export type ObjectType = "mention";
+export type ObjectType = "mention" | "file";
 
 export interface MessageObjectBase {
   type: ObjectType;
@@ -10,5 +10,10 @@ export interface MessageMentionObject extends MessageObjectBase {
   isEveryone: boolean;
 }
 
-type MessageObject = MessageMentionObject;
+export interface MessageFileObject extends MessageObjectBase {
+  type: "file";
+  fileId: string;
+}
+
+type MessageObject = MessageMentionObject | MessageFileObject;
 export default MessageObject;

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { client } from "../../App";
 import { showLoadingAlert } from "../../dawn-ui/components/AlertManager";
 import GoogleMatieralIcon from "../../dawn-ui/components/GoogleMaterialIcon";
@@ -9,6 +10,15 @@ import { uploadImageAlert } from "../alerts/uploadImage";
 import "./chat-bar.css";
 import { useTranslation } from "react-i18next";
 
+function readFileAsDataURL(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = () => resolve(reader.result as string);
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function ChatBar({
   inputRef,
   onKey,
@@ -17,6 +27,27 @@ export default function ChatBar({
   onKey: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }) {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (!inputRef) return;
+
+    inputRef.current?.addEventListener("paste", async (event) => {
+      const items = event.clipboardData?.items;
+      if (!items) return;
+
+      for await (const item of items) {
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+
+          if (file) {
+            const dataUrl = await readFileAsDataURL(file);
+            const syFile = await client.files.upload(file.name, dataUrl);
+            inputRef.current!.value += `<f:${syFile.id}>`;
+          }
+        }
+      }
+    });
+  }, [inputRef]);
 
   return (
     <div className="sy-messageinput-container">

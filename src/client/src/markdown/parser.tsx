@@ -150,6 +150,11 @@ export default function parse(tokens: Token[]): MarkdownParseResult {
           userId: parseInt(idTok[1].data),
           isEveryone: false,
         });
+      else if (mentionType[1].type === TokenType.File)
+        objects.push({
+          type: "file",
+          fileId: idTok[1].data,
+        });
 
       return (
         <Mention
@@ -166,6 +171,10 @@ export default function parse(tokens: Token[]): MarkdownParseResult {
    * The very last part, it just auto returns the data.
    */
   function last(): JSX.Element {
+    if (at().type === TokenType.Newline) {
+      eat();
+      return <br />;
+    }
     return <label>{eat()?.data}</label>;
   }
 

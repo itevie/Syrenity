@@ -83,7 +83,7 @@ body {
 
 .sy-attachment-image {
   max-width: 600px;
-  height: 400px;
+  max-height: 400px;
   transition: 0.3s;
   object-fit: contain;
 }

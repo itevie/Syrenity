@@ -11,6 +11,7 @@ export enum TokenType {
   File,
   Server,
   Strikethrough,
+  Newline,
 }
 
 export interface Token {
@@ -31,6 +32,7 @@ const staticRules: TokenRule[] = [
   { match: "__", type: TokenType.Underscore, length: 2 },
   { match: "~~", type: TokenType.Strikethrough, length: 2 },
   { match: "`", type: TokenType.Code, length: 1 },
+  { match: "\n", type: TokenType.Newline, length: 1 },
   // Mentions
   { match: "<", type: TokenType.OpenAngle, length: 1 },
   { match: ">", type: TokenType.CloseAngle, length: 1 },
@@ -49,6 +51,13 @@ export default function lex(contents: string): Token[] {
 
     if (ch === "\\") {
       index++;
+
+      // if (contents[index] === "n") {
+      //   tokens.push({ type: TokenType.Newline, data: "\n" });
+      //   index++;
+      //   continue;
+      // }
+
       const escaped = contents[index++] ?? "";
       tokens.push({ type: TokenType.Text, data: escaped });
       continue;

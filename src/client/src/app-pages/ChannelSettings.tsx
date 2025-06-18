@@ -30,6 +30,12 @@ export default function ChannelSettings({
             element: <></>,
             icon: "key",
           },
+          {
+            type: "button",
+            label: i18n.t("channel.settings.webhooks.name"),
+            element: <></>,
+            icon: "webhook",
+          },
         ],
       }}
     ></Page>

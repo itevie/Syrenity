@@ -137,20 +137,21 @@ export default function ChannelContent({
     if (!channel) return;
     logger.log(`Loading channel ${channel.id}`);
 
-    let cache: ChannelCache = channelCache.get(channel.id) as ChannelCache;
-    if (cache === undefined) {
-      cache = {
+    let getCache = (channelId?: number) =>
+      channelCache.get(channelId ?? channel.id);
+
+    if (getCache() === undefined) {
+      channelCache.set(channel.id, {
         done: false,
         messages: [],
         timestamp: null,
         last: null,
-      };
-      channelCache.set(channel.id, cache as ChannelCache);
+      } as ChannelCache);
       _loadMoreMessages(channel).then(() => {
         scrollToBottom(100, true);
       });
     } else {
-      setData(cache);
+      setData(getCache()!);
     }
     scrollToBottom(100, true);
 
@@ -158,6 +159,8 @@ export default function ChannelContent({
       client,
       "messageCreate",
       (m: Message) => {
+        let cache = getCache(m.channelID);
+        if (!cache) return;
         cache.messages.push(m);
         setMessages([...cache.messages]);
         scrollToBottom();
@@ -165,6 +168,8 @@ export default function ChannelContent({
     );
 
     function makeUpdate(m: Message) {
+      let cache = getCache(m.channelID);
+      if (!cache) return;
       const index = cache.messages.findIndex((x) => x.id === m.id);
       if (index) {
         cache.messages[index] = m as ExtraMessage;
@@ -181,6 +186,8 @@ export default function ChannelContent({
       client,
       "messageDelete",
       (messageId: number, channelId: number) => {
+        let cache = getCache(channelId);
+        if (!cache) return;
         const index = cache.messages.findIndex((x) => x.id === messageId);
         if (index) {
           cache.messages.splice(index, 1);
@@ -256,8 +263,8 @@ export default function ChannelContent({
       if (!value.length) return;
       e.preventDefault();
 
-      await channel?.messages.send(value);
       (e.target as HTMLTextAreaElement).value = "";
+      await channel?.messages.send(value);
     } else if (e.key === "ArrowUp" && value.length === 0) {
       const past = messages
         .filter((x) => x.authorId === client.user?.id)

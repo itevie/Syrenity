@@ -33,17 +33,17 @@ export default function MessageAttachments({ message }: { message: Message }) {
     ];
 
     // Get <f:file-id> type attachments
-    while (
-      message.content.match(
-        /<f:[\da-f]{8}-[\da-f]{4}-4[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}>/,
-      )
-    ) {
-      const result = message.content.match(
-        /<f:([\da-f]{8}-[\da-f]{4}-4[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12})>/i,
-      ) as RegExpMatchArray;
-      message.content = message.content.replace(result[0], "");
-      extractedUrls.push(baseUrl + File.check(result[1]));
-    }
+    // while (
+    //   message.content.match(
+    //     /<f:[\da-f]{8}-[\da-f]{4}-4[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}>/,
+    //   )
+    // ) {
+    //   const result = message.content.match(
+    //     /<f:([\da-f]{8}-[\da-f]{4}-4[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12})>/i,
+    //   ) as RegExpMatchArray;
+    //   // message.content = message.content.replace(result[0], "");
+    //   extractedUrls.push(baseUrl + File.check(result[1]));
+    // }
 
     // Create promise array
     const fetchImagePromises = extractedUrls.slice(0, 10).map(async (url) => {
@@ -81,7 +81,6 @@ export default function MessageAttachments({ message }: { message: Message }) {
         try {
           let url = new URL(inviteURL);
           if (url.origin !== client.options.baseUrl) continue;
-          console.log(inviteURL.match(/\w+$/));
           let invite = await wrap(
             client.invites.fetch(inviteURL.match(/\w+$/)![0]),
           );

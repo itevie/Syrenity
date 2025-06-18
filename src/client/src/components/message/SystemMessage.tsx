@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import Message from "../../syrenity-client/structures/Message";
 import Row from "../../dawn-ui/components/Row";
 import { useAppSelector } from "../../stores/store";
-import Mention from "./Mention";
+import Mention, { MentionType } from "./Mention";
 
 export default function SystemMessage({ message }: { message: Message }) {
   const users = useAppSelector((d) => d.users);
@@ -14,7 +14,7 @@ export default function SystemMessage({ message }: { message: Message }) {
       node = (
         <label>
           Message ({data.message_id}) was pinned by{" "}
-          <Mention data={`@${data.pinned_by}`} />
+          <Mention type={MentionType.User} id={data.pinned_by} />
         </label>
       );
       break;

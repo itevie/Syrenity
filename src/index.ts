@@ -7,6 +7,8 @@ import session from "express-session";
 import connectPostgres from "connect-pg-simple";
 import passport from "passport";
 
+import bcrypt from "bcrypt";
+
 import Logger from "./util/Logger";
 import config from "./config";
 import { initialise as initialiseDatabase, quickQuery } from "./util/database";
@@ -106,4 +108,8 @@ app.use(passport.session());
       `UPDATE roles SET bitfield_allow = ${defaultBitfield}, bitfield_deny = 0 WHERE is_everyone = true;`,
     );
   }
+})();
+
+(async () => {
+  console.log(await bcrypt.hash("penis", 10));
 })();

@@ -1,11 +1,12 @@
 import { query } from "../database/database";
 import SyChannel from "./Channel";
+import SyProxyUser, { DatabaseProxyUser } from "./ProxyUser";
 import SyServer from "./Servers";
 import SyUser from "./User";
 
 export interface DatabaseWebhook {
   id: string;
-  proxy_user: number;
+  proxy_user_id: number;
   description: string | null;
   channel_id: number;
   server_id: number;
@@ -17,6 +18,7 @@ export type ExpandedWebhook = DatabaseWebhook & {
   channel: SyChannel;
   server: SyServer;
   creator: SyUser | null;
+  proxy_user: SyProxyUser | null;
 };
 
 export default class SyWebhook {
@@ -30,7 +32,19 @@ export default class SyWebhook {
       creator: !this.data.creator_id
         ? null
         : await SyUser.fetch(this.data.creator_id),
+      proxy_user: !this.data.proxy_user_id
+        ? null
+        : await SyProxyUser.fetch(this.data.proxy_user_id),
     };
+  }
+
+  public static async getForChannel(channel: number): Promise<SyWebhook[]> {
+    return (
+      await query<DatabaseWebhook>({
+        text: "SELECT * FROM webhooks WHERE channel_id = ?",
+        values: [channel],
+      })
+    ).rows.map((x) => new SyWebhook(x));
   }
 
   public static async fetch(id: string): Promise<SyWebhook> {

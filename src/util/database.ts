@@ -34,6 +34,16 @@ export async function close(): Promise<void> {
   logger.log("Database client disconnected");
 }
 
+export async function expandMany<B extends { expand: () => Promise<any> }>(
+  data: B[],
+): Promise<Awaited<ReturnType<B["expand"]>>[]> {
+  const expandedData: Awaited<ReturnType<B["expand"]>>[] = [];
+  for await (const element of data) {
+    expandedData.push(await element.expand());
+  }
+  return expandedData;
+}
+
 const cache = new CacheManager();
 
 /**

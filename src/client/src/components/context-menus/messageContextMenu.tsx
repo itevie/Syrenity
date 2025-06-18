@@ -1,5 +1,9 @@
 import EmojiPicker, { Theme } from "emoji-picker-react";
-import { addAlert, closeAlert } from "../../dawn-ui/components/AlertManager";
+import {
+  addAlert,
+  closeAlert,
+  showInfoAlert,
+} from "../../dawn-ui/components/AlertManager";
 import { showContextMenu } from "../../dawn-ui/components/ContextMenuManager";
 import Row from "../../dawn-ui/components/Row";
 import { isErr, handleClientError, wrap } from "../../util";
@@ -102,6 +106,13 @@ export function showMessageContextMenu(options: MessageContextMenuOptions) {
         label: trans("message.action.copyText"),
         onClick: () => {
           window.navigator.clipboard.writeText(options.message.content);
+        },
+      },
+      {
+        type: "button",
+        label: trans("message.action.copyJson"),
+        onClick: () => {
+          showInfoAlert(JSON.stringify(options.message._data));
         },
       },
     ],

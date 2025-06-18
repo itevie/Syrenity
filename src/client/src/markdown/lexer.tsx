@@ -2,6 +2,7 @@ export enum TokenType {
   Bold,
   Italic,
   Underscore,
+  Code,
   Text,
   OpenAngle,
   CloseAngle,
@@ -17,134 +18,57 @@ export interface Token {
   data: string;
 }
 
-export default function lex(contents: string): Token[] {
-  let tokens: Token[] = [];
+type TokenRule = {
+  match: string;
+  type: TokenType;
+  length: number;
+};
 
+const staticRules: TokenRule[] = [
+  // Basic Markdown
+  { match: "**", type: TokenType.Bold, length: 2 },
+  { match: "*", type: TokenType.Italic, length: 1 },
+  { match: "__", type: TokenType.Underscore, length: 2 },
+  { match: "~~", type: TokenType.Strikethrough, length: 2 },
+  { match: "`", type: TokenType.Code, length: 1 },
+  // Mentions
+  { match: "<", type: TokenType.OpenAngle, length: 1 },
+  { match: ">", type: TokenType.CloseAngle, length: 1 },
+  { match: "@", type: TokenType.At, length: 1 },
+  { match: "#", type: TokenType.Hashtag, length: 1 },
+  { match: "f:", type: TokenType.File, length: 2 },
+  { match: "s:", type: TokenType.Server, length: 2 },
+];
+
+export default function lex(contents: string): Token[] {
+  const tokens: Token[] = [];
   let index = 0;
 
-  while (index != contents.length) {
-    switch (contents[index]) {
-      case "\\":
-        index++;
-        let bit = contents[index++] ?? "";
-        tokens.push({
-          data: bit,
-          type: TokenType.Text,
-        });
-        break;
-      case "*":
-        if (contents[index + 1] === "*") {
-          tokens.push({
-            type: TokenType.Bold,
-            data: "**",
-          });
-          index += 2;
-        } else {
-          tokens.push({
-            type: TokenType.Italic,
-            data: "*",
-          });
-          index++;
-        }
-        break;
-      case "_":
-        if (contents[index + 1] === "_") {
-          tokens.push({
-            type: TokenType.Underscore,
-            data: "__",
-          });
-          index += 2;
-        } else {
-          tokens.push({
-            type: TokenType.Text,
-            data: "_",
-          });
-          index++;
-        }
-        break;
-      case "~":
-        if (contents[index + 1] === "~") {
-          tokens.push({
-            type: TokenType.Strikethrough,
-            data: "~~",
-          });
-          index += 2;
-        } else {
-          tokens.push({
-            type: TokenType.Text,
-            data: "~",
-          });
-          index++;
-        }
-        break;
-      case "<":
-        tokens.push({
-          type: TokenType.OpenAngle,
-          data: "<",
-        });
-        index++;
-        break;
-      case ">":
-        tokens.push({
-          type: TokenType.CloseAngle,
-          data: ">",
-        });
-        index++;
-        break;
-      case "@":
-        tokens.push({
-          type: TokenType.At,
-          data: "@",
-        });
-        index++;
-        break;
-      case "#":
-        tokens.push({
-          type: TokenType.Hashtag,
-          data: "#",
-        });
-        index++;
-        break;
-      case "f":
-        if (contents[index + 1] === ":") {
-          tokens.push({
-            type: TokenType.File,
-            data: "f:",
-          });
-          index += 2;
-        } else {
-          tokens.push({
-            type: TokenType.Text,
-            data: "f",
-          });
-          index++;
-        }
-        break;
-      case "s":
-        if (contents[index + 1] === ":") {
-          tokens.push({
-            type: TokenType.Server,
-            data: "s:",
-          });
-          index += 2;
-        } else {
-          tokens.push({
-            type: TokenType.Text,
-            data: "s",
-          });
-          index++;
-        }
-        break;
-      default:
-        if (tokens[tokens.length - 1]?.type === TokenType.Text) {
-          tokens[tokens.length - 1].data += contents[index++];
-        } else {
-          tokens.push({
-            type: TokenType.Text,
-            data: contents[index++],
-          });
-        }
-        break;
+  while (index < contents.length) {
+    const ch = contents[index];
+
+    if (ch === "\\") {
+      index++;
+      const escaped = contents[index++] ?? "";
+      tokens.push({ type: TokenType.Text, data: escaped });
+      continue;
+    }
+
+    const rule = staticRules.find((rule) =>
+      contents.startsWith(rule.match, index),
+    );
+
+    if (rule) {
+      tokens.push({ type: rule.type, data: rule.match });
+      index += rule.length;
+      continue;
+    }
+
+    const last = tokens[tokens.length - 1];
+    if (last?.type === TokenType.Text) {
+      last.data += contents[index++];
+    } else {
+      tokens.push({ type: TokenType.Text, data: contents[index++] });
     }
   }
 

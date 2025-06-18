@@ -1,4 +1,4 @@
-import Mention from "../components/message/Mention";
+import Mention, { textToMentionType } from "../components/message/Mention";
 import { TokenType, Token } from "./lexer";
 import MessageObject from "./objects";
 
@@ -20,6 +20,7 @@ function getElementFor(token: Token | undefined, data?: any): JSX.Element {
       [TokenType.Italic]: <i>{data ?? token?.data}</i>,
       [TokenType.Underscore]: <u>{data ?? token?.data}</u>,
       [TokenType.Strikethrough]: <del>{data ?? token?.data}</del>,
+      [TokenType.Code]: <code>{data ?? token?.data}</code>,
     }[token?.type.toString() ?? "none"] ?? <label>{data ?? token!.data}</label>
   );
 }
@@ -102,6 +103,7 @@ export default function parse(tokens: Token[]): MarkdownParseResult {
         TokenType.Italic,
         TokenType.Underscore,
         TokenType.Strikethrough,
+        TokenType.Code,
       ].includes(at().type)
     ) {
       let t = eat();
@@ -125,15 +127,15 @@ export default function parse(tokens: Token[]): MarkdownParseResult {
     if (at()?.type === TokenType.OpenAngle) {
       // Get mention type [@]
       let _1 = eat()!;
-      let mentionType = expect([TokenType.At, TokenType.Hashtag], [_1]);
+      let mentionType = expect(
+        [TokenType.At, TokenType.Hashtag, TokenType.File],
+        [_1],
+      );
       if (!mentionType[0]) return mentionType[1];
 
       // Get ID
       let idTok = expect([TokenType.Text], [_1, mentionType[1]]);
       if (!idTok[0]) return idTok[1];
-      if (Number.isNaN(parseInt(idTok[1].data)))
-        return combine([_1, mentionType[1], idTok[1]]);
-      let id = parseInt(idTok[1].data);
 
       // Get closing
       let closing = expect(
@@ -145,11 +147,16 @@ export default function parse(tokens: Token[]): MarkdownParseResult {
       if (mentionType[1].type === TokenType.At)
         objects.push({
           type: "mention",
-          userId: id,
+          userId: parseInt(idTok[1].data),
           isEveryone: false,
         });
 
-      return <Mention data={`${mentionType[1].data}${id}`} />;
+      return (
+        <Mention
+          type={textToMentionType(mentionType[1].data)}
+          id={idTok[1].data.trim()}
+        />
+      );
     } else {
       return last();
     }

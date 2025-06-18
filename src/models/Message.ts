@@ -4,6 +4,8 @@ import { query, queryOne } from "../database/database";
 import { send } from "../ws/websocketUtil";
 import SyChannel from "./Channel";
 import SyReaction, { UsefulReaction } from "./Reaction";
+import SyUser from "./User";
+import SyWebhook, { ExpandedWebhook } from "./Webhook";
 
 export interface DatabaseMessage {
   id: number;
@@ -21,6 +23,8 @@ export interface DatabaseMessage {
 
 export type ExpandedMessage = DatabaseMessage & {
   reactions: UsefulReaction[];
+  author: SyUser;
+  webhook: ExpandedWebhook | null;
 };
 
 export interface CreateMessageOptions {
@@ -46,6 +50,10 @@ export default class SyMessage {
       reactions: SyReaction.makeUseful(
         (await SyReaction.getFor(this.data.id)).map((x) => x.data),
       ),
+      webhook: !this.data.webhook_id
+        ? null
+        : await (await SyWebhook.fetch(this.data.webhook_id)).expand(),
+      author: await SyUser.fetch(this.data.author_id),
     };
   }
 

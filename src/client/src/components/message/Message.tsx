@@ -16,6 +16,9 @@ import Words, { TextType } from "../../dawn-ui/components/Words";
 import lex from "../../markdown/lexer";
 import parse from "../../markdown/parser";
 import { client } from "../../App";
+import Button from "../../dawn-ui/components/Button";
+import { showInfoAlert } from "../../dawn-ui/components/AlertManager";
+import Icon from "../../dawn-ui/components/Icon";
 
 interface MessageProps {
   message: ExtraMessage;
@@ -41,6 +44,7 @@ export default function MessageC({
     let hasMentionedMe = parsedMessage.objects.some(
       (x) => x.type === "mention" && x.userId === client.user?.id,
     );
+    let displayAvatar = message.getDisplay();
 
     return (
       <Row
@@ -50,7 +54,12 @@ export default function MessageC({
           gap: "10px",
         }}
       >
-        {!message.shouldInline && <UserIcon id={message.authorId} />}
+        {!message.shouldInline &&
+          (displayAvatar.type === "normal" ? (
+            <UserIcon id={message.authorId} />
+          ) : (
+            <Icon size="48px" src={displayAvatar.avatar.url}></Icon>
+          ))}
         <Column
           style={{ gap: "4px", overflowX: "auto", width: "100%" }}
           onContextMenu={(e) =>
@@ -66,9 +75,9 @@ export default function MessageC({
           {!message.shouldInline && (
             <Row util={["align-center"]} style={{ gap: "10px" }}>
               <b>
-                {users[message.authorId]?.username ??
-                  `Loading... (ID ${message.authorId})`}
-                ({message.id})
+                {displayAvatar.type === "normal"
+                  ? (users[message.authorId]?.username ?? `Loading...`)
+                  : displayAvatar.username}
               </b>
               <Timestamp date={message.createdAt} />
             </Row>

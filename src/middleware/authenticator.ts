@@ -36,6 +36,7 @@ export default async (
     }
 
     // Only attempt to authenticate if that route was found
+    //
     if (!route) return next();
 
     // Check for token authentication

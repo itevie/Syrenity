@@ -19,7 +19,7 @@ export async function initialise(): Promise<void> {
     logger.log("Database connected successfully");
   } catch (err) {
     logger.log(
-      "Encountered an error whilst trying to connect to the database, error is as follows"
+      "Encountered an error whilst trying to connect to the database, error is as follows",
     );
     console.error(err);
     process.exit(1);
@@ -42,6 +42,7 @@ const cache = new CacheManager();
  * @returns The query result
  */
 export async function query(data: DatabaseQuery): Promise<pg.QueryResult> {
+  console.log(1);
   const cacheResult = cache.check(data);
 
   if (cacheResult !== null) return cacheResult;

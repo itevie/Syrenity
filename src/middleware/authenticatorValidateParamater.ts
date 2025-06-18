@@ -10,7 +10,7 @@ import SyUser from "../models/User";
 export default async function validateURLParameters(
   req: express.Request,
   res: express.Response,
-  params: { [key: string]: ParameterDetails }
+  params: { [key: string]: ParameterDetails },
 ): Promise<void | AuthenticationError> {
   // Loop through the params to test
   for (const i in params) {
@@ -114,7 +114,7 @@ export default async function validateURLParameters(
       let ableToView = await canView(
         req.user as User,
         paramTest.is as Resource,
-        parseInt(req.params[i])
+        parseInt(req.params[i]),
       );
 
       if (!ableToView) {
@@ -154,7 +154,7 @@ export default async function validateURLParameters(
         }
       } else {
         console.error(
-          `Cannot compare ${paramTest.is} and ${otherThing.is} for mustBeFrom`
+          `Cannot compare ${paramTest.is} and ${otherThing.is} for mustBeFrom`,
         );
         process.exit(0);
       }

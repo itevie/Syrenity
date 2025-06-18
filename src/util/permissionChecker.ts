@@ -10,12 +10,13 @@ import permissionsBitfield from "./PermissionBitfield";
 export async function canView(
   user: User,
   what: Resource,
-  id: number
+  id: number,
 ): Promise<boolean> {
   switch (what) {
     case "guild":
       // Simple has member check will suit it
-      return await actions.guilds.hasMember(id, user.id);
+      let r = await actions.guilds.hasMember(id, user.id);
+      return r;
     case "message":
       const message = await actions.messages.fetch(id);
       const channel = await actions.channels.fetch(message.channel_id);
@@ -23,7 +24,7 @@ export async function canView(
       // Check if relationship
       if (channel.type === "dm") {
         const relationship = await actions.relationships.fetchForChannel(
-          channel.id
+          channel.id,
         );
 
         // Check if user is one of them
@@ -57,18 +58,18 @@ export async function canView(
                             -- Check if the channel is from a server which the user is from
                             OR EXISTS (
                                 SELECT 1 FROM (
-                                    SELECT 
-                                        CASE 
+                                    SELECT
+                                        CASE
                                             WHEN m.user_id IS NOT NULL THEN TRUE
                                             ELSE FALSE
                                         END AS result
-                                    FROM 
+                                    FROM
                                         channels c
-                                    JOIN 
+                                    JOIN
                                         guilds g ON c.guild_id = g.id
-                                    LEFT JOIN 
+                                    LEFT JOIN
                                         members m ON g.id = m.guild_id AND m.user_id = $1
-                                    WHERE 
+                                    WHERE
                                         c.id = $2
                                 ) AS result
                                 WHERE result = true
@@ -86,7 +87,7 @@ export async function canView(
       const result = (
         await query({
           text: `
-                    SELECT 
+                    SELECT
                         CASE
                             -- Check if the two users contain a mutural server
                             WHEN EXISTS (
@@ -95,7 +96,7 @@ export async function canView(
                                     WHERE user_id IN ($1, $2)
                                     GROUP BY guild_id
                                     HAVING COUNT(DISTINCT user_id) = 2
-                            ) 
+                            )
 
                             -- Check if the two users have a relationship
                             OR EXISTS (
@@ -169,7 +170,7 @@ export async function getBitfieldForMember({
   if (channel) {
     const everyoneOverrides = await actions.channels.fetchRoleOverride(
       channel.id,
-      everyone.id
+      everyone.id,
     );
     if (everyoneOverrides) {
       currentBitfield |= everyoneOverrides.bitfield_allow;

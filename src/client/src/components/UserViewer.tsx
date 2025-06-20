@@ -36,6 +36,7 @@ export default function UserViewer({ userId }: { userId: number }) {
           <UserIcon
             id={userId}
             size="128px"
+            quality={512}
             onClick={() => {
               setFullscreenImage(
                 fixUrlWithProxy(File.check(users[userId].avatar)),

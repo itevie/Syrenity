@@ -14,10 +14,8 @@ const route: RouteDetails = {
     const reaction = await SyReaction.getSpecific(
       message.data.id,
       user.id,
-      emoji
+      emoji,
     );
-
-    console.log(message, reaction, user);
 
     if (!reaction)
       return res.status(400).send(
@@ -25,10 +23,8 @@ const route: RouteDetails = {
           message: "You have not reacted with that emoji",
           errorCode: "UnknownError",
           statusCode: 400,
-        })
+        }),
       );
-
-    console.log(reaction);
 
     await reaction.remove();
 

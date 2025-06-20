@@ -1,5 +1,4 @@
 import fs from "fs";
-import * as uuid from "uuid";
 
 export function getAllFiles(
   dirPath: string,

@@ -20,7 +20,10 @@ import Words from "../../dawn-ui/components/Words";
 import Icon from "../../dawn-ui/components/Icon";
 import Button from "../../dawn-ui/components/Button";
 import { trans } from "../../i18n";
-import MessageObject, { MessageFileObject } from "../../markdown/objects";
+import MessageObject, {
+  MessageFileObject,
+  MessageLinkObject,
+} from "../../markdown/objects";
 
 const logger = new Logger("attachment-loader");
 
@@ -36,14 +39,15 @@ export default function MessageAttachments({
   useEffect(() => {
     // Basic https URLs
     let extractedUrls: string[] = [
-      ...(message.content.match(/https?:\/\/[^\s]+/g) ?? []),
-    ];
-
-    extractedUrls.push(
+      ...objects
+        .filter((x) => x.type === "link")
+        .map((x) => (x as MessageLinkObject).url),
       ...objects
         .filter((x) => x.type === "file")
         .map((x) => `${baseUrl}` + File.check((x as MessageFileObject).fileId)),
-    );
+    ];
+
+    console.log(extractedUrls);
 
     // Get <f:file-id> type attachments
     // while (

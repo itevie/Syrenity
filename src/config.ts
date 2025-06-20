@@ -26,15 +26,6 @@ const config = {
     id: -1,
   },
 
-  /** Database settings */
-  database: {
-    /** The connection string for the postgres database */
-    constring: "postgres://postgres:postgres@127.0.0.1:5432/syrenity",
-
-    /** The connection string for the testing environment */
-    testconstring: "postgres://postgres:postgres@127.0.0.1:5432/syrenity-test",
-  },
-
   /** File settings */
   files: {
     /**
@@ -51,6 +42,9 @@ const config = {
   proxy: {
     /** Whether or not proxied files should be saved to disk (at ../files/yyyy-mm-dd/file-name.ext) */
     saveLocally: true,
+
+    /** Whether or not proxied files should be saved to the S3 bucket provided in .env */
+    saveToS3: true,
   },
 
   /** Websocket settings */

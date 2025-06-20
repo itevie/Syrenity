@@ -1,5 +1,6 @@
 import database from "../../../../database/database";
 import SyrenityError from "../../../../errors/BaseError";
+import SyFile from "../../../../models/File";
 import SyUser, { EditUserOptions } from "../../../../models/User";
 import { RouteDetails } from "../../../../types/route";
 import { send } from "../../../../ws/websocketUtil";
@@ -13,21 +14,21 @@ const handler: RouteDetails<EditUserOptions> = {
 
     if (
       body.avatar &&
-      !(await database.files.get(body.avatar)).mime?.startsWith("image/")
+      !(await SyFile.fetch(body.avatar))?.data.mime?.startsWith("image/")
     ) {
       return res.status(400).send(
         new SyrenityError({
           message: "The avatar file must be an image",
           errorCode: "InvalidFileType",
           statusCode: 400,
-        })
+        }),
       );
     }
 
     if (
       body.profile_banner &&
-      !(await database.files.get(body.profile_banner)).mime?.startsWith(
-        "image/"
+      !(await SyFile.fetch(body.profile_banner))?.data.mime?.startsWith(
+        "image/",
       )
     ) {
       return res.status(400).send(
@@ -35,10 +36,9 @@ const handler: RouteDetails<EditUserOptions> = {
           message: "The profile banner file must be an image",
           errorCode: "InvalidFileType",
           statusCode: 400,
-        })
+        }),
       );
     }
-
     user = await user.edit(req.body as EditUserOptions);
 
     send({

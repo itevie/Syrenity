@@ -1,6 +1,7 @@
 import config from "../../../../config";
 import database from "../../../../database/database";
 import SyrenityError from "../../../../errors/BaseError";
+import SyFile from "../../../../models/File";
 import SyServer, { EditServerOptions } from "../../../../models/Servers";
 import { RouteDetails } from "../../../../types/route";
 import permissionsBitfield from "../../../../util/PermissionBitfield";
@@ -14,14 +15,14 @@ const route: RouteDetails<EditServerOptions> = {
 
     if (
       body.avatar &&
-      !(await database.files.get(body.avatar)).mime?.startsWith("image/")
+      !(await SyFile.fetch(body.avatar))?.data.mime?.startsWith("image/")
     ) {
       return res.status(400).send(
         new SyrenityError({
           message: "The avatar file must be an image",
           errorCode: "InvalidFileType",
           statusCode: 400,
-        }).extract()
+        }).extract(),
       );
     }
 

@@ -102,8 +102,6 @@ export default class SyReaction {
         statusCode: 400,
       });
 
-    console.log(result);
-
     return new SyReaction(result);
   }
 

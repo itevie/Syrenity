@@ -26,15 +26,6 @@ interface ChannelRoleOverride {
   bitfield_deny: number;
 }
 
-interface SyFile {
-  id: string;
-  created_at: Date;
-  file_name: string;
-  original_url: string | null;
-  is_deleting: boolean;
-  mime: string | null;
-}
-
 interface Invite {
   id: string;
   guild_id: number;

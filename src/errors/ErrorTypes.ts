@@ -50,5 +50,9 @@ type ErrorType =
 
   // Resource
   | "NonexistentResource"
-  | "AlreadyAMember";
+  | "AlreadyAMember"
+
+  // Codes
+  | "UnknownVerifyCode"
+  | "ExpiredVerifyCode";
 export default ErrorType;

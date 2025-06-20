@@ -6,8 +6,7 @@ import cors from "cors";
 import session from "express-session";
 import connectPostgres from "connect-pg-simple";
 import passport from "passport";
-
-import bcrypt from "bcrypt";
+import "dotenv/config";
 
 import Logger from "./util/Logger";
 import config from "./config";
@@ -48,11 +47,15 @@ app.use(
   }),
 );
 
+if (!process.env.DB_CONSTRING) {
+  throw new Error("Missing DB_CONSTRING in env");
+}
+
 // Setup passport
 app.use(
   session({
     store: new pgSession({
-      conString: config.database.constring,
+      conString: process.env.DB_CONSTRING,
       tableName: "sessions",
     }),
     secret: "dog food",
@@ -69,47 +72,44 @@ require("./auth/local");
 // Finialise passport
 app.use(passport.initialize());
 app.use(passport.session());
+if (require.main === module) {
+  // Final setup
+  (async () => {
+    await initialiseDatabase();
+    await initialise(process.env.DB_CONSTRING!);
+    initialiseWs(app);
+    loadRoutes(app);
 
-// Final setup
-(async () => {
-  await initialiseDatabase();
-  await initialise(config.database.constring);
-  initialiseWs(app);
-  loadRoutes(app);
+    // @ts-ignore
+    app.use(ErrorHandler);
 
-  // @ts-ignore
-  app.use(ErrorHandler);
+    // Start express server
+    app.listen(config.server.port, async () => {
+      logger.log(
+        `Listening on port ${config.server.port} (http://localhost:${config.server.port}/)`,
+      );
+    });
 
-  // Start express server
-  app.listen(config.server.port, async () => {
-    logger.log(
-      `Listening on port ${config.server.port} (http://localhost:${config.server.port}/)`,
-    );
-  });
+    const servers = (
+      await query<DatabaseServer>({
+        text: "SELECT * FROM guilds",
+        values: [],
+      })
+    ).rows.map((x) => new SyServer(x));
+    for await (const server of servers) {
+      await server.organiseChannels();
+    }
 
-  const servers = (
-    await query<DatabaseServer>({
-      text: "SELECT * FROM guilds",
-      values: [],
-    })
-  ).rows.map((x) => new SyServer(x));
-  for await (const server of servers) {
-    await server.organiseChannels();
-  }
+    // Check args
+    const args = process.argv[2] || "";
 
-  // Check args
-  const args = process.argv[2] || "";
+    if (args.includes("e")) {
+      logger.log(`Resetting @everyone's`);
 
-  if (args.includes("e")) {
-    logger.log(`Resetting @everyone's`);
-
-    // Reset everyone roles
-    await quickQuery(
-      `UPDATE roles SET bitfield_allow = ${defaultBitfield}, bitfield_deny = 0 WHERE is_everyone = true;`,
-    );
-  }
-})();
-
-(async () => {
-  console.log(await bcrypt.hash("penis", 10));
-})();
+      // Reset everyone roles
+      await quickQuery(
+        `UPDATE roles SET bitfield_allow = ${defaultBitfield}, bitfield_deny = 0 WHERE is_everyone = true;`,
+      );
+    }
+  })();
+}

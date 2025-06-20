@@ -174,6 +174,19 @@ export default function parse(tokens: Token[]): MarkdownParseResult {
     if (at().type === TokenType.Newline) {
       eat();
       return <br />;
+    } else if (at().type === TokenType.Link) {
+      let url = eat();
+      objects.push({
+        type: "link",
+        url: url?.data!,
+      });
+      return <a href={url?.data}>{url?.data}</a>;
+    } else if (at().type === TokenType.CloseAngle) {
+      let text = eat()?.data;
+      while (tokens.length !== 0 && at().type === TokenType.Text) {
+        text += eat()?.data ?? "";
+      }
+      return <label style={{ color: "green" }}>{text}</label>;
     }
     return <label>{eat()?.data}</label>;
   }

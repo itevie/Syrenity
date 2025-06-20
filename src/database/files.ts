@@ -1,101 +1,69 @@
-import { createWriteStream, mkdirSync, WriteStream } from "fs";
-import { query } from "./database";
-import path from "path";
-import { fileStoreLocation } from "..";
-import { randomID } from "../util/util";
-import { extension } from "mime-types";
-import fixupURLForProxy from "../util/proxyFixup";
-import axios from "axios";
-import { PassThrough } from "stream";
+// import { createWriteStream, mkdirSync, WriteStream } from "fs";
+// import { query } from "./database";
+// import path from "path";
+// import { fileStoreLocation } from "..";
+// import { randomID } from "../util/util";
+// import { extension } from "mime-types";
+// import fixupURLForProxy from "../util/proxyFixup";
+// import axios from "axios";
+// import { PassThrough } from "stream";
+// import config from "../config";
+// import { uploadFileToS3 } from "./s3";
 
-const _actions = {
-  get: async (id: string): Promise<SyFile> => {
-    return (
-      await query<SyFile>({
-        text: "SELECT * FROM files WHERE id = $1",
-        values: [id],
-      })
-    ).rows[0];
-  },
+// const _actions = {
+//   downloadAndCreate: async (url: string): Promise<SyFile> => {
+//     return await _actions.downloadTo(url)[0];
+//   },
 
-  getByUrl: async (url: string): Promise<SyFile | null> => {
-    return (
-      await query<SyFile>({
-        text: "SELECT * FROM files WHERE original_url = $1",
-        values: [url],
-      })
-    ).rows[0];
-  },
+//   downloadTo: async (
+//     url: string,
+//     fileObject: SyFile | null = null,
+//   ): Promise<[SyFile, PassThrough, string]> => {
+//     const headers = fixupURLForProxy(url);
 
-  setFileName: async (id: string, fileName: string): Promise<void> => {
-    await query({
-      text: "UPDATE files SET file_name = $2 WHERE id = $1",
-      values: [id, fileName],
-    });
-  },
+//     const response = await axios.get(url, {
+//       headers,
+//       responseType: "stream",
+//     });
 
-  create: async (
-    fileName: string,
-    originalUrl?: string,
-    mime?: string
-  ): Promise<SyFile> => {
-    return (
-      await query<SyFile>({
-        text: "INSERT INTO files (file_name, original_url, mime) VALUES ($1, $2, $3) RETURNING *",
-        values: [fileName, originalUrl, mime],
-      })
-    ).rows[0];
-  },
+//     if (fileObject === null)
+//       fileObject = await _actions.create(
+//         `proxied-${randomID(10)}.${extension(response.headers["content-type"])}`,
+//         url,
+//         response.headers["content-type"],
+//       );
 
-  delete: async (id: string): Promise<void> => {
-    await query({
-      text: "DELETE FROM files WHERE id = $1",
-      values: [id],
-    });
-  },
+//     const folder = path.resolve(
+//       path.join(
+//         fileStoreLocation + "/",
+//         fileObject.created_at.toLocaleDateString().replace(/\//g, "-"),
+//       ),
+//     );
+//     mkdirSync(folder, { recursive: true });
+//     const actualPath = path.join(
+//       folder,
+//       `${fileObject.id}-${fileObject.file_name}`,
+//     );
 
-  downloadAndCreate: async (url: string): Promise<SyFile> => {
-    return await _actions.downloadTo(url)[0];
-  },
+//     const passthrough = new PassThrough();
 
-  downloadTo: async (
-    url: string,
-    fileObject: SyFile | null = null
-  ): Promise<[SyFile, PassThrough, string]> => {
-    const headers = fixupURLForProxy(url);
+//     response.data.pipe(passthrough);
 
-    const response = await axios.get(url, {
-      headers,
-      responseType: "stream",
-    });
+//     const fileStream = createWriteStream(actualPath);
+//     const s3Stream = new PassThrough();
+//     const returnStream = new PassThrough();
 
-    if (fileObject === null)
-      fileObject = await _actions.create(
-        `proxied-${randomID(10)}.${extension(response.headers["content-type"])}`,
-        url,
-        response.headers["content-type"]
-      );
+//     passthrough.pipe(fileStream);
+//     passthrough.pipe(s3Stream);
+//     passthrough.pipe(returnStream);
 
-    const folder = path.resolve(
-      path.join(
-        fileStoreLocation + "/",
-        fileObject.created_at.toLocaleDateString().replace(/\//g, "-")
-      )
-    );
-    mkdirSync(folder, { recursive: true });
-    const actualPath = path.join(
-      folder,
-      `${fileObject.id}-${fileObject.file_name}`
-    );
+//     (async () => {
+//       let buffer = await streamToBuffer(s3Stream);
+//       if (config.proxy.saveToS3) await uploadFileToS3(fileObject, buffer);
+//     })();
 
-    const fileStream = createWriteStream(actualPath);
-    const passthrough = new PassThrough();
-    response.data.pipe(passthrough);
+//     return [fileObject, returnStream, response.headers["content-type"]];
+//   },
+// } as const;
 
-    passthrough.pipe(fileStream);
-
-    return [fileObject, passthrough, response.headers["content-type"]];
-  },
-} as const;
-
-export default _actions;
+// export default _actions;

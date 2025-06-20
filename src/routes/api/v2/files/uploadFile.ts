@@ -9,6 +9,9 @@ import SyrenityError from "../../../../errors/BaseError";
 import https from "https";
 import http from "http";
 import { URL } from "url";
+import SyFile from "../../../../models/File";
+import { fuckYouJs } from "../../../../util/util";
+import { PassThrough, Readable } from "stream";
 
 interface UploadFileBody {
   file_name: string;
@@ -100,24 +103,9 @@ const handler: RouteDetails<UploadFileBody> = {
     }
 
     // Create file record
-    const fileObject = await actions.files.create(body.file_name, mime, origin);
-
-    // Create target directory
-    const folder = path.resolve(
-      path.join(
-        fileStoreLocation + "/",
-        fileObject.created_at.toLocaleDateString().replace(/\//g, "-"),
-      ),
-    );
-    fs.mkdirSync(folder, { recursive: true });
-
-    // Write file
-    const filepath = path.join(
-      folder,
-      `${fileObject.id}-${fileObject.file_name}`,
-    );
-    fs.writeFileSync(filepath, buffer);
-
+    const fileObject = await SyFile.create(body.file_name, mime, origin);
+    console.log(fileObject);
+    await fileObject.uploadFile(Readable.from(buffer) as PassThrough);
     return res.status(200).send(fileObject);
   },
 

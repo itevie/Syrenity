@@ -4,7 +4,6 @@ import members from "./members";
 import messages from "./messages";
 import roles from "./roles";
 import relationships from "./relationships";
-import files from "./files";
 import invites from "./invites";
 
 export default {
@@ -14,6 +13,5 @@ export default {
   messages,
   roles,
   relationships,
-  files,
   invites,
 };

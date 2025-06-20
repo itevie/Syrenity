@@ -81,10 +81,11 @@ export default class SyUser {
     return newRelationships;
   }
 
-  public async edit(options: EditUserOptions) {
+  public async edit(options: EditUserOptions): Promise<SyUser> {
     const setClause = Object.entries(options)
       .map((x, i) => `${x[0]} = $${i + 2}`)
       .join(", ");
+    if (setClause.length === 0) return this;
 
     const queryText = `
       UPDATE users

@@ -1,4 +1,4 @@
-export type ObjectType = "mention" | "file";
+export type ObjectType = "mention" | "file" | "link";
 
 export interface MessageObjectBase {
   type: ObjectType;
@@ -15,5 +15,13 @@ export interface MessageFileObject extends MessageObjectBase {
   fileId: string;
 }
 
-type MessageObject = MessageMentionObject | MessageFileObject;
+export interface MessageLinkObject extends MessageObjectBase {
+  type: "link";
+  url: string;
+}
+
+type MessageObject =
+  | MessageMentionObject
+  | MessageFileObject
+  | MessageLinkObject;
 export default MessageObject;

@@ -15,6 +15,7 @@ import database from "../../database/database";
 import config from "../../config";
 import { PassThrough } from "stream";
 import sharp from "sharp";
+import SyFile from "../../models/File";
 
 const handler: RouteDetails = {
   method: "GET",
@@ -22,7 +23,7 @@ const handler: RouteDetails = {
   handler: async (req, res) => {
     // Load details
     const id = req.params.id as string;
-    const file = await actions.files.get(id);
+    const file = await SyFile.fetch(id);
     const size = parseInt(req.query.size as string) || null;
 
     // Check if there is a ?size and if it's allowed
@@ -45,75 +46,20 @@ const handler: RouteDetails = {
         }),
       );
 
-    // Create paths
-    const directoryPath = path.join(
-      fileStoreLocation,
-      file.created_at.toLocaleDateString().replace(/\//g, "-"),
+    let stream = await file.getStream();
+    res.setHeader(
+      "Content-Type",
+      lookup(file.data.file_name) || "application/octet-stream",
     );
-    const filePath = path.join(directoryPath, `${file.id}-${file.file_name}`);
-
-    let stream: PassThrough | ReadStream;
-
-    // If the file doesn't exist, try to download it
-    if (!existsSync(filePath)) {
-      if (file.original_url) {
-        try {
-          const result = await database.files.downloadTo(
-            file.original_url,
-            file,
-          );
-          res.contentType(
-            result[2] ??
-              lookup(result[0].file_name) ??
-              "application/octet-stream",
-          );
-
-          stream = result[1];
-        } catch (e) {
-          return res.status(500).send(
-            new SyrenityError({
-              message: "Failed to re-download the image",
-              statusCode: 500,
-              errorCode: "FileNotOnDisk",
-            }).extract(),
-          );
-        }
-      } else
-        return res.status(500).send(
-          new SyrenityError({
-            message: "The file was not found on disk",
-            statusCode: 500,
-            errorCode: "FileNotOnDisk",
-          }).extract(),
-        );
-    } else {
-      const mimeType = lookup(file.file_name) || "application/octet-stream";
-      res.setHeader("Content-Type", mimeType);
-      stream = createReadStream(filePath);
-    }
 
     // Check if user wants a smaller size
     if (size) {
-      const newPath = path.join(
-        directoryPath,
-        `${size}@${file.id}-${file.file_name}`,
-      );
-
-      if (!existsSync(newPath)) {
-        const passthrough = new PassThrough();
-        stream
-          .pipe(sharp({ animated: true }).resize(size, size))
-          .pipe(passthrough);
-        stream = passthrough;
-        passthrough.pipe(createWriteStream(newPath));
-      } else {
-        stream = createReadStream(newPath);
-      }
+      stream = await file.resize(size, stream);
     }
 
     res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-    res.setHeader("Last-Modified", file.created_at.toUTCString());
-    res.setHeader("ETag", file.id);
+    res.setHeader("Last-Modified", file.data.created_at.toUTCString());
+    res.setHeader("ETag", file.data.id);
 
     stream.pipe(res);
   },

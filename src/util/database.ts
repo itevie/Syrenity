@@ -7,7 +7,7 @@ import ErrorType from "../errors/ErrorTypes";
 import CacheManager from "./CacheManager";
 
 // Create client
-export const client = new pg.Client(config.database.constring);
+export const client = new pg.Client(process.env.DB_CONSTRING);
 const logger = new Logger("database");
 
 /**
@@ -52,7 +52,6 @@ const cache = new CacheManager();
  * @returns The query result
  */
 export async function query(data: DatabaseQuery): Promise<pg.QueryResult> {
-  console.log(1);
   const cacheResult = cache.check(data);
 
   if (cacheResult !== null) return cacheResult;

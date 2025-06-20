@@ -4,8 +4,8 @@ import * as database from "../util/database";
 import { canView } from "../util/permissionChecker";
 import AuthenticationError from "../errors/AuthenticationError";
 import SyMessage from "../models/Message";
-import files from "../util/dbactions/files";
 import SyUser from "../models/User";
+import SyFile from "../models/File";
 
 export default async function validateURLParameters(
   req: express.Request,
@@ -78,7 +78,7 @@ export default async function validateURLParameters(
           await SyMessage.exists(parseInt(param)),
         invite: async (param: string) =>
           await database.actions.invites.exists(param),
-        file: async (param: string) => !!(await files.get(param)),
+        file: async (param: string) => !!(await SyFile.fetch(param)),
       }[paramTest.is];
 
       // Check if it worked

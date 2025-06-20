@@ -5,7 +5,6 @@ const handler: RouteDetails = {
   method: "GET",
   path: "/channels/:channel",
   handler: async (req, res) => {
-    console.log(await actions.channels.fetch(parseInt(req.params.channel)));
     return res
       .status(200)
       .send(await actions.channels.fetch(parseInt(req.params.channel)));

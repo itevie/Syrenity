@@ -11,6 +11,7 @@ export enum TokenType {
   File,
   Server,
   Strikethrough,
+  Link,
   Newline,
 }
 
@@ -71,6 +72,21 @@ export default function lex(contents: string): Token[] {
       tokens.push({ type: rule.type, data: rule.match });
       index += rule.length;
       continue;
+    } else if (contents.startsWith("https://")) {
+      let url = "https://";
+      index += url.length;
+      while (
+        index < contents.length &&
+        contents[index].match(/[A-Za-z0-9:/?#@!$&'()*+,;=._~%\[\]-]/)
+      ) {
+        url += contents[index++];
+      }
+      try {
+        new URL(url);
+        tokens.push({ type: TokenType.Link, data: url });
+      } catch {
+        tokens.push({ type: TokenType.Text, data: url });
+      }
     }
 
     const last = tokens[tokens.length - 1];

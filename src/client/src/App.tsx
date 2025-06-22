@@ -111,6 +111,7 @@ function App() {
     });
 
     client.on("ready", async (user, reconnect) => {
+      logger.log(`Ready event fired! Reconnected?:`, reconnect);
       loader.stop();
       if (reconnect) return;
 

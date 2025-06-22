@@ -40,6 +40,7 @@ export default function Page({ options }: { options: PageOptions }) {
         {options.sections.map((section, index) =>
           section.type === "button" ? (
             <SidebarButton
+              key={section.label}
               icon={section.icon}
               label={section.label}
               selected={
@@ -56,9 +57,11 @@ export default function Page({ options }: { options: PageOptions }) {
               }
             />
           ) : section.type === "label" ? (
-            <Words type={TextType.Small}>{section.label}</Words>
+            <Words key={section.label} type={TextType.Small}>
+              {section.label}
+            </Words>
           ) : (
-            <br />
+            <br key={Math.random()} />
           ),
         )}
       </Sidebar>

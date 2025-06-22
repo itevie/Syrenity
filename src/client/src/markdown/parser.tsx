@@ -14,15 +14,26 @@ export interface MarkdownParseResult {
  * @returns The JSX element created
  */
 function getElementFor(token: Token | undefined, data?: any): JSX.Element {
-  return (
-    {
-      [TokenType.Bold]: <b>{data ?? token?.data}</b>,
-      [TokenType.Italic]: <i>{data ?? token?.data}</i>,
-      [TokenType.Underscore]: <u>{data ?? token?.data}</u>,
-      [TokenType.Strikethrough]: <del>{data ?? token?.data}</del>,
-      [TokenType.Code]: <code>{data ?? token?.data}</code>,
-    }[token?.type.toString() ?? "none"] ?? <label>{data ?? token!.data}</label>
-  );
+  data = data ?? token!.data;
+
+  if (token === undefined) {
+    return <label>{data}</label>;
+  }
+
+  switch (token?.type) {
+    case TokenType.Bold:
+      return <b>{data}</b>;
+    case TokenType.Italic:
+      return <i>{data}</i>;
+    case TokenType.Underscore:
+      return <u>{data}</u>;
+    case TokenType.Strikethrough:
+      return <del>{data}</del>;
+    case TokenType.Code:
+      return <code>{data}</code>;
+    default:
+      return <label>{data}</label>;
+  }
 }
 
 /**
@@ -32,20 +43,42 @@ function getElementFor(token: Token | undefined, data?: any): JSX.Element {
  */
 export default function parse(tokens: Token[]): MarkdownParseResult {
   let objects: MessageObject[] = [];
+  let index = 0;
 
   /**
    * @returns The current token
    */
-  function at() {
-    return tokens[0];
+  function at(): Token {
+    if (!tokens[index])
+      throw new Error(
+        `TRIED RUNNING AT!!!! BUT ITS AT THE END!!! prev token: ` +
+          JSON.stringify(prev()) +
+          ` WHOLE MESSAGE: ` +
+          tokens.map((x) => x.data).join(""),
+      );
+    return tokens[index];
   }
 
   /**
    * Removes the first element from tokens
    * @returns The element removed
    */
-  function eat() {
-    return tokens.shift();
+  function eat(): Token {
+    return tokens[index++];
+  }
+
+  /**
+   * Checks if we have reached the end
+   */
+  function end(): boolean {
+    return index >= tokens.length;
+  }
+
+  /**
+   * Returns the previous token
+   */
+  function prev(): Token | undefined {
+    return tokens[index - 1];
   }
 
   /**
@@ -87,7 +120,7 @@ export default function parse(tokens: Token[]): MarkdownParseResult {
    */
   function pre(): JSX.Element {
     let parts: JSX.Element[] = [];
-    while (tokens.length != 0) {
+    while (!end()) {
       parts.push(base());
     }
     return <>{parts}</>;
@@ -109,11 +142,11 @@ export default function parse(tokens: Token[]): MarkdownParseResult {
       let t = eat();
       let inner: JSX.Element[] = [];
 
-      while (tokens.length !== 0 && at().type !== t?.type) {
+      while (!end() && at().type !== t?.type) {
         inner.push(base());
       }
 
-      if (at()?.type === t?.type) eat();
+      if (!end() && at()?.type === t?.type) eat();
       return getElementFor(t, inner);
     } else {
       return mention();
@@ -181,9 +214,12 @@ export default function parse(tokens: Token[]): MarkdownParseResult {
         url: url?.data!,
       });
       return <a href={url?.data}>{url?.data}</a>;
-    } else if (at().type === TokenType.CloseAngle) {
+    } else if (
+      at().type === TokenType.CloseAngle &&
+      (!prev() || prev()?.type === TokenType.Newline)
+    ) {
       let text = eat()?.data;
-      while (tokens.length !== 0 && at().type === TokenType.Text) {
+      while (!end() && at().type !== TokenType.Newline) {
         text += eat()?.data ?? "";
       }
       return <label style={{ color: "green" }}>{text}</label>;

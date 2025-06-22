@@ -47,8 +47,6 @@ export default function MessageAttachments({
         .map((x) => `${baseUrl}` + File.check((x as MessageFileObject).fileId)),
     ];
 
-    console.log(extractedUrls);
-
     // Get <f:file-id> type attachments
     // while (
     //   message.content.match(

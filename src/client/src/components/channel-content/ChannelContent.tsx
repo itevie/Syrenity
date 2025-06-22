@@ -112,7 +112,6 @@ export default function ChannelContent({
           (messageAreaRef.current?.scrollTop ?? 0) < SCROLL_THRESHOLD
         )
           return;
-        console.log("scrolling");
 
         messageAreaRef.current?.scrollTo({
           top: messageAreaRef.current.scrollHeight,

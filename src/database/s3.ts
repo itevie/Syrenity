@@ -6,6 +6,7 @@ import {
 import SyFile from "../models/File";
 import { Readable } from "stream";
 import Logger from "../client/src/dawn-ui/Logger";
+let fileType = import("file-type");
 
 const s3 = new S3Client({
   region: "auto",
@@ -28,7 +29,10 @@ export async function uploadFileToS3(
     Bucket: "syrenity",
     Key: `${file.data.id}`,
     Body: fileStream,
-    ContentType: file.data.mime || "application/octet-stream",
+    ContentType:
+      file.data.mime ??
+      ((await (await fileType).fileTypeFromBuffer(fileStream))?.mime ||
+        "application/octet-stream"),
   });
 
   await s3.send(command);

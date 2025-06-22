@@ -166,6 +166,7 @@ export default class SyFile {
     if (!noS3 && config.proxy.saveToS3) {
       (async () => {
         const buffer = await streamToBuffer(s3Stream);
+
         await uploadFileToS3(this, buffer);
       })();
     }
@@ -188,7 +189,7 @@ export default class SyFile {
       (
         await query<DatabaseFile>({
           text: "INSERT INTO files (file_name, original_url, mime) VALUES ($1, $2, $3) RETURNING *",
-          values: [fileName, originalUrl, mime],
+          values: [fileName, mime, originalUrl],
         })
       ).rows[0],
     );

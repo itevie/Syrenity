@@ -9,6 +9,7 @@ import Row from "../../dawn-ui/components/Row";
 import { isErr, handleClientError, wrap } from "../../util";
 import Message from "../../syrenity-client/structures/Message";
 import { trans } from "../../i18n";
+import { addTextToChatBar } from "../channel-content/ChatBar";
 
 export interface MessageContextMenuOptions {
   event: React.MouseEvent<HTMLDivElement, MouseEvent>;
@@ -51,17 +52,6 @@ export function showMessageContextMenu(options: MessageContextMenuOptions) {
       },
       {
         type: "button",
-        label: trans("message.action.delete"),
-        scheme: "danger",
-        onClick: async () => {
-          const result = await wrap(options.message.delete());
-          if (isErr(result)) {
-            return handleClientError("delete message", result.v);
-          }
-        },
-      },
-      {
-        type: "button",
         label: trans("message.action.react"),
         onClick: async () => {
           addAlert({
@@ -96,6 +86,30 @@ export function showMessageContextMenu(options: MessageContextMenuOptions) {
               },
             ],
           });
+        },
+      },
+      {
+        type: "button",
+        label: trans("message.action.reply"),
+        onClick: async () => {
+          addTextToChatBar(
+            options.message.content
+              .split("\n")
+              .map((x) => `>${x}`)
+              .join("\n") + "\n",
+            "prepend",
+          );
+        },
+      },
+      {
+        type: "button",
+        label: trans("message.action.delete"),
+        scheme: "danger",
+        onClick: async () => {
+          const result = await wrap(options.message.delete());
+          if (isErr(result)) {
+            return handleClientError("delete message", result.v);
+          }
         },
       },
       {

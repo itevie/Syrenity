@@ -19,6 +19,11 @@ function readFileAsDataURL(file: File): Promise<string> {
   });
 }
 
+export let addTextToChatBar: (
+  what: string,
+  type: "append" | "prepend",
+) => void = () => {};
+
 export default function ChatBar({
   inputRef,
   onKey,
@@ -47,6 +52,16 @@ export default function ChatBar({
         }
       }
     });
+
+    addTextToChatBar = (what, where) => {
+      if (!inputRef.current) return;
+      inputRef.current.value =
+        where === "append"
+          ? inputRef.current.value + what
+          : what + inputRef.current.value;
+
+      inputRef.current.focus();
+    };
   }, [inputRef]);
 
   return (

@@ -49,13 +49,3 @@ function generateMailOptions(email: SyrenityEmail): {
 
   return { subject, text };
 }
-
-sendEmail({
-  type: "forgot-password",
-  code: "test!",
-  user: {
-    fullData: {
-      email: "izzyplays07@gmail.com",
-    },
-  } as unknown as SyUser,
-});

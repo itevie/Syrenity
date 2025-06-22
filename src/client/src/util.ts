@@ -73,7 +73,7 @@ export type Ok<T> = {
 
 export type Result<T, E> = Ok<T> | Err<E>;
 
-export async function wrap<T, E = any>(
+export async function wrap<E = any, T = any>(
   promise: Promise<T>,
 ): Promise<Result<T, E>> {
   try {

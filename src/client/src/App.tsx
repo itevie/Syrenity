@@ -43,6 +43,7 @@ axiosClient.noErrorMessage = true;
 axiosClient.config.headers = {
   Authorization: `Token ${localStorage.getItem("token") as string}`,
 };
+axiosClient.config.baseURL = baseUrl;
 
 document.body.style.setProperty(
   "--sy-base-color",

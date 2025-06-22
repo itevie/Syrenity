@@ -1,6 +1,8 @@
 import { sendEmail } from "../../mail/mailing";
 import SyUser from "../../models/User";
+import VerifyCode from "../../models/VerifyCode";
 import { RouteDetails } from "../../types/route";
+import { randomID } from "../../util/util";
 
 interface EmailBody {
   email: string;
@@ -11,12 +13,22 @@ const command: RouteDetails<EmailBody> = {
   method: "POST",
 
   handler: async (req, res) => {
-    let user = await SyUser.fetchByEmail((req.body as EmailBody).email);
-    sendEmail({
-      type: "forgot-password",
-      user,
-      
-    })
+    try {
+      let user = await SyUser.fetchByEmail((req.body as EmailBody).email);
+      const code = await VerifyCode.create(
+        user.data.id,
+        "forgot-password",
+        randomID(20),
+      );
+      await sendEmail({
+        type: "forgot-password",
+        user,
+        code: code.data.code,
+      });
+    } catch (e) {
+      console.log(e);
+    }
+    return res.status(204).send();
   },
 
   auth: {
@@ -34,3 +46,5 @@ const command: RouteDetails<EmailBody> = {
     required: ["email"],
   },
 };
+
+export default command;

@@ -224,6 +224,14 @@ export default class SyUser {
     return new SyUser(user);
   }
 
+  public async changePassword(to: string): Promise<void> {
+    const _password = await bcrypt.hash(to, 10);
+    await query({
+      text: "UPDATE users SET password = $1 WHERE id = $2",
+      values: [_password, this.data.id],
+    });
+  }
+
   toJSON() {
     return this.data;
   }

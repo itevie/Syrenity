@@ -72,12 +72,12 @@ export default function lex(contents: string): Token[] {
       tokens.push({ type: rule.type, data: rule.match });
       index += rule.length;
       continue;
-    } else if (contents.startsWith("https://")) {
+    } else if (contents.startsWith("https://", index)) {
       let url = "https://";
       index += url.length;
       while (
         index < contents.length &&
-        contents[index].match(/[A-Za-z0-9:/?#@!$&'()*+,;=._~%\[\]-]/)
+        contents[index].match(/[A-Za-z0-9:/?#@!$&'*+,;=._~%\[\]-]/)
       ) {
         url += contents[index++];
       }
@@ -87,6 +87,7 @@ export default function lex(contents: string): Token[] {
       } catch {
         tokens.push({ type: TokenType.Text, data: url });
       }
+      continue;
     }
 
     const last = tokens[tokens.length - 1];

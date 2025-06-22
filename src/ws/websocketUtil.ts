@@ -5,6 +5,8 @@ import WebsocketHandler from "./WebsocketHandler";
 import { WebsocketDispatchTypes } from "./WebsocketDispatchTypes";
 import { query } from "../database/database";
 import SyUser from "../models/User";
+import { setInterval } from "node:timers";
+import config from "../config";
 
 interface WSConnection {
   uuid: string;
@@ -23,6 +25,15 @@ interface WSSendOptions<T extends keyof WebsocketDispatchTypes> {
 
 export const wsLogger = new Logger("ws");
 export const connections = new Map<string, WSConnection>();
+
+setInterval(() => {
+  wsLogger.log(
+    `Attempting to send heartbeat to ${connections.size} connections`,
+  );
+  for (const connection of connections) {
+    connection[1].ws.send("Heartbeat", {});
+  }
+}, config.ws.heartbeatInterval);
 
 /**
  * Sends a message to all connected ws clients

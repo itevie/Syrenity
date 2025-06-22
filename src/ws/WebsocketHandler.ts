@@ -65,6 +65,7 @@ export default class WebsocketHandler {
         return this.basicError(`Failed to authenticate: ${e.message}`);
       }
     },
+    Heartbeat: async () => {},
   };
 
   private basicError(error: string) {

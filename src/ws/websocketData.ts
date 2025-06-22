@@ -3,7 +3,8 @@ export type WebsocketType =
   | "Identify"
   | "Authenticate"
   | "Error"
-  | "Dispatch";
+  | "Dispatch"
+  | "Heartbeat";
 
 export interface BaseWSMessage {
   type: WebsocketType;

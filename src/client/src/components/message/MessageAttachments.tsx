@@ -5,7 +5,7 @@ import { baseUrl, client } from "../../App";
 import File from "../../syrenity-client/structures/File";
 import { AxiosResponse } from "axios";
 import Logger from "../../dawn-ui/Logger";
-import MessageImageAttachment from "../MessageImageAttachment";
+import MessageImageAttachment from "./MessageImageAttachment";
 import { setFullscreenImage } from "../../dawn-ui/components/ImageViewer";
 import {
   fixUrlWithProxy,
@@ -145,13 +145,13 @@ export default function MessageAttachments({
           <MessageImageAttachment
             key={url}
             onLoad={() => {}}
-            onClick={(url) =>
+            onClick={(url) => {
               setFullscreenImage({
                 image: url,
                 images: resolvedImages,
                 onContextMenu: showImageContextMenu,
-              })
-            }
+              });
+            }}
             url={url}
           />
         )),

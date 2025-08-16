@@ -43,7 +43,7 @@ export default function Mention({
   switch (type) {
     case MentionType.User:
       let user = users[parseInt(id)];
-      if (!user) text = `Unknown User`;
+      if (!user) text = `Unknown User ${id}`;
       else {
         text = `@${user.username}`;
         click = () => {

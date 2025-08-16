@@ -10,6 +10,7 @@ import UserIcon from "./UserIcon";
 import showUserContextMenu from "./context-menus/userContextMenu";
 import { useTranslation } from "react-i18next";
 import showFriendsPage from "../app-pages/FriendsPage";
+import Words from "../dawn-ui/components/Words";
 
 export default function DmBar(props: {
   selected: Channel | null;

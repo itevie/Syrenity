@@ -9,7 +9,7 @@ import { client, wrapLoading } from "../../App";
 import { units } from "../../dawn-ui/time";
 import { makeListener } from "../../dawn-ui/util";
 import ChannelName from "./ChannelName";
-import GoogleMatieralIcon from "../../dawn-ui/components/GoogleMaterialIcon";
+import GoogleMaterialIcon from "../../dawn-ui/components/GoogleMaterialIcon";
 import Row from "../../dawn-ui/components/Row";
 
 export type ExtraMessage = Message & { shouldInline?: boolean };
@@ -27,64 +27,57 @@ const channelCache = new Map<number, ChannelCache>();
 const SCROLL_THRESHOLD = 100;
 const SCROLL_RATELIMIT = units.second / 4;
 
-function fixMessageInlination(messages: Message[]): ExtraMessage[] {
-  return messages.map<ExtraMessage>((v, i, a) => {
-    let shouldInline = false;
+/**
+ * Computes inline flags for messages (same author within 5 minutes).
+ */
+function computeInlineFlags(messages: Message[]): ExtraMessage[] {
+  return messages.map((msg, i, arr) => {
+    const prev = arr[i - 1];
+    const shouldInline =
+      i > 0 &&
+      prev.authorId === msg.authorId &&
+      msg.createdAt.getTime() - prev.createdAt.getTime() < units.minute * 5;
 
-    if (i !== 0) {
-      if (
-        v.createdAt.getTime() - a[i - 1].createdAt.getTime() <
-          units.minute * 5 &&
-        a[i - 1].authorId === v.authorId
-      ) {
-        shouldInline = true;
-      }
-    }
-
-    (v as any).shouldInline = shouldInline;
-    return v as ExtraMessage;
+    (msg as ExtraMessage).shouldInline = shouldInline;
+    return msg as ExtraMessage;
   });
 }
 
+/**
+ * Loads older messages for a given channel and updates the cache.
+ */
 async function loadMoreMessages(channel: Channel): Promise<ChannelCache> {
   const cache = channelCache.get(channel.id);
   if (!cache) {
-    throw `Cache for ${channel.id} was undefined!`;
+    throw new Error(`Cache for channel ${channel.id} is undefined!`);
   }
 
-  // Check if it should load more
+  // Prevent spamming loads
   if (cache.done) {
-    logger.warn(
-      `Not loading more messages for ${channel.id} as it is marked as done`,
-    );
+    logger.warn(`Not loading more messages for ${channel.id}: already done`);
     return cache;
   }
-
   if (cache.timestamp && Date.now() - cache.timestamp <= SCROLL_RATELIMIT) {
-    logger.warn(
-      `Not loading more messages for ${channel.id} as the timestamp is too soon`,
-    );
+    logger.warn(`Skipping load: throttled for ${channel.id}`);
     return cache;
   }
 
+  cache.timestamp = Date.now();
   logger.log(
-    `Loading more messages for channel ${channel.id} starting at message ${cache.last}`,
+    `Loading more messages for channel ${channel.id} starting at ${cache.last}`,
   );
 
-  // Set last
-  cache.timestamp = Date.now();
-
-  // Load them
   const newMessages = await wrapLoading(
     channel.messages.query(cache.last ? { startAt: cache.last } : {}),
   );
+
   newMessages.reverse();
   logger.log(`Loaded ${newMessages.length} messages for channel ${channel.id}`);
 
-  // Update
-  cache.messages = fixMessageInlination([...newMessages, ...cache.messages]);
+  const combined = [...newMessages, ...cache.messages];
+  cache.messages = computeInlineFlags(combined);
 
-  if (!newMessages.length) {
+  if (newMessages.length === 0) {
     cache.done = true;
     cache.last = null;
     logger.log(`Reached end of messages for channel ${channel.id}`);
@@ -95,106 +88,78 @@ async function loadMoreMessages(channel: Channel): Promise<ChannelCache> {
   return cache;
 }
 
-export default function ChannelContent({
-  channel,
-}: {
-  channel: Channel | null;
-}) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [isDone, setIsDone] = useState<boolean>(false);
-  const [editing, setEditing] = useState<number | null>(null);
+function useChannelMessages(channel: Channel | null) {
+  const [messages, setMessages] = useState<ExtraMessage[]>([]);
+  const [isDone, setIsDone] = useState(false);
 
-  const messageAreaRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  const scrollToBottom = useCallback(
-    (delay: number = 100, force: boolean = false) => {
-      setTimeout(() => {
-        if (
-          !force &&
-          (messageAreaRef.current?.scrollTop ?? 0) < SCROLL_THRESHOLD
-        )
-          return;
-
-        messageAreaRef.current?.scrollTo({
-          top: messageAreaRef.current.scrollHeight,
-        });
-      }, delay);
-    },
-    [channel],
+  // Keep a stable getter for cache
+  const getCache = useCallback(
+    (channelId?: number) => channelCache.get(channelId ?? channel?.id ?? -1),
+    [channel?.id],
   );
 
-  async function _loadMoreMessages(channel: Channel) {
-    const result = await loadMoreMessages(channel);
-    setData(result);
-  }
-
-  function setData(cache: ChannelCache) {
-    setIsDone(cache.done);
-    setMessages(cache.messages);
-  }
-
-  // For initial load of the channel
+  // Initial load and channel switch
   useEffect(() => {
-    if (!channel) return setMessages([]);
+    if (!channel) {
+      setMessages([]);
+      setIsDone(false);
+      return;
+    }
 
     logger.log(`Loading channel ${channel.id}`);
 
-    let getCache = (channelId?: number) =>
-      channelCache.get(channelId ?? channel.id);
-
-    if (getCache() === undefined) {
-      channelCache.set(channel.id, {
-        done: false,
-        messages: [],
-        timestamp: null,
-        last: null,
-      } as ChannelCache);
-      _loadMoreMessages(channel).then(() => {
-        scrollToBottom(100, true);
+    let cache = getCache();
+    if (!cache) {
+      cache = { done: false, messages: [], timestamp: null, last: null };
+      channelCache.set(channel.id, cache);
+      loadMoreMessages(channel).then((result) => {
+        setMessages(result.messages);
+        setIsDone(result.done);
       });
     } else {
-      setData(getCache()!);
+      setMessages(cache.messages);
+      setIsDone(cache.done);
     }
-    scrollToBottom(100, true);
+
+    // Message listeners
+    const updateMessage = (m: Message) => {
+      const c = getCache(m.channelID);
+      if (!c) return;
+
+      const idx = c.messages.findIndex((x) => x.id === m.id);
+      if (idx !== -1) {
+        (m as ExtraMessage).shouldInline = c.messages[idx].shouldInline;
+        c.messages[idx] = m as ExtraMessage;
+        setMessages([...c.messages]);
+      }
+    };
 
     const messageCreate = makeListener(
       client,
       "messageCreate",
       (m: Message) => {
-        let cache = getCache(m.channelID);
-        if (!cache) return;
-        cache.messages.push(m);
-        setMessages([...cache.messages]);
-        scrollToBottom();
+        const c = getCache(m.channelID);
+        if (!c) return;
+        c.messages = computeInlineFlags([...c.messages, m]);
+        setMessages([...c.messages]);
       },
     );
 
-    function makeUpdate(m: Message) {
-      let cache = getCache(m.channelID);
-      if (!cache) return;
-      const index = cache.messages.findIndex((x) => x.id === m.id);
-      if (index) {
-        cache.messages[index] = m as ExtraMessage;
-      }
-      setMessages([...cache.messages]);
-      scrollToBottom();
-    }
-
-    const messageEdit = makeListener(client, "messageUpdate", (m: Message) => {
-      makeUpdate(m);
-    });
+    const messageEdit = makeListener(client, "messageUpdate", updateMessage);
 
     const messageDelete = makeListener(
       client,
       "messageDelete",
       (messageId: number, channelId: number) => {
-        let cache = getCache(channelId);
-        if (!cache) return;
-        const index = cache.messages.findIndex((x) => x.id === messageId);
-        if (index) {
-          cache.messages.splice(index, 1);
-          setMessages([...cache.messages]);
+        const c = getCache(channelId);
+        if (!c) return;
+        const idx = c.messages.findIndex((x) => x.id === messageId);
+        if (idx !== -1) {
+          c.messages = [
+            ...c.messages.slice(0, idx),
+            ...c.messages.slice(idx + 1),
+          ];
+          setMessages([...c.messages]);
         }
       },
     );
@@ -202,17 +167,13 @@ export default function ChannelContent({
     const messageReactionAdd = makeListener(
       client,
       "messageReactionAdd",
-      (_, m: Message) => {
-        makeUpdate(m);
-      },
+      (_, m: Message) => updateMessage(m),
     );
 
     const messageReactionRemove = makeListener(
       client,
       "messageReactionRemove",
-      (_, m: Message) => {
-        makeUpdate(m);
-      },
+      (_, m: Message) => updateMessage(m),
     );
 
     return () => {
@@ -222,53 +183,78 @@ export default function ChannelContent({
       client.removeListener("messageReactionAdd", messageReactionAdd);
       client.removeListener("messageReactionRemove", messageReactionRemove);
     };
-  }, [channel]);
+  }, [channel, getCache]);
 
-  // For detecting scrolls
+  return { messages, isDone, getCache, setMessages, setIsDone };
+}
+
+export default function ChannelContent({
+  channel,
+}: {
+  channel: Channel | null;
+}) {
+  const { messages, isDone, getCache, setMessages, setIsDone } =
+    useChannelMessages(channel);
+
+  const [editing, setEditing] = useState<number | null>(null);
+  const messageAreaRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const scrollToBottom = useCallback(
+    (delay = 100, force = false) => {
+      setTimeout(() => {
+        if (
+          !force &&
+          (messageAreaRef.current?.scrollTop ?? 0) < SCROLL_THRESHOLD
+        ) {
+          return;
+        }
+        messageAreaRef.current?.scrollTo({
+          top: messageAreaRef.current.scrollHeight,
+        });
+      }, delay);
+    },
+    [channel?.id],
+  );
+
+  // Handle infinite scroll
   useEffect(() => {
-    if (channel)
-      if (channel.type === "dm") {
-        window.history.pushState(null, "", `/channels/@me/${channel.id}`);
-      } else {
-        window.history.pushState(
-          null,
-          "",
-          `/channels/${channel.guildId}/${channel.id}`,
-        );
-      }
+    const handleScroll = () => {
+      const area = messageAreaRef.current;
+      if (!channel || !area) return;
 
-    const handleScroll = async () => {
-      const messageArea = messageAreaRef.current;
-      if (!messageArea || !channel) return;
+      if (area.scrollTop < SCROLL_THRESHOLD) {
+        const prevHeight = area.scrollHeight;
+        loadMoreMessages(channel).then((result) => {
+          setMessages(result.messages);
+          setIsDone(result.done);
 
-      if (messageArea.scrollTop < SCROLL_THRESHOLD) {
-        const prevHeight = messageArea.scrollHeight;
-        _loadMoreMessages(channel).then(() => {
           setTimeout(() => {
-            messageArea.scrollTop = messageArea.scrollHeight - prevHeight;
+            area.scrollTop = area.scrollHeight - prevHeight;
           }, 20);
         });
       }
     };
 
-    if (messageAreaRef.current)
-      messageAreaRef.current.addEventListener("wheel", handleScroll);
-
+    const area = messageAreaRef.current;
+    area?.addEventListener("scroll", handleScroll);
     return () => {
-      messageAreaRef.current?.removeEventListener("wheel", handleScroll);
+      area?.removeEventListener("scroll", handleScroll);
     };
-  }, [channel]);
+  }, [channel?.id, setMessages, setIsDone]);
 
+  // Handle sending/editing
   async function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    let value = e.currentTarget.value.trim();
+    const value = e.currentTarget.value.trim();
 
     if (e.key === "Enter" && !e.shiftKey) {
-      if (!value.length) return;
+      if (!value) return;
       e.preventDefault();
 
       (e.target as HTMLTextAreaElement).value = "";
       await channel?.messages.send(value);
-    } else if (e.key === "ArrowUp" && value.length === 0) {
+      scrollToBottom();
+    } else if (e.key === "ArrowUp" && !value) {
       const past = messages
         .filter((x) => x.authorId === client.user?.id)
         .sort((a, b) => b.id - a.id);
@@ -282,50 +268,49 @@ export default function ChannelContent({
       style={{ overflow: "hidden", maxHeight: "100vh" }}
       className="sy-chat-content"
     >
+      {/* Top bar */}
       <Row
         util={["no-shrink", "justify-center", "align-center"]}
         className="sy-topbar"
       >
         {!channel ? "Loading..." : <ChannelName channel={channel} />}
-        <GoogleMatieralIcon name="search" />
-        <GoogleMatieralIcon name="search" />
+        <GoogleMaterialIcon name="search" />
       </Row>
+
+      {/* Messages area */}
       <div
         ref={messageAreaRef}
         className="sy-chatarea dawn-column flex-grow"
-        style={{
-          padding: "10px",
-          overflowX: "hidden",
-          overflowY: "auto",
-          gap: "0px",
-        }}
+        style={{ padding: "10px", overflowX: "hidden", overflowY: "auto" }}
       >
         {isDone && <label>You've reached the end - go away.</label>}
-        {fixMessageInlination(messages || []).map((x) => (
+        {messages.map((msg) => (
           <MessageC
+            key={msg.id}
+            message={msg}
+            editing={editing === msg.id}
             scrollDown={(amount) => {
               if (messageAreaRef.current) {
                 messageAreaRef.current.scrollTop += amount;
               }
             }}
-            editing={editing === x.id}
-            setEditing={async (e) => {
-              if (x.authorId !== client.user?.id) return;
+            setEditing={async (val) => {
+              if (msg.authorId !== client.user?.id) return;
 
-              if (e === true) {
-                setEditing(x.id);
+              if (val === true) {
+                setEditing(msg.id);
               } else {
                 setEditing(null);
-                if (e !== null) {
-                  await x.edit(e);
+                if (val !== null) {
+                  await msg.edit(val);
                 }
               }
             }}
-            key={x.id}
-            message={x}
           />
         ))}
       </div>
+
+      {/* Input */}
       <ChatBar inputRef={inputRef} onKey={handleKeyDown} />
     </Column>
   );

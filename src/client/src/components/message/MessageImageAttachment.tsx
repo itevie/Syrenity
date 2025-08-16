@@ -1,6 +1,7 @@
 import { useState } from "react";
-import showImageContextMenu from "./context-menus/imageContextMenu";
-import { fallbackImage } from "../config";
+import showImageContextMenu from "../context-menus/imageContextMenu";
+import { fallbackImage } from "../../config";
+import { setFullscreenImage } from "../../dawn-ui/components/ImageViewer";
 
 interface MessageImageAttachmentProps {
   url: string;

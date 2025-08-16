@@ -1,4 +1,4 @@
-import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
+import EmojiPicker, { EmojiClickData, Theme } from "emoji-picker-react";
 import { HTMLAttributes } from "react";
 
 export default function SyEmojiPicker({
@@ -11,6 +11,7 @@ export default function SyEmojiPicker({
   return (
     <EmojiPicker
       style={style}
+      theme={Theme.DARK}
       onEmojiClick={(emoji) => {
         select(emoji);
       }}

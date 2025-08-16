@@ -10,6 +10,7 @@ import { uploadImageAlert } from "../alerts/uploadImage";
 import "./chat-bar.css";
 import { useTranslation } from "react-i18next";
 import SyEmojiPicker from "../EmojiPicker";
+import Words from "../../dawn-ui/components/Words";
 
 function readFileAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -70,6 +71,7 @@ export default function ChatBar({
 
   return (
     <div className="sy-messageinput-container">
+      Test is typing
       <Row
         util={[
           "no-shrink",

@@ -15,7 +15,7 @@ export interface DatabaseUser {
   password: string;
   email: string;
   email_verified: boolean;
-  discriminator: number;
+  discriminator: string;
   avatar: string | null;
   created_at: Date;
   is_bot: boolean;
@@ -166,6 +166,11 @@ export default class SyUser {
     password: string,
   ): Promise<SyUser> {
     const user = await SyUser.fetchByEmail(email);
+    console.log(
+      user.fullData.password,
+      password,
+      await bcrypt.compare(password, user.fullData.password),
+    );
     if (!(await bcrypt.compare(password, user.fullData.password))) {
       throw new AuthenticationError({
         errorCode: "NotLoggedIn",

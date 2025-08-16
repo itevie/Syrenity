@@ -46,6 +46,11 @@ export interface WebsocketDispatchTypes {
     channels: number[];
   };
 
+  ChannelStartTyping: {
+    channel_id: number;
+    user_id: number;
+  };
+
   UserUpdate: {
     user: StrippedDatabaseUser;
   };

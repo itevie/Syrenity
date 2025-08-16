@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { AxiosWrapper } from "../dawn-ui/util";
 import { handleClientError, isErr, isOk, wrap } from "../util";
 import SyPage from "../components/SyPage";
 import { axiosClient, baseUrl } from "../App";
@@ -27,6 +26,9 @@ export default function Invite() {
       );
 
       if (isErr(result)) {
+        // if (result.v?.response.data?.error?.code === "InvalidToken") {
+        //   return (window.location.href = `/login?cb=${window.location.href}`);
+        // }
         return handleClientError("fetch invite", result.v);
       }
 

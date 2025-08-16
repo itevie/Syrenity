@@ -53,7 +53,8 @@
       "pin": "Pin",
       "delete": "Delete",
       "react": "React",
-      "copyText": "Copy Text"
+      "copyText": "Copy Text",
+      "reply": "Reply"
     }
   },
   "dms": {

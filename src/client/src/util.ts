@@ -5,6 +5,7 @@ import { baseUrl, client } from "./App";
 import { fallbackImage } from "./config";
 import { trans } from "./i18n";
 import { TFunction } from "i18next/typescript/t";
+import { dawnUIConfig } from "./dawn-ui";
 
 export function generateAvatar(
   text: string,
@@ -52,11 +53,25 @@ export function handleClientError(what: string, error: any) {
 
 export function fixUrlWithProxy(_url: string): string {
   if (!_url) return fallbackImage;
-  const base = new URL(client.options.baseUrl || baseUrl);
+  let base;
+  try {
+    base = new URL(client.options.baseUrl || baseUrl);
+  } catch (e) {
+    showErrorAlert(
+      `Failed to get base url from ${client.options.baseUrl || baseUrl}`,
+    );
+    base = new URL(dawnUIConfig.baseLocalhostUrl);
+  }
 
   if (_url.startsWith("/")) return `${base.protocol}//${base.host}${_url}`;
 
-  const url = new URL(_url);
+  let url;
+  try {
+    url = new URL(_url);
+  } catch {
+    url = new URL(dawnUIConfig.imageFallback);
+  }
+
   if (base.host === url.host) return url.toString();
   else return `${base.protocol}//${base.host}/api/proxy?url=${url}`;
 }

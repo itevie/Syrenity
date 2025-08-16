@@ -9,6 +9,7 @@ passport.use(
       try {
         // Fetch the user by their email
         const user = await SyUser.fetchByEmail(username);
+        console.log(user, username, password);
 
         // Check passwords
         if ((await bcrypt.compare(password, user.fullData.password)) === false)
@@ -21,8 +22,8 @@ passport.use(
         console.error(err);
         return cb(null, false);
       }
-    }
-  )
+    },
+  ),
 );
 
 passport.serializeUser((user, done) => {

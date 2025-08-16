@@ -1,13 +1,13 @@
 import { useRef } from "react";
 import Button from "../dawn-ui/components/Button";
 import Link from "../dawn-ui/components/Link";
-import { AxiosWrapper, axiosWrapper } from "../dawn-ui/util";
 import { showInfoAlert } from "../dawn-ui/components/AlertManager";
 import { baseUrl } from "../App";
 import Row from "../dawn-ui/components/Row";
 import SyPage from "../components/SyPage";
 import Container from "../dawn-ui/components/Container";
 import { handleClientError, isErr, wrap } from "../util";
+import { AxiosWrapper } from "../dawn-ui/axios";
 
 export default function Register() {
   const usernameRef = useRef<HTMLInputElement>(null);
@@ -27,14 +27,14 @@ export default function Register() {
           username,
           email,
           password,
-        })
+        }),
       );
 
       if (isErr(result)) {
         handleClientError("register", result.v);
       } else {
         showInfoAlert(
-          `Welcome to Syrenity, ${result.v.data.username}#${result.v.data.discriminator}!`
+          `Welcome to Syrenity, ${result.v.data.username}#${result.v.data.discriminator}!`,
         );
         setTimeout(() => {
           window.location.href = "/login";

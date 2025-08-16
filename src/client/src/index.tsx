@@ -1,6 +1,6 @@
 import "./i18n";
 import ReactDOM from "react-dom/client";
-import App, { baseUrl } from "./App";
+import App from "./App";
 import "./dawn-ui/index";
 import "./style/main.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -15,7 +15,6 @@ import PageManager from "./components/PageManager";
 import AllUtilities from "./dawn-ui/AllUtilities";
 import UserViewerManager from "./components/UserViewerManager";
 import ForgotPassword from "./pages/ForgotPassword";
-import { AxiosWrapper } from "./dawn-ui/util";
 
 const router = createBrowserRouter(
   [

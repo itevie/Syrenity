@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { HTMLAttributes, useEffect, useState } from "react";
 import { client } from "../../App";
 import { showLoadingAlert } from "../../dawn-ui/components/AlertManager";
 import GoogleMatieralIcon from "../../dawn-ui/components/GoogleMaterialIcon";
@@ -9,6 +9,7 @@ import showEmojiPickerAlert from "../alerts/emojiPickerAlert";
 import { uploadImageAlert } from "../alerts/uploadImage";
 import "./chat-bar.css";
 import { useTranslation } from "react-i18next";
+import SyEmojiPicker from "../EmojiPicker";
 
 function readFileAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -31,6 +32,9 @@ export default function ChatBar({
   inputRef: React.RefObject<HTMLTextAreaElement>;
   onKey: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }) {
+  const [emojiPicker, setEmojiPicker] = useState<
+    HTMLAttributes<HTMLDivElement>["style"] | null
+  >(null);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -104,15 +108,27 @@ export default function ChatBar({
           className="sy-messageinput-input"
           onKeyUp={onKey}
         />
+        {emojiPicker && (
+          <SyEmojiPicker
+            style={emojiPicker}
+            select={(emoji) => {
+              if (inputRef.current) inputRef.current.value += emoji.emoji;
+            }}
+          />
+        )}
         <GoogleMatieralIcon
           name="mood"
           util={["clickable"]}
           onClick={() => {
-            showEmojiPickerAlert({
-              select: (emoji) => {
-                if (inputRef.current) inputRef.current.value += emoji.emoji;
-              },
-            });
+            setEmojiPicker(
+              emojiPicker !== null
+                ? null
+                : {
+                    position: "absolute",
+                    right: 0,
+                    bottom: "75px",
+                  },
+            );
           }}
         />
       </Row>

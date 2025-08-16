@@ -1,16 +1,7 @@
 import { useEffect, useState } from "react";
 import User, { UserAPIData } from "../syrenity-client/structures/User";
 import Fullscreen from "../dawn-ui/components/Fullscreen";
-import Container from "../dawn-ui/components/Container";
-import UserIcon from "./UserIcon";
-import Words, { TextType } from "../dawn-ui/components/Words";
-import Column from "../dawn-ui/components/Column";
-import Row from "../dawn-ui/components/Row";
-import Tabbed from "../dawn-ui/components/Tabbed";
-import { setFullscreenImage } from "./ImageViewer";
 import { useAppSelector } from "../stores/store";
-import File from "../syrenity-client/structures/File";
-import { fixUrlWithProxy } from "../util";
 import "./userViewer.css";
 import UserViewer from "./UserViewer";
 

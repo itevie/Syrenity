@@ -9,6 +9,8 @@ import { client, wrapLoading } from "../../App";
 import { units } from "../../dawn-ui/time";
 import { makeListener } from "../../dawn-ui/util";
 import ChannelName from "./ChannelName";
+import GoogleMatieralIcon from "../../dawn-ui/components/GoogleMaterialIcon";
+import Row from "../../dawn-ui/components/Row";
 
 export type ExtraMessage = Message & { shouldInline?: boolean };
 
@@ -23,6 +25,7 @@ const logger = new Logger("channel-messages");
 const channelCache = new Map<number, ChannelCache>();
 
 const SCROLL_THRESHOLD = 100;
+const SCROLL_RATELIMIT = units.second / 4;
 
 function fixMessageInlination(messages: Message[]): ExtraMessage[] {
   return messages.map<ExtraMessage>((v, i, a) => {
@@ -57,7 +60,7 @@ async function loadMoreMessages(channel: Channel): Promise<ChannelCache> {
     return cache;
   }
 
-  if (cache.timestamp && Date.now() - cache.timestamp <= units.second) {
+  if (cache.timestamp && Date.now() - cache.timestamp <= SCROLL_RATELIMIT) {
     logger.warn(
       `Not loading more messages for ${channel.id} as the timestamp is too soon`,
     );
@@ -133,7 +136,8 @@ export default function ChannelContent({
 
   // For initial load of the channel
   useEffect(() => {
-    if (!channel) return;
+    if (!channel) return setMessages([]);
+
     logger.log(`Loading channel ${channel.id}`);
 
     let getCache = (channelId?: number) =>
@@ -278,9 +282,14 @@ export default function ChannelContent({
       style={{ overflow: "hidden", maxHeight: "100vh" }}
       className="sy-chat-content"
     >
-      <Column util={["no-shrink", "justify-center"]} className="sy-topbar">
+      <Row
+        util={["no-shrink", "justify-center", "align-center"]}
+        className="sy-topbar"
+      >
         {!channel ? "Loading..." : <ChannelName channel={channel} />}
-      </Column>
+        <GoogleMatieralIcon name="search" />
+        <GoogleMatieralIcon name="search" />
+      </Row>
       <div
         ref={messageAreaRef}
         className="sy-chatarea dawn-column flex-grow"

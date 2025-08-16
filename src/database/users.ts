@@ -49,7 +49,9 @@ const _actions = {
     email: string,
     password: string,
   ): Promise<FullUser> {
-    const user = await this.getByEmail(email);
+    const user = await _actions.getByEmail(email);
+
+    console.log(user.password, password);
     if (!(await bcrypt.compare(password, user.password))) {
       throw new AuthenticationError({
         errorCode: "NotLoggedIn",

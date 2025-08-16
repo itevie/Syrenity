@@ -93,13 +93,15 @@ export default async (
       route.path !== "/auth/register"
     ) {
       try {
-        const user = await database.users.validateEmailPassword(
+        const user = await SyUser.fetchByEmailAndPassword(
           req.body.email,
           req.body.password,
         );
+        console.log(user);
         req.login(user, () => {});
-        req.user = user;
-      } catch {
+        req.user = user.fullData;
+      } catch (e) {
+        console.log(e);
         return res.status(401).send(
           new AuthenticationError({
             message: "Invalid email and password in body",

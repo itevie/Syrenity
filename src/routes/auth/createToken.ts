@@ -2,6 +2,11 @@ import database from "../../database/database";
 import SyToken from "../../models/Token";
 import { RouteDetails } from "../../types/route";
 
+interface GetTokenBody {
+  email: string;
+  password: string;
+}
+
 const handler: RouteDetails = {
   path: "/auth/get-token",
   method: "POST",

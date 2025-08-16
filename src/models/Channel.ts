@@ -67,6 +67,17 @@ export default class SyChannel {
     return this;
   }
 
+  public async startTyping(user: number): Promise<void> {
+    send({
+      type: "ChannelStartTyping",
+      guild: this.data.guild_id,
+      payload: {
+        channel_id: this.data.id,
+        user_id: user,
+      },
+    });
+  }
+
   public async edit(options: UpdateChannelOptions) {
     const setClause = Object.entries(options)
       .map((x, i) => `${x[0]} = $${i + 2}`)

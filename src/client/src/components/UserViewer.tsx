@@ -5,11 +5,12 @@ import Tabbed from "../dawn-ui/components/Tabbed";
 import Words, { TextType } from "../dawn-ui/components/Words";
 import { useAppSelector } from "../stores/store";
 import { fixUrlWithProxy } from "../util";
-import { setFullscreenImage } from "./ImageViewer";
 import UserIcon from "./UserIcon";
 import File from "../syrenity-client/structures/File";
 import { useTranslation } from "react-i18next";
 import DateText from "./DateText";
+import { setFullscreenImage } from "../dawn-ui/components/ImageViewer";
+import showImageContextMenu from "./context-menus/imageContextMenu";
 
 export default function UserViewer({ userId }: { userId: number }) {
   const users = useAppSelector((x) => x.users);
@@ -23,9 +24,12 @@ export default function UserViewer({ userId }: { userId: number }) {
             className="sy-user-viewer-banner clickable"
             src={fixUrlWithProxy(File.check(users[userId].profile_banner))}
             onClick={() => {
-              setFullscreenImage(
-                fixUrlWithProxy(File.check(users[userId].profile_banner)),
-              );
+              setFullscreenImage({
+                image: fixUrlWithProxy(
+                  File.check(users[userId].profile_banner),
+                ),
+                onContextMenu: showImageContextMenu,
+              });
             }}
           ></img>
         ) : (
@@ -38,9 +42,10 @@ export default function UserViewer({ userId }: { userId: number }) {
             size="128px"
             quality={512}
             onClick={() => {
-              setFullscreenImage(
-                fixUrlWithProxy(File.check(users[userId].avatar)),
-              );
+              setFullscreenImage({
+                image: fixUrlWithProxy(File.check(users[userId].avatar)),
+                onContextMenu: showImageContextMenu,
+              });
             }}
           />
           <Row

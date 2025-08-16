@@ -108,6 +108,9 @@ export default function parse(tokens: Token[]): MarkdownParseResult {
     type: TokenType[],
     also?: Token[],
   ): [false, JSX.Element] | [true, Token] {
+    if (end()) {
+      return [false, combine([...(also || [])])];
+    }
     if (type.includes(at().type)) {
       return [true, eat()!];
     } else {

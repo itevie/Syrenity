@@ -1,8 +1,7 @@
 import { useRef } from "react";
 import Button from "../dawn-ui/components/Button";
 import Link from "../dawn-ui/components/Link";
-import { axiosWrapper } from "../dawn-ui/util";
-import { axiosClient, baseUrl } from "../App";
+import { axiosClient } from "../App";
 import SyPage from "../components/SyPage";
 import {
   showErrorAlert,
@@ -22,6 +21,19 @@ export default function Login() {
     const email = emailRef.current?.value;
     const password = passwordRef.current?.value;
 
+    // const loginResult = await wrap(
+    //   axiosClient.post("/auth/password", {
+    //     email,
+    //     password,
+    //   }),
+    // );
+
+    // console.log(loginResult);
+
+    // if (isErr(loginResult)) {
+    //   return handleClientError("login", loginResult.v);
+    // }
+
     const result = await wrap(
       axiosClient.post("/auth/get-token", {
         email,
@@ -36,7 +48,7 @@ export default function Login() {
           trans("login.invalidPassword.body"),
         );
       } else {
-        handleClientError("login", result.v);
+        handleClientError("make token", result.v);
       }
       return;
     }

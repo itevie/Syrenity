@@ -1,8 +1,7 @@
 import { useRef, useState } from "react";
 import Button from "../dawn-ui/components/Button";
 import Link from "../dawn-ui/components/Link";
-import { axiosWrapper } from "../dawn-ui/util";
-import { axiosClient, baseUrl } from "../App";
+import { axiosClient } from "../App";
 import SyPage from "../components/SyPage";
 import { showInfoAlert } from "../dawn-ui/components/AlertManager";
 import Row from "../dawn-ui/components/Row";

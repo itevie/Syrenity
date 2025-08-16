@@ -12,12 +12,14 @@ import { handleServers } from "./stores/serverStore";
 import ChannelBar from "./components/ChannelBar";
 import ChannelContent from "./components/channel-content/ChannelContent";
 import { addChannels } from "./stores/channelStore";
-import ImageViewer from "./components/ImageViewer";
+import ImageViewer from "./dawn-ui/components/ImageViewer";
 import Logger from "./dawn-ui/Logger";
-import { showLoadingAlert } from "./dawn-ui/components/AlertManager";
+import {
+  showInputAlert,
+  showLoadingAlert,
+} from "./dawn-ui/components/AlertManager";
 import FullscreenLoader from "./components/FullscreenLoader";
 import DmBar from "./components/DmBar";
-import { AxiosWrapper } from "./dawn-ui/util";
 import { handleClientError, isErr, wrap } from "./util";
 import { setUserViewerUser } from "./components/UserViewerManager";
 import Column from "./dawn-ui/components/Column";
@@ -28,26 +30,37 @@ import { useAppSelector } from "./stores/store";
 import { showSelfContextMenu } from "./components/context-menus/selfContextMenu";
 import GoogleMatieralIcon from "./dawn-ui/components/GoogleMaterialIcon";
 import showSettingsPage from "./app-pages/SettingsPage";
-import {
+import CommandPaletteManager, {
   CommandPaletteProviderManager,
   fuzzy,
 } from "./dawn-ui/components/CommandPaletteManager";
+import { AxiosWrapper } from "./dawn-ui/axios";
+import { dawnUIConfig } from "./dawn-ui";
 
 export const baseUrl =
-  window.location.hostname === "localhost"
+  localStorage.getItem("api-url") ??
+  (window.location.hostname === "localhost"
     ? "http://localhost:3000"
-    : `${window.location.protocol}//${window.location.host}`;
+    : `${window.location.protocol}//${window.location.host}`);
+dawnUIConfig.baseLocalhostUrl = baseUrl;
 
 export const axiosClient = new AxiosWrapper();
 axiosClient.noErrorMessage = true;
-axiosClient.config.headers = {
-  Authorization: `Token ${localStorage.getItem("token") as string}`,
-};
+if (localStorage.getItem("token"))
+  axiosClient.config.headers = {
+    Authorization: `Token ${localStorage.getItem("token") as string}`,
+  };
 axiosClient.config.baseURL = baseUrl;
+
+const BASE_HUE = "30";
 
 document.body.style.setProperty(
   "--sy-base-color",
-  localStorage.getItem("sy-app-hue") ?? "300",
+  localStorage.getItem("sy-app-hue") ?? BASE_HUE,
+);
+document.body.style.setProperty(
+  "--dawn-accent-base-color",
+  localStorage.getItem("sy-app-hue") ?? BASE_HUE,
 );
 
 export let client: Client;
@@ -64,6 +77,27 @@ export function addLoading() {
 export function decLoading() {
   loading -= 1;
 }
+
+CommandPaletteProviderManager.register({
+  name: "Syrenity Shortcuts",
+  exec: (query: string) => {
+    if (fuzzy("change api url").match(query)) {
+      return [
+        {
+          name: "Change API Url",
+          icon: undefined,
+          callback: async () => {
+            let n = await showInputAlert("Enter new URL");
+            if (n) localStorage.setItem("api-url", n);
+            window.location.reload();
+          },
+        },
+      ];
+    } else {
+      return [];
+    }
+  },
+});
 
 export function wrapLoading<T>(x: Promise<T>): Promise<T> {
   return new Promise<T>((resolve, reject) => {
@@ -84,7 +118,6 @@ function App() {
   const [selectedServer, setSelectedServer] = useState<Server | "@me" | null>(
     null,
   );
-  const [channels, setChannels] = useState<Channel[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
 
   const [showLoader, setShowLoader] = useState<boolean>(true);
@@ -203,37 +236,51 @@ function App() {
   }, []);
 
   async function loadServer(id: number | "@me") {
+    // Check type of server
     logger.log(`Loading server ${id}`);
     if (id === "@me") {
       setSelectedServer("@me");
       return;
     }
 
+    // Load server & channels
     let server = await wrap(client.servers.fetch(id));
     if (isErr(server)) {
       handleClientError("load server", server.v);
     } else {
       setSelectedServer(server.v);
       let channels = await server.v.channels.fetchList();
-      setChannels(channels);
       dispatch(addChannels(channels.map((x) => x._data)));
+    }
+
+    // Check if there's a past channel
+    let past = localStorage.getItem(`prev-loaded-channel-${id}`);
+    if (past) {
+      loadChannel(parseInt(past), id);
+    } else {
+      setSelectedChannel(null);
     }
   }
 
-  async function loadChannel(id: number) {
+  async function loadChannel(id: number, server: number | "@me" | null = null) {
+    // Load channel
     let channel = await wrap(client.channels.fetch(id));
     if (isErr(channel)) {
       handleClientError("load channel", channel.v);
     } else {
       setSelectedChannel(channel.v);
-      //setSelectedChannel2(await client.channels.fetch(208));
     }
 
-    /* if (!channelContentStore.has(channel.id)) {
-      channelContentStore.set(channel.id, <ChannelContent channel={channel} />);
-    }
+    // Set the current loaded channel for the server
+    let serverId =
+      server ??
+      (selectedServer && typeof selectedServer === "object"
+        ? selectedServer.id
+        : selectedServer);
 
-    setChannelContent(channelContentStore.get(channel.id) as ReactElement);*/
+    if (serverId) {
+      localStorage.setItem(`prev-loaded-channel-${serverId}`, id.toString());
+    }
   }
 
   return (

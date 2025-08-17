@@ -10,29 +10,17 @@ const handler: RouteDetails = {
     const payload = req.body;
 
     console.log(payload);
-
     let content: string | null = null;
-    switch (payload.action) {
-      case "opened":
-        if (payload.issue) {
-          const issueTitle: string = payload.issue.title;
-          const issueBody: string | null = payload.issue.body;
-          const repoName: string = payload.repository.name;
-          const userLogin: string = payload.issue.user.login;
 
-          content = `New issue created in **${repoName}**: **${issueTitle}**\n\nBody: ${issueBody}\nCreated by: **${userLogin}**\n\nRAW: \`${JSON.stringify(payload)}\``;
-        }
-        break;
+    if (payload.pusher && payload.repository) {
+      content = `New push on **${payload.repository.full_name}**: ${payload.head_commit.message} (${payload.head_commit.url}) by **${payload.head_commit.author.username}**`;
+    } else if (payload.issue) {
+      const issueTitle: string = payload.issue.title;
+      const issueBody: string | null = payload.issue.body;
+      const repoName: string = payload.repository.name;
+      const userLogin: string = payload.issue.user.login;
 
-      case "push":
-        if (payload.repository && payload.head_commit) {
-          content = `New push on **${payload.repository.full_name}**: ${payload.head_commit.message} (${payload.head_commit.url}) by **${payload.head_commit.author.username}**\n\nRAW: \`${JSON.stringify(payload)}\``;
-        }
-        break;
-
-      default:
-        console.log(`Unhandled event type: ${payload.action}`);
-        break;
+      content = `New issue created in **${repoName}**: **${issueTitle}**\n\nBody: ${issueBody}\nCreated by: **${userLogin}**`;
     }
 
     console.log(content);

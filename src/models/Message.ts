@@ -80,7 +80,19 @@ export default class SyMessage {
         pinned_by: pinner,
       });
 
+    let channel = await this.fetchChannel();
+
     this.data = result;
+
+    send({
+      type: "MessageUpdate",
+      guild: channel.data.guild_id,
+      channel: channel.data.id,
+      payload: {
+        message: await this.expand(),
+      },
+    });
+
     return this;
   }
 

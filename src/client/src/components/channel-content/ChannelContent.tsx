@@ -132,14 +132,19 @@ const checkInterval = setInterval(() => {
     triggerRefresh();
   });
 
-  client.on("messageReactionAdd", (_, message) =>
-    updateMessage(message as Message),
-  );
-  client.on("messageReactionRemove", (_, message) =>
-    updateMessage(message as Message),
-  );
+  client.on("messageReactionAdd", (_, message) => {
+    updateMessage(message as Message);
+    triggerRefresh();
+  });
+  client.on("messageReactionRemove", (_, message) => {
+    updateMessage(message as Message);
+    triggerRefresh();
+  });
 
-  client.on("messageUpdate", updateMessage);
+  client.on("messageUpdate", (message) => {
+    updateMessage(message as Message);
+    triggerRefresh();
+  });
   client.on("messageDelete", (messageID, channelID) => {
     let cache = getCache(channelID);
 

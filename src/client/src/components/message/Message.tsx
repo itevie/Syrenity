@@ -19,6 +19,7 @@ import { client } from "../../App";
 import Button from "../../dawn-ui/components/Button";
 import { showInfoAlert } from "../../dawn-ui/components/AlertManager";
 import Icon from "../../dawn-ui/components/Icon";
+import GoogleMatieralIcon from "../../dawn-ui/components/GoogleMaterialIcon";
 
 interface MessageProps {
   message: ExtraMessage;
@@ -92,6 +93,7 @@ export default function MessageC({
                   : displayAvatar.username}
               </b>
               <Timestamp date={message.createdAt} />
+              {message.isPinned && <GoogleMatieralIcon name="pin_drop" />}
             </Row>
           )}
           {editing ? (

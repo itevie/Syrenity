@@ -11,6 +11,7 @@ import { makeListener } from "../../dawn-ui/util";
 import ChannelName from "./ChannelName";
 import GoogleMaterialIcon from "../../dawn-ui/components/GoogleMaterialIcon";
 import Row from "../../dawn-ui/components/Row";
+import User from "../../syrenity-client/structures/User";
 
 export type ExtraMessage = Message & { shouldInline?: boolean };
 
@@ -26,6 +27,8 @@ const channelCache = new Map<number, ChannelCache>();
 
 const SCROLL_THRESHOLD = 100;
 const SCROLL_RATELIMIT = units.second / 4;
+
+let lastSendTyping = 0;
 
 /**
  * Computes inline flags for messages (same author within 5 minutes).
@@ -91,6 +94,7 @@ async function loadMoreMessages(channel: Channel): Promise<ChannelCache> {
 function useChannelMessages(channel: Channel | null) {
   const [messages, setMessages] = useState<ExtraMessage[]>([]);
   const [isDone, setIsDone] = useState(false);
+  const [typing, setTyping] = useState<{ user: User; started: Date }[]>([]);
 
   // Keep a stable getter for cache
   const getCache = useCallback(
@@ -100,6 +104,7 @@ function useChannelMessages(channel: Channel | null) {
 
   // Initial load and channel switch
   useEffect(() => {
+    setTyping([]);
     if (!channel) {
       setMessages([]);
       setIsDone(false);
@@ -141,6 +146,9 @@ function useChannelMessages(channel: Channel | null) {
         const c = getCache(m.channelID);
         if (!c) return;
         c.messages = computeInlineFlags([...c.messages, m]);
+        setTyping((old) => {
+          return [...old].filter((x) => x.user.id !== m.author.id);
+        });
         setMessages([...c.messages]);
       },
     );
@@ -176,16 +184,44 @@ function useChannelMessages(channel: Channel | null) {
       (_, m: Message) => updateMessage(m),
     );
 
+    const channelStartTyping = makeListener(
+      client,
+      "channelStartTyping",
+      (c, u) => {
+        setTyping((old) => {
+          let n = [...old].filter(
+            (x) =>
+              x.user.id !== u.id &&
+              Date.now() - x.started.getTime() < units.second * 5,
+          );
+
+          return [...n, { user: u, started: new Date() }];
+        });
+      },
+    );
+
+    const timer = setInterval(() => {
+      setTyping((old) => {
+        let n = [...old].filter(
+          (x) => Date.now() - x.started.getTime() < units.second * 5,
+        );
+
+        return [...n];
+      });
+    }, 1000);
+
     return () => {
       client.removeListener("messageCreate", messageCreate);
       client.removeListener("messageUpdate", messageEdit);
       client.removeListener("messageDelete", messageDelete);
       client.removeListener("messageReactionAdd", messageReactionAdd);
       client.removeListener("messageReactionRemove", messageReactionRemove);
+      client.removeListener("channelStartTyping", channelStartTyping);
+      clearInterval(timer);
     };
   }, [channel, getCache]);
 
-  return { messages, isDone, getCache, setMessages, setIsDone };
+  return { messages, isDone, getCache, setMessages, setIsDone, typing };
 }
 
 export default function ChannelContent({
@@ -193,7 +229,7 @@ export default function ChannelContent({
 }: {
   channel: Channel | null;
 }) {
-  const { messages, isDone, getCache, setMessages, setIsDone } =
+  const { messages, isDone, getCache, setMessages, setIsDone, typing } =
     useChannelMessages(channel);
 
   const [editing, setEditing] = useState<number | null>(null);
@@ -236,10 +272,12 @@ export default function ChannelContent({
       }
     };
 
+    scrollToBottom();
+
     const area = messageAreaRef.current;
-    area?.addEventListener("scroll", handleScroll);
+    area?.addEventListener("wheel", handleScroll);
     return () => {
-      area?.removeEventListener("scroll", handleScroll);
+      area?.removeEventListener("wheel", handleScroll);
     };
   }, [channel?.id, setMessages, setIsDone]);
 
@@ -247,9 +285,15 @@ export default function ChannelContent({
   async function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     const value = e.currentTarget.value.trim();
 
+    if (Date.now() - lastSendTyping >= units.second * 3 && e.key !== "Enter") {
+      channel?.startTyping();
+      lastSendTyping = Date.now();
+    }
+
     if (e.key === "Enter" && !e.shiftKey) {
       if (!value) return;
       e.preventDefault();
+      lastSendTyping = 0;
 
       (e.target as HTMLTextAreaElement).value = "";
       await channel?.messages.send(value);
@@ -281,7 +325,12 @@ export default function ChannelContent({
       <div
         ref={messageAreaRef}
         className="sy-chatarea dawn-column flex-grow"
-        style={{ padding: "10px", overflowX: "hidden", overflowY: "auto" }}
+        style={{
+          padding: "10px",
+          overflowX: "hidden",
+          overflowY: "auto",
+          gap: "0px",
+        }}
       >
         {isDone && <label>You've reached the end - go away.</label>}
         {messages.map((msg) => (
@@ -311,7 +360,7 @@ export default function ChannelContent({
       </div>
 
       {/* Input */}
-      <ChatBar inputRef={inputRef} onKey={handleKeyDown} />
+      <ChatBar typing={typing} inputRef={inputRef} onKey={handleKeyDown} />
     </Column>
   );
 }

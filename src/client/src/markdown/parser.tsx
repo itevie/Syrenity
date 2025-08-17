@@ -1,3 +1,4 @@
+import React from "react";
 import Mention, { textToMentionType } from "../components/message/Mention";
 import { TokenType, Token } from "./lexer";
 import MessageObject from "./objects";
@@ -7,231 +8,169 @@ export interface MarkdownParseResult {
   objects: MessageObject[];
 }
 
-/**
- * Returns a JSX element based off a token
- * @param token The token to give
- * @param data The inner data, leave undefined to use token["data"]
- * @returns The JSX element created
- */
-function getElementFor(token: Token | undefined, data?: any): JSX.Element {
-  data = data ?? token!.data;
+const FORMATTING = new Set([
+  TokenType.Bold,
+  TokenType.Italic,
+  TokenType.Underscore,
+  TokenType.Strikethrough,
+  TokenType.Code,
+]);
 
-  if (token === undefined) {
-    return <label>{data}</label>;
-  }
+function isToken(x: any): x is Token {
+  return !!x && typeof x === "object" && "type" in x && "data" in x;
+}
 
-  switch (token?.type) {
+function getElementFor(token?: Token, data?: React.ReactNode): JSX.Element {
+  const content = data ?? token?.data ?? "";
+  if (!token) return <label>{content}</label>;
+
+  switch (token.type) {
     case TokenType.Bold:
-      return <b>{data}</b>;
+      return <b>{content}</b>;
     case TokenType.Italic:
-      return <i>{data}</i>;
+      return <i>{content}</i>;
     case TokenType.Underscore:
-      return <u>{data}</u>;
+      return <u>{content}</u>;
     case TokenType.Strikethrough:
-      return <del>{data}</del>;
+      return <del>{content}</del>;
     case TokenType.Code:
-      return <code>{data}</code>;
+      return <code>{content}</code>;
     default:
-      return <label>{data}</label>;
+      return <label>{content}</label>;
   }
 }
 
-/**
- * Returns a JSX element tree based off lexed tokens
- * @param tokens The tokens to create the tree off of
- * @returns The resulting JSX element
- */
 export default function parse(tokens: Token[]): MarkdownParseResult {
-  let objects: MessageObject[] = [];
-  let index = 0;
+  const objects: MessageObject[] = [];
+  let i = 0;
 
-  /**
-   * @returns The current token
-   */
-  function at(): Token {
-    if (!tokens[index])
+  const at = () => {
+    const t = tokens[i];
+    if (!t) {
       throw new Error(
-        `TRIED RUNNING AT!!!! BUT ITS AT THE END!!! prev token: ` +
-          JSON.stringify(prev()) +
-          ` WHOLE MESSAGE: ` +
-          tokens.map((x) => x.data).join(""),
+        `Unexpected end of tokens. prev: ${JSON.stringify(tokens[i - 1])} full: ${tokens
+          .map((x) => x.data)
+          .join("")}`,
       );
-    return tokens[index];
-  }
-
-  /**
-   * Removes the first element from tokens
-   * @returns The element removed
-   */
-  function eat(): Token {
-    return tokens[index++];
-  }
-
-  /**
-   * Checks if we have reached the end
-   */
-  function end(): boolean {
-    return index >= tokens.length;
-  }
-
-  /**
-   * Returns the previous token
-   */
-  function prev(): Token | undefined {
-    return tokens[index - 1];
-  }
-
-  /**
-   * Combines multiple tokens into 1 JSX element
-   * @param tokens
-   * @returns The combined element
-   */
-  function combine(tokens: (Token | JSX.Element)[]): JSX.Element {
-    return (
-      <>
-        {tokens.map((x) =>
-          typeof x === "object" && "type" in x && "data" in x
-            ? getElementFor(x)
-            : x,
-        )}
-      </>
-    );
-  }
-
-  /**
-   * Returns a token if the current token is one of type[], otherwise returns JSX element
-   * @param type The types to allow
-   * @param also The previous tokens to add onto it
-   * @returns [true, Token] if it matched, [false, JSX.Element] if it didn't, if so, it should early return
-   */
-  function expect(
-    type: TokenType[],
-    also?: Token[],
-  ): [false, JSX.Element] | [true, Token] {
-    if (end()) {
-      return [false, combine([...(also || [])])];
     }
-    if (type.includes(at().type)) {
-      return [true, eat()!];
-    } else {
-      return [false, combine([...(also || []), eat()!])];
-    }
-  }
+    return t;
+  };
+  const eat = () => tokens[i++];
+  const end = () => i >= tokens.length;
+  const prev = () => tokens[i - 1];
 
-  /**
-   * The very first part of the parser
-   */
-  function pre(): JSX.Element {
-    let parts: JSX.Element[] = [];
-    while (!end()) {
-      parts.push(base());
-    }
+  const combine = (parts: (Token | JSX.Element)[]) => (
+    <>
+      {parts.map((p, idx) =>
+        isToken(p) ? (
+          getElementFor(p)
+        ) : (
+          <React.Fragment key={idx}>{p}</React.Fragment>
+        ),
+      )}
+    </>
+  );
+
+  type ExpectResult =
+    | { ok: true; token: Token }
+    | { ok: false; node: JSX.Element };
+  const expect = (
+    types: TokenType[],
+    extra?: (Token | JSX.Element)[],
+  ): ExpectResult => {
+    if (end()) return { ok: false, node: combine(extra ?? []) };
+    if (types.includes(at().type)) return { ok: true, token: eat()! };
+    return { ok: false, node: combine([...(extra ?? []), eat()!]) };
+  };
+
+  function parseAll(): JSX.Element {
+    const parts: JSX.Element[] = [];
+    while (!end()) parts.push(parseBase());
     return <>{parts}</>;
   }
 
-  /**
-   * Base things like bold, italic
-   */
-  function base(): JSX.Element {
-    if (
-      [
-        TokenType.Bold,
-        TokenType.Italic,
-        TokenType.Underscore,
-        TokenType.Strikethrough,
-        TokenType.Code,
-      ].includes(at().type)
-    ) {
-      let t = eat();
-      let inner: JSX.Element[] = [];
-
-      while (!end() && at().type !== t?.type) {
-        inner.push(base());
-      }
-
-      if (!end() && at()?.type === t?.type) eat();
-      return getElementFor(t, inner);
-    } else {
-      return mention();
+  function parseBase(): JSX.Element {
+    const t = at();
+    if (FORMATTING.has(t.type)) {
+      const opener = eat();
+      const inner: JSX.Element[] = [];
+      while (!end() && at().type !== opener.type) inner.push(parseBase());
+      if (!end() && at().type === opener.type) eat();
+      return getElementFor(opener, inner);
     }
+    return parseMention();
   }
 
-  /**
-   * Mentions
-   */
-  function mention(): JSX.Element {
-    if (at()?.type === TokenType.OpenAngle) {
-      // Get mention type [@]
-      let _1 = eat()!;
-      let mentionType = expect(
-        [TokenType.At, TokenType.Hashtag, TokenType.File],
-        [_1],
-      );
-      if (!mentionType[0]) return mentionType[1];
+  function parseMention(): JSX.Element {
+    if (at().type !== TokenType.OpenAngle) return parseLast();
 
-      // Get ID
-      let idTok = expect([TokenType.Text], [_1, mentionType[1]]);
-      if (!idTok[0]) return idTok[1];
+    const open = eat()!;
+    const mentionType = expect(
+      [TokenType.At, TokenType.Hashtag, TokenType.File],
+      [open],
+    );
+    if (!mentionType.ok) return mentionType.node;
 
-      // Get closing
-      let closing = expect(
-        [TokenType.CloseAngle],
-        [_1, mentionType[1], idTok[1]],
-      );
-      if (!closing[0]) return closing[1];
+    const idTok = expect([TokenType.Text], [open, mentionType.token]);
+    if (!idTok.ok) return idTok.node;
 
-      if (mentionType[1].type === TokenType.At)
+    const closing = expect(
+      [TokenType.CloseAngle],
+      [open, mentionType.token, idTok.token],
+    );
+    if (!closing.ok) return closing.node;
+
+    const id = idTok.token.data.trim();
+
+    if (mentionType.token.type === TokenType.At) {
+      if (id === "everyone") {
+        objects.push({ type: "mention", userId: -1, isEveryone: true });
+      } else {
         objects.push({
           type: "mention",
-          userId: parseInt(idTok[1].data),
+          userId: parseInt(id, 10),
           isEveryone: false,
         });
-      else if (mentionType[1].type === TokenType.File)
-        objects.push({
-          type: "file",
-          fileId: idTok[1].data,
-        });
-
-      return (
-        <Mention
-          type={textToMentionType(mentionType[1].data)}
-          id={idTok[1].data.trim()}
-        />
-      );
-    } else {
-      return last();
-    }
-  }
-
-  /**
-   * The very last part, it just auto returns the data.
-   */
-  function last(): JSX.Element {
-    if (at().type === TokenType.Newline) {
-      eat();
-      return <br />;
-    } else if (at().type === TokenType.Link) {
-      let url = eat();
-      objects.push({
-        type: "link",
-        url: url?.data!,
-      });
-      return <a href={url?.data}>{url?.data}</a>;
-    } else if (
-      at().type === TokenType.CloseAngle &&
-      (!prev() || prev()?.type === TokenType.Newline)
-    ) {
-      let text = eat()?.data;
-      while (!end() && at().type !== TokenType.Newline) {
-        text += eat()?.data ?? "";
       }
-      return <label style={{ color: "green" }}>{text}</label>;
+    } else if (mentionType.token.type === TokenType.File) {
+      objects.push({ type: "file", fileId: idTok.token.data });
     }
-    return <label>{eat()?.data}</label>;
+
+    return (
+      <Mention
+        type={textToMentionType(mentionType.token.data)}
+        id={idTok.token.data}
+        isEveryone={id === "everyone"}
+      />
+    );
   }
 
-  return {
-    element: pre(),
-    objects,
-  };
+  function parseLast(): JSX.Element {
+    const t = at();
+    switch (t.type) {
+      case TokenType.Newline: {
+        eat();
+        return <br />;
+      }
+      case TokenType.Link: {
+        const url = eat()!;
+        objects.push({ type: "link", url: url.data });
+        return <a href={url.data}>{url.data}</a>;
+      }
+      case TokenType.CloseAngle: {
+        if (!prev() || prev()?.type === TokenType.Newline) {
+          let text = eat()?.data ?? "";
+          while (!end() && at().type !== TokenType.Newline)
+            text += eat()?.data ?? "";
+          return <label style={{ color: "green" }}>{text}</label>;
+        } else {
+          return <label>{eat()?.data}</label>;
+        }
+      }
+      default:
+        return <label>{eat()?.data}</label>;
+    }
+  }
+
+  return { element: parseAll(), objects };
 }

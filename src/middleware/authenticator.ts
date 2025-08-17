@@ -1,5 +1,5 @@
 import express from "express";
-import { RouteDetails } from "../types/route";
+import { MetaHead, RouteDetails } from "../types/route";
 import { routes } from "../util/routeManager";
 import Ajv, { ValidateFunction } from "ajv";
 import ajvFormat from "ajv-formats";
@@ -9,10 +9,24 @@ import validatePermissions from "./authenticatorValidatePermissions";
 import AuthenticationError from "../errors/AuthenticationError";
 import database from "../database/database";
 import SyUser from "../models/User";
+import crawlers from "../util/crawlers.json";
 
 const ajv = new Ajv({ allErrors: true, $data: true });
 ajvFormat(ajv);
 ajvErrors(ajv);
+
+const defaultMeta: MetaHead = {
+  title: "Syrenity",
+  description: `Syrenity - the best chat application ever. Join today!`,
+  color: "#F09A57",
+};
+
+const metaTags = {
+  title: "og:title",
+  image: "og:image",
+  color: "theme-color",
+  description: "og:description",
+} as const;
 
 export default async (
   req: express.Request,
@@ -173,6 +187,44 @@ export default async (
 
       if (error) {
         return res.status(error.data.statusCode || 400).send(error.extract());
+      }
+    }
+
+    if (route.auth?.forCrawlers) {
+      let isCrawler = false;
+      for (const i in crawlers) {
+        if (req.headers["user-agent"]?.match(crawlers[i].pattern)) {
+          isCrawler = true;
+          break;
+        }
+      }
+
+      if (isCrawler) {
+        try {
+          const result = await route.auth.forCrawlers(req);
+          let tags = {
+            ...defaultMeta,
+            ...result,
+          };
+
+          let meta = "";
+
+          for (const i in tags) {
+            meta += `<meta name="${metaTags[i]}" content="${tags[i]}"></meta>`;
+          }
+
+          const head = `<!DOCTYPE HTML>
+  <html>
+    <head>
+      <title>${result.title || req.originalUrl}</title>
+      ${meta}
+    </head>
+  </html`;
+
+          return res.status(200).send(head);
+        } catch (e) {
+          console.log(e);
+        }
       }
     }
 

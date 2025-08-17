@@ -35,7 +35,10 @@ import CommandPaletteManager, {
   fuzzy,
 } from "./dawn-ui/components/CommandPaletteManager";
 import { AxiosWrapper } from "./dawn-ui/axios";
-import { dawnUIConfig } from "./dawn-ui";
+import { ShortcutManager } from "./dawn-ui/components/ShortcutManager";
+import { setPage } from "./components/PageManager";
+import { dawnUIConfig } from "./dawn-ui/config";
+import { trans } from "./i18n";
 
 export const baseUrl =
   localStorage.getItem("api-url") ??
@@ -54,17 +57,14 @@ axiosClient.config.baseURL = baseUrl;
 
 const BASE_HUE = "30";
 
-document.body.style.setProperty(
-  "--sy-base-color",
-  localStorage.getItem("sy-app-hue") ?? BASE_HUE,
-);
-document.body.style.setProperty(
-  "--dawn-accent-base-color",
-  localStorage.getItem("sy-app-hue") ?? BASE_HUE,
-);
+let hue = localStorage.getItem("sy-app-hue") ?? BASE_HUE;
+document.body.style.setProperty("--sy-base-color", hue);
+document.body.style.setProperty("--dawn-accent-base-color", hue);
 
 export let client: Client;
 const logger = new Logger("client");
+Logger.baseConfig.baseColor = `hsla(${hue}, 45%, 80%, 1)`;
+console.log(`hsla(${hue}, 100% 100% 1)`);
 const clientDebugLogger = new Logger("client-debug");
 
 //const channelContentStore: Map<number, ReactElement> = new Map();
@@ -98,6 +98,12 @@ CommandPaletteProviderManager.register({
     }
   },
 });
+
+ShortcutManager.registerShortcut("Open Settings", {
+  modifiers: ["ctrl"],
+  key: "i",
+});
+ShortcutManager.setShortcutCallback("Open Settings", showSettingsPage);
 
 export function wrapLoading<T>(x: Promise<T>): Promise<T> {
   return new Promise<T>((resolve, reject) => {
@@ -281,6 +287,8 @@ function App() {
     if (serverId) {
       localStorage.setItem(`prev-loaded-channel-${serverId}`, id.toString());
     }
+
+    window.history.pushState("", "", `/channels/${serverId}/${id}`);
   }
 
   return (
@@ -331,7 +339,9 @@ function App() {
               </Row>
             </Row>
           </Column>
-          <ChannelContent channel={selectedChannel} />
+          <Row>
+            <ChannelContent channel={selectedChannel} />
+          </Row>
         </Row>
       </FullPage>
     </>

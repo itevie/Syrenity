@@ -42,17 +42,29 @@ export default function MessageC({
   else {
     let parsedMessage = parse(lex(message.content));
     let hasMentionedMe = parsedMessage.objects.some(
-      (x) => x.type === "mention" && x.userId === client.user?.id,
+      (x) =>
+        x.type === "mention" && (x.userId === client.user?.id || x.isEveryone),
     );
     let displayAvatar = message.getDisplay();
+
+    let lastSeenKey = `last-seen-${message.channelID}`;
+    let lastSeen = localStorage.getItem(lastSeenKey);
+
+    if (
+      message.authorId !== client.user?.id &&
+      hasMentionedMe &&
+      lastSeen &&
+      parseInt(lastSeen) < message.id
+    ) {
+      new Audio("/public/audio/ping.mp3").play();
+    }
+    if (parseInt(lastSeen || "0") <= message.id)
+      localStorage.setItem(lastSeenKey, message.id.toString());
 
     return (
       <Row
         util={["ignore-responsive-mobile"]}
         className={`sy-message ${message.shouldInline ? "sy-message-inline" : ""} ${hasMentionedMe ? "sy-message-mentioned" : ""}`}
-        style={{
-          gap: "10px",
-        }}
       >
         {!message.shouldInline &&
           (displayAvatar.type === "normal" ? (
@@ -61,7 +73,7 @@ export default function MessageC({
             <Icon size="48px" src={displayAvatar.avatar.url}></Icon>
           ))}
         <Column
-          style={{ gap: "4px", overflowX: "auto", width: "100%" }}
+          className="sy-message-inner"
           onContextMenu={(e) =>
             showMessageContextMenu({
               message,

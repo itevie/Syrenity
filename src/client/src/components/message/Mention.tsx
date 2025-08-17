@@ -29,9 +29,11 @@ export function textToMentionType(text: string): MentionType {
 export default function Mention({
   type,
   id,
+  isEveryone,
 }: {
   type: MentionType;
   id: string;
+  isEveryone?: boolean;
 }) {
   const users = useAppSelector((x) => x.users);
   const channels = useAppSelector((x) => x.channels);
@@ -42,16 +44,19 @@ export default function Mention({
 
   switch (type) {
     case MentionType.User:
-      let user = users[parseInt(id)];
-      if (!user) text = `Unknown User ${id}`;
+      if (isEveryone) text = "@everyone";
       else {
-        text = `@${user.username}`;
-        click = () => {
-          setUserViewerUser(user);
-        };
-        context = (e) => {
-          showUserContextMenu(e, user);
-        };
+        let user = users[parseInt(id)];
+        if (!user) text = `Unknown User ${id}`;
+        else {
+          text = `@${user.username}`;
+          click = () => {
+            setUserViewerUser(user);
+          };
+          context = (e) => {
+            showUserContextMenu(e, user);
+          };
+        }
       }
       break;
     case MentionType.Channel:

@@ -9,7 +9,7 @@ const handler: RouteDetails = {
   handler: async (req, res) => {
     let content = `New push on **${req.body.repository.full_name}**: ${req.body.head_commit.message} (${req.body.head_commit.url}) by **${req.body.head_commit.author.username}**`;
     await SyMessage.create({
-      channelId: 203,
+      channelId: 206,
       content,
       authorId: -1,
       withSend: true,

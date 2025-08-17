@@ -38,9 +38,12 @@ export async function streamToBuffer(stream: Readable): Promise<Buffer> {
 }
 
 export default class SyFile {
-  constructor(public data: DatabaseFile) {}
+  constructor(public data: DatabaseFile) {
+    if (!data) throw new Error(`Data was undefined`);
+  }
 
   public get directoryLocation() {
+    console.log(this);
     return path.join(
       fileStoreLocation,
       this.data.created_at.toLocaleDateString().replace(/\//g, "-"),
@@ -196,14 +199,22 @@ export default class SyFile {
   }
 
   public static async fetch(id: string): Promise<SyFile | null> {
-    return new SyFile(
-      (
-        await query<DatabaseFile>({
-          text: "SELECT * FROM files WHERE id = $1",
-          values: [id],
-        })
-      ).rows[0],
-    );
+    let file = (
+      await query<DatabaseFile>({
+        text: "SELECT * FROM files WHERE id = $1",
+        values: [id],
+      })
+    ).rows[0];
+
+    if (!file) {
+      throw new DatabaseError({
+        message: "Failed to fetch file",
+        errorCode: "NonexistentResource",
+        statusCode: 500,
+      });
+    }
+
+    return new SyFile(file);
   }
 
   public static async fetchByUrl(url: string): Promise<SyFile | null> {

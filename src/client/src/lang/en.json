@@ -1,15 +1,17 @@
 {
+  "alert": {
+    "button": {
+      "yes": "Yes",
+      "no": "No",
+      "cancel": "Cancel",
+      "ok": "OK!"
+    }
+  },
   "errors": {
     "noPermission": "Hey! You don't have permission to {{what}}"
   },
   "chatbar": {
     "placeholder": "Type your message here..."
-  },
-  "alert": {
-    "buttons": {
-      "ok": "Ok!",
-      "cancel": "Cancel"
-    }
   },
   "userViewer": {
     "aboutMe": {

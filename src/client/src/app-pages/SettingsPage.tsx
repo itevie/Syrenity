@@ -9,6 +9,7 @@ import { ServerSettings } from "../syrenity-client/client/Client";
 import { client } from "../App";
 import { todo } from "../dawn-ui/util";
 import { showConfirmModel } from "../dawn-ui/components/AlertManager";
+import { ShortcutList } from "../dawn-ui/components/ShortcutManager";
 
 function SettingsPage() {
   const [settings, setSettings] = useState<ServerSettings | null>(null);
@@ -37,6 +38,12 @@ function SettingsPage() {
             label: trans("settings.appAppearance.name"),
             icon: "contrast",
             element: <AppearanceSettings />,
+          },
+          {
+            type: "button",
+            label: trans("settings.keybinds.name"),
+            icon: "key",
+            element: <ShortcutList />,
           },
           {
             type: "br",

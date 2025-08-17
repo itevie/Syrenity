@@ -1,3 +1,19 @@
+.sy-message-content > p {
+  margin: 0;
+  word-break: break-word;
+}
+
+.sy-message {
+  gap: 10px !important;
+}
+
+.sy-message-inner {
+  gap: 4px !important;
+  overflow-x: auto;
+  width: 100%;
+  justify-content: center;
+}
+
 .sy-message {
   border-radius: var(--dawn-border-radius);
 }
@@ -36,4 +52,5 @@
 
 .sy-message-mentioned {
   background-color: var(--dawn-container-background-highlight);
+  border-radius: 0px;
 }

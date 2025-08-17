@@ -2,10 +2,9 @@ import { isAxiosError } from "axios";
 import { showErrorAlert } from "./dawn-ui/components/AlertManager";
 import { defaultLogger } from "./dawn-ui/Logger";
 import { baseUrl, client } from "./App";
-import { fallbackImage } from "./config";
 import { trans } from "./i18n";
-import { TFunction } from "i18next/typescript/t";
-import { dawnUIConfig } from "./dawn-ui";
+import { fallbackImage } from "./config";
+import { dawnUIConfig } from "./dawn-ui/config";
 
 export function generateAvatar(
   text: string,

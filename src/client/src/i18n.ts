@@ -5,6 +5,7 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import en from "./lang/en.json";
 import sk from "./lang/sk.json";
 import { CommandPaletteProviderManager } from "./dawn-ui/components/CommandPaletteManager";
+import { dawnUIConfig } from "./dawn-ui/config";
 
 i18n
   .use(LanguageDetector)
@@ -23,6 +24,15 @@ i18n
     },
   });
 
+export function fixLang() {
+  ["yes", "no", "cancel", "ok"].forEach(
+    (x) => (dawnUIConfig.strings[x] = t(`alert.button.${x}`)),
+  );
+  ["confirmTitle", "errorTitle", "informationTitle"].forEach(
+    (x) => (dawnUIConfig.strings[x] = t(`alert.title.${x}`)),
+  );
+}
+
 CommandPaletteProviderManager.register({
   name: "Languages",
   exec: (query) => {
@@ -32,6 +42,7 @@ CommandPaletteProviderManager.register({
           name: `Switch language to ${query}`,
           callback: () => {
             i18n.changeLanguage(query);
+            fixLang();
           },
         },
       ];
@@ -47,3 +58,5 @@ export default i18n;
 
 const t = i18n.t as any;
 export { t as trans };
+
+fixLang();

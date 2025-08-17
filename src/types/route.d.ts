@@ -4,7 +4,7 @@ import * as Ajv from "ajv";
 type HttpMethods = "GET" | "POST" | "DELETE" | "PATCH" | "PUT" | "HEAD";
 type ExpressRequestLambda = (
   req: express.Request,
-  res: express.Response
+  res: express.Response,
 ) => void;
 
 declare module "express-serve-static-core" {
@@ -39,6 +39,14 @@ interface AuthenticationDetails {
   botsOnly?: boolean;
   disallowBots?: boolean;
   sessionOnly?: boolean;
+  forCrawlers?: (req: express.Request) => Promise<MetaHead>;
+}
+
+interface MetaHead {
+  title?: string;
+  image?: string;
+  description?: string;
+  color?: string;
 }
 
 interface ParameterDetails {

@@ -102,8 +102,3 @@ body {
   margin: 10px;
   object-fit: contain;
 }
-
-.sy-message-content > p {
-  margin: 0;
-  word-break: break-word;
-}

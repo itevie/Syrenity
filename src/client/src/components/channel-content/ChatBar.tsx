@@ -11,6 +11,9 @@ import "./chat-bar.css";
 import { useTranslation } from "react-i18next";
 import SyEmojiPicker from "../EmojiPicker";
 import Words from "../../dawn-ui/components/Words";
+import User from "../../syrenity-client/structures/User";
+import TypingIndicator from "./TypingIndicator";
+import { todo } from "../../dawn-ui/util";
 
 function readFileAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -29,9 +32,11 @@ export let addTextToChatBar: (
 export default function ChatBar({
   inputRef,
   onKey,
+  typing,
 }: {
   inputRef: React.RefObject<HTMLTextAreaElement>;
   onKey: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  typing: { user: User; started: Date }[];
 }) {
   const [emojiPicker, setEmojiPicker] = useState<
     HTMLAttributes<HTMLDivElement>["style"] | null
@@ -71,7 +76,7 @@ export default function ChatBar({
 
   return (
     <div className="sy-messageinput-container">
-      Test is typing
+      <TypingIndicator typing={typing} />
       <Row
         util={[
           "no-shrink",
@@ -118,6 +123,13 @@ export default function ChatBar({
             }}
           />
         )}
+        <GoogleMatieralIcon
+          name="gif_box"
+          util={["clickable"]}
+          onClick={() => {
+            todo();
+          }}
+        />
         <GoogleMatieralIcon
           name="mood"
           util={["clickable"]}

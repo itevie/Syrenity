@@ -1,4 +1,4 @@
-import { queryOne } from "../database/database";
+import { queryOne, query } from "../database/database";
 import DatabaseError from "../errors/DatabaseError";
 import { send } from "../ws/websocketUtil";
 import { DatabaseInvite } from "./Invite";
@@ -55,6 +55,15 @@ export default class SyMember {
       });
 
     return new SyMember(result);
+  }
+
+  public static async fetchAll(serverId: number): Promise<SyMember[]> {
+    const result = await query<DatabaseMember>({
+      text: "SELECT * FROM members WHERE guild_id = $1",
+      values: [serverId],
+    });
+
+    return result.rows.map((x) => new SyMember(x));
   }
 
   public static async create(

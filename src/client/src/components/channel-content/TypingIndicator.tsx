@@ -19,7 +19,9 @@ export default function TypingIndicator({
           {t.length === 1 ? (
             <>{t[0].user.username} is typing...</>
           ) : (
-            <>{t.map((x) => x.user.username).join(", ")} are typing...</>
+            <>
+              {toEnglishSentence(t.map((x) => x.user.username))} are typing...
+            </>
           )}
         </label>
       ) : (
@@ -27,4 +29,12 @@ export default function TypingIndicator({
       )}
     </div>
   );
+}
+
+function toEnglishSentence(items: string[]): string {
+  if (items.length === 0) return "";
+  if (items.length === 1) return items[0];
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
 }

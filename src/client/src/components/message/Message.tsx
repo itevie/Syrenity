@@ -92,6 +92,14 @@ export default function MessageC({
                   ? (users[message.authorId]?.username ?? `Loading...`)
                   : displayAvatar.username}
               </b>
+              {message.author.isBot && (
+                <label
+                  className="dawn-accent-bg"
+                  style={{ padding: "3px 8px", borderRadius: "10px" }}
+                >
+                  bot
+                </label>
+              )}
               <Timestamp date={message.createdAt} />
               {message.isPinned && <GoogleMatieralIcon name="pin_drop" />}
             </Row>

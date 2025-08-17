@@ -44,8 +44,8 @@ export default function Login() {
     if (isErr(result)) {
       if (result.v instanceof AxiosError && result.v.status === 401) {
         showErrorAlert(
-          trans("login.invalidPassword.title"),
           trans("login.invalidPassword.body"),
+          trans("login.invalidPassword.title"),
         );
       } else {
         handleClientError("make token", result.v);

@@ -9,18 +9,16 @@ const handler: RouteDetails = {
   handler: async (req, res) => {
     const payload = req.body;
 
+    const repoName = payload.repository.full_name;
+
     console.log(payload);
     let content: string | null = null;
 
     if (payload.pusher && payload.repository) {
-      content = `New push on **${payload.repository.full_name}**: ${payload.head_commit.message} (${payload.head_commit.url}) by **${payload.head_commit.author.username}**`;
+      content = `New push on **${repoName}**: ${payload.head_commit.message} (${payload.head_commit.url}) by **${payload.head_commit.author.username}**`;
     } else if (payload.issue) {
-      const issueTitle: string = payload.issue.title;
-      const issueBody: string | null = payload.issue.body;
-      const repoName: string = payload.repository.name;
-      const userLogin: string = payload.issue.user.login;
-
-      content = `New issue created in **${repoName}**: **${issueTitle}**\n\nBody: ${issueBody}\nCreated by: **${userLogin}**`;
+      const issue = payload.issue;
+      content = `New issue **${payload.action}** in **${repoName}**: **${issue.title}** (${issue.url})\n\nBody: ${issue.body}\nCreated By: **${issue.user.login}**`;
     }
 
     console.log(content);

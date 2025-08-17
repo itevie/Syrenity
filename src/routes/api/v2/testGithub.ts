@@ -9,7 +9,9 @@ const handler: RouteDetails = {
   handler: async (req, res) => {
     const payload = req.body;
 
-    let content: string = "";
+    console.log(payload);
+
+    let content: string | null = null;
     switch (payload.action) {
       case "opened":
         if (payload.issue) {

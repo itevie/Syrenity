@@ -56,7 +56,7 @@ export default function MessageC({
       lastSeen &&
       parseInt(lastSeen) < message.id
     ) {
-      // new Audio("/public/audio/ping.mp3").play();
+      new Audio("/public/audio/ping.mp3").play();
     }
     if (parseInt(lastSeen || "0") <= message.id)
       localStorage.setItem(lastSeenKey, message.id.toString());

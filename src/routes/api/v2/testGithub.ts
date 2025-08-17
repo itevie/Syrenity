@@ -35,6 +35,8 @@ const handler: RouteDetails = {
         break;
     }
 
+    console.log(content);
+
     if (content)
       await SyMessage.create({
         channelId: 206,

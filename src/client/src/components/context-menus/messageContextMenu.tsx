@@ -103,6 +103,13 @@ export function showMessageContextMenu(options: MessageContextMenuOptions) {
       },
       {
         type: "button",
+        label: trans("message.action.mention"),
+        onClick: () => {
+          addTextToChatBar(`<@${options.message.author.id}>`, "prepend");
+        },
+      },
+      {
+        type: "button",
         label: trans("message.action.delete"),
         scheme: "danger",
         onClick: async () => {

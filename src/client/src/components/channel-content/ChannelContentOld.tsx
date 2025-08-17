@@ -16,17 +16,11 @@ import TypingIndicator from "./TypingIndicator";
 
 export type ExtraMessage = Message & { shouldInline?: boolean };
 
-export interface ChannelCache {
+interface ChannelCache {
   done: boolean;
   messages: ExtraMessage[];
   timestamp: number | null;
   last: number | null;
-  typing: Typing[];
-}
-
-export interface Typing {
-  user: User;
-  started: number;
 }
 
 const logger = new Logger("channel-messages");
@@ -57,7 +51,10 @@ function computeInlineFlags(messages: Message[]): ExtraMessage[] {
  * Loads older messages for a given channel and updates the cache.
  */
 async function loadMoreMessages(channel: Channel): Promise<ChannelCache> {
-  const cache = getCache(channel.id);
+  const cache = channelCache.get(channel.id);
+  if (!cache) {
+    throw new Error(`Cache for channel ${channel.id} is undefined!`);
+  }
 
   // Prevent spamming loads
   if (cache.done) {
@@ -95,94 +92,146 @@ async function loadMoreMessages(channel: Channel): Promise<ChannelCache> {
   return cache;
 }
 
-function getCache(channel: number): ChannelCache {
-  if (!channelCache.get(channel))
-    channelCache.set(channel, {
-      messages: [],
-      timestamp: null,
-      last: null,
-      done: false,
-      typing: [],
-    });
-  return channelCache.get(channel)!;
-}
+function useChannelMessages(channel: Channel | null) {
+  const [messages, setMessages] = useState<ExtraMessage[]>([]);
+  const [isDone, setIsDone] = useState(false);
+  const [typing, setTyping] = useState<{ user: User; started: Date }[]>([]);
 
-async function loadChannel(channel: Channel) {
-  await loadMoreMessages(channel);
-  triggerRefresh();
-}
-
-function updateMessage(message: Message) {
-  const cache = getCache(message.channelID);
-
-  const idx = cache.messages.findIndex((x) => x.id === message.id);
-  if (idx !== -1) {
-    (message as ExtraMessage).shouldInline = cache.messages[idx].shouldInline;
-    cache.messages[idx] = message as ExtraMessage;
-  }
-}
-
-const checkInterval = setInterval(() => {
-  if (!client) return;
-  clearInterval(checkInterval);
-
-  client.on("messageCreate", async (m) => {
-    let cache = getCache(m.channelID);
-    cache.messages = computeInlineFlags([...cache.messages, m]);
-    triggerRefresh();
-  });
-
-  client.on("messageReactionAdd", (_, message) =>
-    updateMessage(message as Message),
-  );
-  client.on("messageReactionRemove", (_, message) =>
-    updateMessage(message as Message),
+  // Keep a stable getter for cache
+  const getCache = useCallback(
+    (channelId?: number) => channelCache.get(channelId ?? channel?.id ?? -1),
+    [channel?.id],
   );
 
-  client.on("messageUpdate", updateMessage);
-  client.on("messageDelete", (messageID, channelID) => {
-    let cache = getCache(channelID);
-
-    const idx = cache.messages.findIndex((x) => x.id === messageID);
-    if (idx !== -1) {
-      cache.messages = [
-        ...cache.messages.slice(0, idx),
-        ...cache.messages.slice(idx + 1),
-      ];
+  // Initial load and channel switch
+  useEffect(() => {
+    setTyping([]);
+    if (!channel) {
+      setMessages([]);
+      setIsDone(false);
+      return;
     }
-  });
 
-  client.on("channelStartTyping", (channel, user) => {
-    let cache = getCache(channel.id);
-    cache.typing = [
-      ...cache.typing.filter(
-        (x) =>
-          x.user.id !== user.id && Date.now() - x.started < units.second * 5,
-      ),
-      { user, started: Date.now() },
-    ];
-  });
-}, 100);
+    logger.log(`Loading channel ${channel.id}`);
 
-let triggerRefresh: () => void = () => {};
+    let cache = getCache();
+    if (!cache) {
+      cache = { done: false, messages: [], timestamp: null, last: null };
+      channelCache.set(channel.id, cache);
+      loadMoreMessages(channel).then((result) => {
+        setMessages(result.messages);
+        setIsDone(result.done);
+      });
+    } else {
+      setMessages(cache.messages);
+      setIsDone(cache.done);
+    }
+
+    // Message listeners
+    const updateMessage = (m: Message) => {
+      const c = getCache(m.channelID);
+      if (!c) return;
+
+      const idx = c.messages.findIndex((x) => x.id === m.id);
+      if (idx !== -1) {
+        (m as ExtraMessage).shouldInline = c.messages[idx].shouldInline;
+        c.messages[idx] = m as ExtraMessage;
+        setMessages([...c.messages]);
+      }
+    };
+
+    const messageCreate = makeListener(
+      client,
+      "messageCreate",
+      (m: Message) => {
+        const c = getCache(m.channelID);
+        if (!c) return;
+        c.messages = computeInlineFlags([...c.messages, m]);
+        setTyping((old) => {
+          return [...old].filter((x) => x.user.id !== m.author.id);
+        });
+        setMessages([...c.messages]);
+      },
+    );
+
+    const messageEdit = makeListener(client, "messageUpdate", updateMessage);
+
+    const messageDelete = makeListener(
+      client,
+      "messageDelete",
+      (messageId: number, channelId: number) => {
+        const c = getCache(channelId);
+        if (!c) return;
+        const idx = c.messages.findIndex((x) => x.id === messageId);
+        if (idx !== -1) {
+          c.messages = [
+            ...c.messages.slice(0, idx),
+            ...c.messages.slice(idx + 1),
+          ];
+          setMessages([...c.messages]);
+        }
+      },
+    );
+
+    const messageReactionAdd = makeListener(
+      client,
+      "messageReactionAdd",
+      (_, m: Message) => updateMessage(m),
+    );
+
+    const messageReactionRemove = makeListener(
+      client,
+      "messageReactionRemove",
+      (_, m: Message) => updateMessage(m),
+    );
+
+    const channelStartTyping = makeListener(
+      client,
+      "channelStartTyping",
+      (c, u) => {
+        setTyping((old) => {
+          let n = [...old].filter(
+            (x) =>
+              x.user.id !== u.id &&
+              Date.now() - x.started.getTime() < units.second * 5,
+          );
+
+          return [...n, { user: u, started: new Date() }];
+        });
+      },
+    );
+
+    const timer = setInterval(() => {
+      setTyping((old) => {
+        let n = [...old].filter(
+          (x) => Date.now() - x.started.getTime() < units.second * 5,
+        );
+
+        return [...n];
+      });
+    }, 1000);
+
+    return () => {
+      client.removeListener("messageCreate", messageCreate);
+      client.removeListener("messageUpdate", messageEdit);
+      client.removeListener("messageDelete", messageDelete);
+      client.removeListener("messageReactionAdd", messageReactionAdd);
+      client.removeListener("messageReactionRemove", messageReactionRemove);
+      client.removeListener("channelStartTyping", channelStartTyping);
+      clearInterval(timer);
+    };
+  }, [channel, getCache]);
+
+  return { messages, isDone, getCache, setMessages, setIsDone, typing };
+}
 
 export default function ChannelContent({
   channel,
 }: {
   channel: Channel | null;
 }) {
-  const [cache, setCache] = useState<ChannelCache | undefined>(undefined);
-
-  useEffect(() => {
-    if (!channel) return;
-    loadChannel(channel);
-
-    triggerRefresh = () => {
-      const cache = channelCache.get(channel.id);
-      setCache(cache);
-      scrollToBottom();
-    };
-  }, [channel?.id]);
+  const { messages, isDone, getCache, setMessages, setIsDone, typing } =
+    useChannelMessages(channel);
 
   const [editing, setEditing] = useState<number | null>(null);
   const messageAreaRef = useRef<HTMLDivElement>(null);
@@ -205,8 +254,40 @@ export default function ChannelContent({
     [channel?.id],
   );
 
+  // Handle infinite scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const area = messageAreaRef.current;
+      if (!channel || !area) return;
+
+      if (area.scrollTop < SCROLL_THRESHOLD) {
+        const prevHeight = area.scrollHeight;
+        loadMoreMessages(channel).then((result) => {
+          setMessages(result.messages);
+          setIsDone(result.done);
+
+          setTimeout(() => {
+            area.scrollTop = area.scrollHeight - prevHeight;
+          }, 20);
+        });
+      }
+    };
+
+    scrollToBottom();
+
+    const area = messageAreaRef.current;
+    area?.addEventListener("wheel", handleScroll);
+    return () => {
+      area?.removeEventListener("wheel", handleScroll);
+    };
+  }, [channel?.id, setMessages, setIsDone]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [channel?.id, messages]);
+
+  // Handle sending/editing
   async function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (!cache) return;
     const value = e.currentTarget.value.trim();
 
     if (Date.now() - lastSendTyping >= units.second * 3 && e.key !== "Enter") {
@@ -223,16 +304,14 @@ export default function ChannelContent({
       await channel?.messages.send(value);
       scrollToBottom();
     } else if (e.key === "ArrowUp" && !value) {
-      const past = cache.messages
+      const past = messages
         .filter((x) => x.authorId === client.user?.id)
         .sort((a, b) => b.id - a.id);
       if (past.length > 0) setEditing(past[0].id);
     }
   }
 
-  return !cache ? (
-    <>loading...</>
-  ) : (
+  return (
     <Column
       util={["flex-grow", "no-gap"]}
       style={{ overflow: "hidden", maxHeight: "100vh" }}
@@ -258,7 +337,8 @@ export default function ChannelContent({
           gap: "0px",
         }}
       >
-        {cache.messages.map((msg) => (
+        {isDone && <label>You've reached the end - go away.</label>}
+        {messages.map((msg) => (
           <MessageC
             key={msg.id}
             message={msg}
@@ -285,8 +365,7 @@ export default function ChannelContent({
       </div>
 
       {/* Input */}
-      <TypingIndicator typing={cache.typing} />
-      <ChatBar inputRef={inputRef} onKey={handleKeyDown} />
+      <TypingIndicator typing={typing as any} />
     </Column>
   );
 }

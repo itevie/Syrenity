@@ -1,15 +1,12 @@
 import { client } from "../../App";
 import { units } from "../../dawn-ui/time";
 import User from "../../syrenity-client/structures/User";
+import { Typing } from "./ChannelContent";
 
-export default function TypingIndicator({
-  typing,
-}: {
-  typing: { user: User; started: Date }[];
-}) {
+export default function TypingIndicator({ typing }: { typing: Typing[] }) {
   let t = typing.filter(
     (x) =>
-      Date.now() - x.started.getTime() < units.second * 3 &&
+      Date.now() - x.started < units.second * 3 &&
       x.user.id !== client.user?.id,
   );
   return (

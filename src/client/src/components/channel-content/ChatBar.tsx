@@ -14,6 +14,7 @@ import Words from "../../dawn-ui/components/Words";
 import User from "../../syrenity-client/structures/User";
 import TypingIndicator from "./TypingIndicator";
 import { todo } from "../../dawn-ui/util";
+import { Typing } from "./ChannelContent";
 
 function readFileAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -32,11 +33,9 @@ export let addTextToChatBar: (
 export default function ChatBar({
   inputRef,
   onKey,
-  typing,
 }: {
   inputRef: React.RefObject<HTMLTextAreaElement>;
   onKey: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
-  typing: { user: User; started: Date }[];
 }) {
   const [emojiPicker, setEmojiPicker] = useState<
     HTMLAttributes<HTMLDivElement>["style"] | null

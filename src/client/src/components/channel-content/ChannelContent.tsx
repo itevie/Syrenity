@@ -281,6 +281,10 @@ export default function ChannelContent({
     };
   }, [channel?.id, setMessages, setIsDone]);
 
+  useEffect(() => {
+    scrollToBottom();
+  }, [channel?.id, messages]);
+
   // Handle sending/editing
   async function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     const value = e.currentTarget.value.trim();

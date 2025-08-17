@@ -109,9 +109,7 @@ function getCache(channel: number): ChannelCache {
 
 async function loadChannel(channel: Channel) {
   await loadMoreMessages(channel);
-  setTimeout(() => {
-    triggerRefresh();
-  }, 1000);
+  triggerRefresh();
 }
 
 function updateMessage(message: Message) {
@@ -187,6 +185,7 @@ export default function ChannelContent({
     triggerRefresh = () => {
       const cache = channelCache.get(channel.id);
       setCache(cache);
+      scrollToBottom();
     };
   }, [channel?.id]);
 

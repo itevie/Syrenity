@@ -12,6 +12,7 @@ import ChannelName from "./ChannelName";
 import GoogleMaterialIcon from "../../dawn-ui/components/GoogleMaterialIcon";
 import Row from "../../dawn-ui/components/Row";
 import User from "../../syrenity-client/structures/User";
+import TypingIndicator from "./TypingIndicator";
 
 export type ExtraMessage = Message & { shouldInline?: boolean };
 
@@ -364,6 +365,7 @@ export default function ChannelContent({
       </div>
 
       {/* Input */}
+      <TypingIndicator typing={typing} />
       <ChatBar typing={typing} inputRef={inputRef} onKey={handleKeyDown} />
     </Column>
   );

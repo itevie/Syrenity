@@ -76,7 +76,7 @@ export default function ChatBar({
 
   return (
     <div className="sy-messageinput-container">
-      <TypingIndicator typing={typing} />
+      {/*<TypingIndicator typing={typing} />*/}
       <Row
         util={[
           "no-shrink",

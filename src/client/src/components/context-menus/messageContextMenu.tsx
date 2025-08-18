@@ -136,6 +136,13 @@ export function showMessageContextMenu(options: MessageContextMenuOptions) {
           showInfoAlert(JSON.stringify(options.message._data));
         },
       },
+      {
+        type: "button",
+        label: trans("message.action.copyId"),
+        onClick: () => {
+          window.navigator.clipboard.writeText(options.message.id.toString());
+        },
+      },
     ],
   });
 }

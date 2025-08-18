@@ -1,5 +1,5 @@
 import { PassThrough, PassThrough as Readable, Stream } from "node:stream";
-import { query } from "../database/database";
+import { query, queryOne } from "../database/database";
 import path from "node:path";
 import { fileStoreLocation } from "..";
 import {
@@ -43,7 +43,6 @@ export default class SyFile {
   }
 
   public get directoryLocation() {
-    console.log(this);
     return path.join(
       fileStoreLocation,
       this.data.created_at.toLocaleDateString().replace(/\//g, "-"),
@@ -157,6 +156,7 @@ export default class SyFile {
     stream: Readable,
     noS3: boolean = false,
   ): Promise<void> {
+    logger.log(`Preparing to upload ${this.data.file_name}`);
     const fileStream = new Readable();
     const s3Stream = new Readable();
 
@@ -192,7 +192,7 @@ export default class SyFile {
       (
         await query<DatabaseFile>({
           text: "INSERT INTO files (file_name, original_url, mime) VALUES ($1, $2, $3) RETURNING *",
-          values: [fileName, mime, originalUrl],
+          values: [fileName, originalUrl, mime],
         })
       ).rows[0],
     );
@@ -218,16 +218,16 @@ export default class SyFile {
   }
 
   public static async fetchByUrl(url: string): Promise<SyFile | null> {
-    let result = (
-      await query<DatabaseFile>({
-        text: "SELECT * FROM files WHERE original_url = $1",
-        values: [url],
-      })
-    ).rows[0];
+    let result = await queryOne<DatabaseFile>({
+      text: "SELECT * FROM files WHERE original_url = $1",
+      values: [url],
+    });
+    logger.log(
+      `Fetch: ${url} (${!!result ? "FOUND" : "NOT FOUND"}): ${result?.file_name}`,
+    );
     if (!result) return null;
 
     let file = new SyFile(result);
-    file.data = result;
 
     return file;
   }

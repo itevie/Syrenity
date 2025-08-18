@@ -65,7 +65,7 @@ export default function MessageC({
     return (
       <Row
         util={["ignore-responsive-mobile"]}
-        className={`sy-message ${message.shouldInline ? "sy-message-inline" : ""} ${hasMentionedMe ? "sy-message-mentioned" : ""}`}
+        className={`sy-message ${message.shouldInline ? "sy-message-inline" : ""} ${hasMentionedMe ? "sy-message-mentioned" : ""} ${message.isPinned ? "sy-message-pinned" : ""}`}
       >
         {!message.shouldInline &&
           (displayAvatar.type === "normal" ? (

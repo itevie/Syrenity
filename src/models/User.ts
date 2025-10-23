@@ -15,7 +15,6 @@ export interface DatabaseUser {
   password: string;
   email: string;
   email_verified: boolean;
-  discriminator: string;
   avatar: string | null;
   created_at: Date;
   is_bot: boolean;
@@ -183,17 +182,6 @@ export default class SyUser {
     return user;
   }
 
-  public static async getDiscriminatorsFor(
-    username: string,
-  ): Promise<string[]> {
-    return (
-      await query<{ discriminator: string }>({
-        text: "SELECT discriminator FROM users WHERE username = $1",
-        values: [username],
-      })
-    ).rows.map((x) => x.discriminator);
-  }
-
   public static async create(
     email: string,
     password: string,
@@ -206,25 +194,23 @@ export default class SyUser {
         statusCode: 400,
       });
 
-    const discrims = await SyUser.getDiscriminatorsFor(username);
-    if (discrims.length > 9996)
+    let u = await queryOne<DatabaseUser>({
+      text: "SELECT * FROM users WHERE username = $1",
+      values: [username],
+    });
+
+    if (!!u)
       throw new DatabaseError({
-        message: "Too many users have this username",
-        errorCode: "TooManyUsers",
+        message: "Somebody already has this username!",
+        errorCode: "Conflict",
         statusCode: 400,
       });
-
-    let discriminator: string = "";
-    do {
-      const d = randomRange(0, 1000).toString().padStart(4, "0");
-      if (!discrims.includes(d)) discriminator = d;
-    } while (discriminator === "");
 
     const _password = await bcrypt.hash(password, 10);
 
     const user = (await queryOne<DatabaseUser>({
-      text: "INSERT INTO users (username, discriminator, password, email) VALUES ($1, $2, $3, $4) RETURNING *",
-      values: [username, discriminator, _password, email],
+      text: "INSERT INTO users (username, password, email) VALUES ($1, $2, $3, $4) RETURNING *",
+      values: [username, _password, email],
     })) as DatabaseUser;
 
     return new SyUser(user);

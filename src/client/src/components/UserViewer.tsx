@@ -56,7 +56,6 @@ export default function UserViewer({ userId }: { userId: number }) {
             <Words type={TextType.Heading} style={{ fontSize: "1.5em" }}>
               {users[userId].username}
             </Words>
-            <small>#{users[userId].discriminator}</small>
           </Row>
         </Row>
         <Column className="sy-user-viewer-main-content">

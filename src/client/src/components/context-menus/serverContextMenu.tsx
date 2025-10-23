@@ -4,10 +4,6 @@ import {
   showInfoAlert,
   showInputAlert,
 } from "../../dawn-ui/components/AlertManager";
-import {
-  ContextMenuEvent,
-  showContextMenu,
-} from "../../dawn-ui/components/ContextMenuManager";
 import uploadFile from "../../dawn-ui/uploadFile";
 import Server from "../../syrenity-client/structures/Server";
 import { handleClientError, isErr, wrap } from "../../util";
@@ -15,13 +11,11 @@ import Row from "../../dawn-ui/components/Row";
 import Button from "../../dawn-ui/components/Button";
 import showServerDetails from "../alerts/serverDetails";
 import { trans } from "../../i18n";
+import { ClickEvent } from "../../dawn-ui/util";
+import { updateContextMenu } from "../../dawn-ui/components/ContextMenuManager";
 
-export default function showServerContextMenu(
-  e: ContextMenuEvent,
-  server: Server,
-) {
-  showContextMenu({
-    event: e,
+export default function showServerContextMenu(e: ClickEvent, server: Server) {
+  updateContextMenu(e, {
     elements: [
       {
         type: "button",

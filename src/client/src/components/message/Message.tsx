@@ -6,7 +6,7 @@ import UserIcon from "../UserIcon";
 import Link from "../../dawn-ui/components/Link";
 import MessageContent from "./MessageContent";
 import MessageReactions from "./MessageReactions";
-import { showMessageContextMenu } from "../context-menus/messageContextMenu";
+import MessageContextMenu from "../context-menus/messageContextMenu";
 import MessageAttachments from "./MessageAttachments";
 import "./message.css";
 import Timestamp from "./Timestamp";
@@ -20,6 +20,7 @@ import Button from "../../dawn-ui/components/Button";
 import { showInfoAlert } from "../../dawn-ui/components/AlertManager";
 import Icon from "../../dawn-ui/components/Icon";
 import GoogleMatieralIcon from "../../dawn-ui/components/GoogleMaterialIcon";
+import Embed from "./Embed";
 
 interface MessageProps {
   message: ExtraMessage;
@@ -75,15 +76,15 @@ export default function MessageC({
           ))}
         <Column
           className="sy-message-inner"
-          onContextMenu={(e) =>
-            showMessageContextMenu({
-              message,
-              event: e,
-              edit() {
-                setEditing(true);
-              },
-            })
-          }
+          // onContextMenu={(e) =>
+          //   showMessageContextMenu({
+          //     message,
+          //     event: e,
+          //     edit() {
+          //       setEditing(true);
+          //     },
+          //   })
+          // }
         >
           {!message.shouldInline && (
             <Row util={["align-center"]} style={{ gap: "10px" }}>
@@ -92,16 +93,22 @@ export default function MessageC({
                   ? (users[message.authorId]?.username ?? `Loading...`)
                   : displayAvatar.username}
               </b>
-              {message.author.isBot && (
+              {message.author.isBot ? (
                 <label
                   className="dawn-accent-bg"
                   style={{ padding: "3px 8px", borderRadius: "10px" }}
                 >
                   bot
                 </label>
+              ) : (
+                <></>
               )}
               <Timestamp date={message.createdAt} />
-              {message.isPinned && <GoogleMatieralIcon name="pin_drop" />}
+              {message.isPinned ? (
+                <GoogleMatieralIcon name="pin_drop" />
+              ) : (
+                <></>
+              )}
             </Row>
           )}
           {editing ? (
@@ -142,12 +149,20 @@ export default function MessageC({
               )}
             </Row>
           )}
-
+          {/*<Embed />*/}
           <MessageAttachments
             message={message}
             objects={parsedMessage.objects}
           />
           <MessageReactions message={message} />
+          <MessageContextMenu
+            options={{
+              message,
+              edit() {
+                setEditing(true);
+              },
+            }}
+          />
         </Column>
       </Row>
     );

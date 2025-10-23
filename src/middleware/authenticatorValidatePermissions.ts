@@ -9,6 +9,8 @@ import AuthenticationError from "../errors/AuthenticationError";
 import SyReaction from "../models/Reaction";
 import SyRelationship from "../models/Relationship";
 import permissionsBitfield from "../util/PermissionBitfield";
+import SyChannel from "../models/Channel";
+import SyServer from "../models/Servers";
 
 const DM_PERMISSIONS =
   permissionsBitfield.CreateMessages | permissionsBitfield.ReadChannelHistory;
@@ -16,27 +18,27 @@ const DM_PERMISSIONS =
 export default async function validatePermissions(
   req: express.Request,
   res: express.Response,
-  permissionDetails: PermissionDetails
+  permissionDetails: PermissionDetails,
 ): Promise<void | AuthenticationError> {
-  let guild: null | Server = null;
-  let channel: null | Channel = null;
+  let guild: null | SyServer = null;
+  let channel: null | SyChannel = null;
 
   // Try get guild
   if (permissionDetails.guildParam) {
     let id = parseInt(req.params[permissionDetails.guildParam]);
-    guild = await actions.guilds.fetch(id);
+    guild = await SyServer.fetch(id);
   }
 
   // Try get channel
   if (permissionDetails.channelParam) {
     let id = parseInt(req.params[permissionDetails.channelParam]);
-    channel = await actions.channels.fetch(id);
+    channel = await SyChannel.fetch(id);
 
     // Check to set guild
-    if (!guild && channel.type === "channel") {
-      guild = await actions.guilds.fetch(channel.guild_id);
-    } else if (channel.type === "dm") {
-      const relationship = await SyRelationship.fetchByChannel(channel.id);
+    if (!guild && channel.data.type === "channel") {
+      guild = await SyServer.fetch(channel.data.guild_id);
+    } else if (channel.data.type === "dm") {
+      const relationship = await SyRelationship.fetchByChannel(channel.data.id);
       const user = req.user as User;
       if (
         relationship.data.user1 !== user.id &&
@@ -70,8 +72,8 @@ export default async function validatePermissions(
 
   const gotPermissionYo = await hasPermission({
     user: req.user as User,
-    guild,
-    channel: channel ?? undefined,
+    guild: guild.data,
+    channel: channel?.data ?? undefined,
     permission: permissionDetails.permissions,
   });
 

@@ -1,16 +1,10 @@
 import Icon from "../dawn-ui/components/Icon";
 import Server, { ServerAPIData } from "../syrenity-client/structures/Server";
 import Flyout from "../dawn-ui/components/Flyout";
-import React from "react";
-import { showContextMenu } from "../dawn-ui/components/ContextMenuManager";
-import { addAlert, showInfoAlert } from "../dawn-ui/components/AlertManager";
 import { client } from "../App";
 import File from "../syrenity-client/structures/File";
-import { generateAvatar, handleClientError, isErr, wrap } from "../util";
+import { generateAvatar } from "../util";
 import { fallbackImage } from "../config";
-import Row from "../dawn-ui/components/Row";
-import Button from "../dawn-ui/components/Button";
-import uploadFile from "../dawn-ui/uploadFile";
 import { useAppSelector } from "../stores/store";
 import showServerContextMenu from "./context-menus/serverContextMenu";
 

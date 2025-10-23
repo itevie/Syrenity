@@ -6,6 +6,8 @@ import AuthenticationError from "../errors/AuthenticationError";
 import SyMessage from "../models/Message";
 import SyUser from "../models/User";
 import SyFile from "../models/File";
+import SyChannel from "../models/Channel";
+import SyServer from "../models/Servers";
 
 export default async function validateURLParameters(
   req: express.Request,
@@ -70,10 +72,9 @@ export default async function validateURLParameters(
 
           return await SyUser.exists(parseInt(param));
         },
-        guild: async (param: string) =>
-          await database.actions.guilds.exists(parseInt(param)),
+        guild: async (param: string) => await SyServer.exists(parseInt(param)),
         channel: async (param: string) =>
-          await database.actions.channels.exists(parseInt(param)),
+          await SyChannel.exists(parseInt(param)),
         message: async (param: string) =>
           await SyMessage.exists(parseInt(param)),
         invite: async (param: string) =>

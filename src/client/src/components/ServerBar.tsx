@@ -1,25 +1,9 @@
-import { client } from "../App";
-import { fallbackImage } from "../config";
 import { joinOrCreateServer } from "./alerts/joinOrCreateServer";
-import {
-  addAlert,
-  closeAlert,
-  showInfoAlert,
-  showInputAlert,
-} from "../dawn-ui/components/AlertManager";
-import Button from "../dawn-ui/components/Button";
 import Column from "../dawn-ui/components/Column";
-import { showContextMenu } from "../dawn-ui/components/ContextMenuManager";
-import UploadFile from "../dawn-ui/components/FileUpload";
 import Icon from "../dawn-ui/components/Icon";
-import Row from "../dawn-ui/components/Row";
-import uploadFile from "../dawn-ui/uploadFile";
 import { useAppSelector } from "../stores/store";
-import File from "../syrenity-client/structures/File";
 import Server from "../syrenity-client/structures/Server";
-import { handleClientError, isErr, wrap } from "../util";
 import ServerIcon from "./ServerIcon";
-import showSettingsPage from "../app-pages/SettingsPage";
 
 export default function ServerBar(props: {
   selected: Server | null | "@me";

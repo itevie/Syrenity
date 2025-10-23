@@ -1,10 +1,9 @@
 import { client } from "../../App";
-import { ContextMenuEvent } from "../../dawn-ui/components/ContextMenuManager";
-import { todo } from "../../dawn-ui/util";
+import { ClickEvent, todo } from "../../dawn-ui/util";
 import { useAppSelector } from "../../stores/store";
 import FileBase from "../../syrenity-client/structures/FileBase";
 import showChannelContextMenu from "../context-menus/channelContextMenu";
-import showUserContextMenu from "../context-menus/userContextMenu";
+import { showUserContextMenu } from "../context-menus/userContextMenu";
 import { setUserViewerUser } from "../UserViewerManager";
 
 export enum MentionType {
@@ -39,8 +38,8 @@ export default function Mention({
   const channels = useAppSelector((x) => x.channels);
 
   let text = "Unknown Mention";
-  let click: (e: ContextMenuEvent) => void = () => {};
-  let context: (e: ContextMenuEvent) => void = () => {};
+  let click: (e: ClickEvent) => void = () => {};
+  let context: (e: ClickEvent) => void = () => {};
 
   switch (type) {
     case MentionType.User:

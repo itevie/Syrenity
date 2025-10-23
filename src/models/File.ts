@@ -156,7 +156,9 @@ export default class SyFile {
     stream: Readable,
     noS3: boolean = false,
   ): Promise<void> {
-    logger.log(`Preparing to upload ${this.data.file_name}`);
+    logger.log(
+      `Preparing to upload ${this.data.file_name} [${this.data.mime}]`,
+    );
     const fileStream = new Readable();
     const s3Stream = new Readable();
 
@@ -185,16 +187,14 @@ export default class SyFile {
 
   public static async create(
     fileName: string,
-    originalUrl?: string,
+    originalUrl?: string | null,
     mime?: string | null,
   ): Promise<SyFile> {
     return new SyFile(
-      (
-        await query<DatabaseFile>({
-          text: "INSERT INTO files (file_name, original_url, mime) VALUES ($1, $2, $3) RETURNING *",
-          values: [fileName, originalUrl, mime],
-        })
-      ).rows[0],
+      (await queryOne<DatabaseFile>({
+        text: "INSERT INTO files (file_name, original_url, mime) VALUES ($1, $2, $3) RETURNING *",
+        values: [fileName, originalUrl, mime],
+      })) as DatabaseFile,
     );
   }
 

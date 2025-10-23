@@ -15,9 +15,14 @@ import PageManager from "./components/PageManager";
 import AllUtilities from "./dawn-ui/AllUtilities";
 import UserViewerManager from "./components/UserViewerManager";
 import ForgotPassword from "./pages/ForgotPassword";
+import Testing from "./testing";
 
 const router = createBrowserRouter(
   [
+    {
+      path: "/testing",
+      element: <Testing />,
+    },
     {
       path: "/channels/:sid?/:cid?",
       element: <App />,

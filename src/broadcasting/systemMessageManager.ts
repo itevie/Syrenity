@@ -1,6 +1,6 @@
 import config from "../config";
+import SyChannel from "../models/Channel";
 import SyMessage from "../models/Message";
-import { actions } from "../util/database";
 import { send } from "../ws/websocketUtil";
 import { SystemMessageTypes } from "./SystemMessageTypes";
 
@@ -21,7 +21,7 @@ export async function createSystemMessage<T extends keyof SystemMessageTypes>(
   // Broadcast to WS
   send({
     channel: channel,
-    guild: (await actions.channels.fetch(channel)).guild_id,
+    guild: (await SyChannel.fetch(channel)).data.guild_id,
     type: "MessageCreate",
     payload: {
       message: await message.expand(),

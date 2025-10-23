@@ -3,6 +3,9 @@ import Message from "../../syrenity-client/structures/Message";
 import Row from "../../dawn-ui/components/Row";
 import { useAppSelector } from "../../stores/store";
 import Mention, { MentionType } from "./Mention";
+import MessageContextMenu from "../context-menus/messageContextMenu";
+import MessageReactions from "./MessageReactions";
+import Column from "../../dawn-ui/components/Column";
 
 export default function SystemMessage({ message }: { message: Message }) {
   const users = useAppSelector((d) => d.users);
@@ -22,5 +25,11 @@ export default function SystemMessage({ message }: { message: Message }) {
       node = "FUCK!";
   }
 
-  return <Row className="sy-message sy-system-message">{node}</Row>;
+  return (
+    <Column className="sy-message sy-system-message">
+      {node}
+      <MessageReactions message={message} />
+      <MessageContextMenu options={{ message, edit: null }} />
+    </Column>
+  );
 }

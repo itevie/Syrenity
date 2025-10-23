@@ -31,6 +31,7 @@ export type StrippedDatabaseUser = Omit<DatabaseUser, "password" | "email">;
 export interface EditUserOptions {
   avatar?: string;
   profile_banner?: string;
+  about_me?: string;
 }
 
 export default class SyUser {

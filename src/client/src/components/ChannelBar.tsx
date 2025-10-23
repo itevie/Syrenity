@@ -1,17 +1,8 @@
-import { client } from "../App";
-import {
-  showConfirmModel,
-  showErrorAlert,
-  showInputAlert,
-} from "../dawn-ui/components/AlertManager";
 import Button from "../dawn-ui/components/Button";
 import Column from "../dawn-ui/components/Column";
-import { showContextMenu } from "../dawn-ui/components/ContextMenuManager";
-import { trans } from "../i18n";
 import { useAppSelector } from "../stores/store";
 import Channel from "../syrenity-client/structures/Channel";
 import Server from "../syrenity-client/structures/Server";
-import { handleClientError, isErr, isOk, wrap } from "../util";
 import showChannelContextMenu from "./context-menus/channelContextMenu";
 import showServerContextMenu from "./context-menus/serverContextMenu";
 

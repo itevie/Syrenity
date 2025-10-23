@@ -1,3 +1,5 @@
+import SyChannel from "../models/Channel";
+import SyServer from "../models/Servers";
 import { actions, query } from "./database";
 import permissionsBitfield from "./PermissionBitfield";
 
@@ -19,12 +21,12 @@ export async function canView(
       return r;
     case "message":
       const message = await actions.messages.fetch(id);
-      const channel = await actions.channels.fetch(message.channel_id);
+      const channel = await SyChannel.fetch(message.channel_id);
 
       // Check if relationship
-      if (channel.type === "dm") {
+      if (channel.data.type === "dm") {
         const relationship = await actions.relationships.fetchForChannel(
-          channel.id,
+          channel.data.id,
         );
 
         // Check if user is one of them
@@ -32,11 +34,11 @@ export async function canView(
       }
 
       // Fetch guild and check if has permission
-      const guild = await actions.guilds.fetch(channel.guild_id);
+      const guild = await SyServer.fetch(channel.data.guild_id);
       const hasPerm = await hasPermission({
         permission: permissionsBitfield.ReadChannelHistory,
-        guild,
-        channel,
+        guild: guild.data,
+        channel: channel.data,
         user,
       });
 

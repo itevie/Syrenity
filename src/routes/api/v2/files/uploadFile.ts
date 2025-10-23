@@ -103,7 +103,7 @@ const handler: RouteDetails<UploadFileBody> = {
     }
 
     // Create file record
-    const fileObject = await SyFile.create(body.file_name, mime, origin);
+    const fileObject = await SyFile.create(body.file_name, origin, mime);
     await fileObject.uploadFile(Readable.from(buffer) as PassThrough);
     return res.status(200).send(fileObject);
   },

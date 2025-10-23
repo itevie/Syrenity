@@ -6,6 +6,7 @@ import {
 } from "./websocketData";
 import database from "../database/database";
 import SyUser from "../models/User";
+import { wsLogger } from "./websocketUtil";
 
 interface WSConnectionOptions {
   uuid: string;
@@ -39,6 +40,7 @@ export default class WebsocketHandler {
 
       if (!this.operations[message.type])
         return this.basicError("Invalid operation");
+      wsLogger.log(`Receive ${message.type} for ${this.data.uuid}`);
 
       this.operations[message.type](message.payload);
     });

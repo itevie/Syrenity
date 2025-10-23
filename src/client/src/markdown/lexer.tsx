@@ -1,6 +1,7 @@
 export enum TokenType {
   Bold,
   Italic,
+  BoldItalic,
   Underscore,
   Code,
   Text,
@@ -28,6 +29,7 @@ type TokenRule = {
 
 const staticRules: TokenRule[] = [
   // Basic Markdown
+  { match: "***", type: TokenType.BoldItalic, length: 3 },
   { match: "**", type: TokenType.Bold, length: 2 },
   { match: "*", type: TokenType.Italic, length: 1 },
   { match: "__", type: TokenType.Underscore, length: 2 },

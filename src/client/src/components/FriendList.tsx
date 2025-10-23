@@ -23,30 +23,32 @@ export default function FriendList() {
 
   return (
     <Column>
-      {relationships.map((x) => (
-        <Container style={{ minHeight: "fit-content" }}>
-          <Row style={{ justifyContent: "space-between" }}>
-            <Column>
-              <Row util={["align-center"]}>
-                <UserIcon id={x.user1.id} />
-                <GoogleMatieralIcon name="arrow_forward" />
-                <UserIcon id={x.user2.id} />
+      {relationships
+        .filter((x) => x.isFriends)
+        .map((x) => (
+          <Container key={x.recipient.id} style={{ minHeight: "fit-content" }}>
+            <Row style={{ justifyContent: "space-between" }}>
+              <Column>
+                <Row util={["align-center"]}>
+                  <UserIcon id={x.user1.id} />
+                  <GoogleMatieralIcon name="arrow_forward" />
+                  <UserIcon id={x.user2.id} />
+                </Row>
+                <Words type={TextType.Small}>
+                  <DateText date={x.createdAt} />
+                </Words>
+              </Column>
+              <Row style={{ alignSelf: "end" }}>
+                <Button big type="danger">
+                  {i18n.t("friends.list.revoke")}
+                </Button>
+                <Button big type="normal">
+                  {i18n.t("friends.list.message")}
+                </Button>
               </Row>
-              <Words type={TextType.Small}>
-                <DateText date={x.createdAt} />
-              </Words>
-            </Column>
-            <Row style={{ alignSelf: "end" }}>
-              <Button big type="danger">
-                {i18n.t("friends.list.revoke")}
-              </Button>
-              <Button big type="normal">
-                {i18n.t("friends.list.message")}
-              </Button>
             </Row>
-          </Row>
-        </Container>
-      ))}
+          </Container>
+        ))}
     </Column>
   );
 }

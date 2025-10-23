@@ -1,11 +1,10 @@
 import { client } from "../App";
-import { showContextMenu } from "../dawn-ui/components/ContextMenuManager";
 import Icon from "../dawn-ui/components/Icon";
 import { useAppSelector } from "../stores/store";
 import File from "../syrenity-client/structures/File";
 import { allowedSizes } from "../syrenity-client/structures/FileBase";
 import User from "../syrenity-client/structures/User";
-import showUserContextMenu from "./context-menus/userContextMenu";
+import { showUserContextMenu } from "./context-menus/userContextMenu";
 import { setUserViewerUser } from "./UserViewerManager";
 
 export default function UserIcon({

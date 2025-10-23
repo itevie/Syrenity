@@ -1,14 +1,11 @@
 import { client } from "../../App";
-import {
-  ContextMenuEvent,
-  showContextMenu,
-} from "../../dawn-ui/components/ContextMenuManager";
+import { updateContextMenu } from "../../dawn-ui/components/ContextMenuManager";
+import { ClickEvent } from "../../dawn-ui/util";
 import { trans } from "../../i18n";
 import { isErr, isOk, wrap } from "../../util";
 
-export default function showImageContextMenu(e: ContextMenuEvent, url: string) {
-  showContextMenu({
-    event: e,
+export default function showImageContextMenu(e: ClickEvent, url: string) {
+  updateContextMenu(e, {
     elements: [
       {
         label: trans("file.action.copyMediaLink"),

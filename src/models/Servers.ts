@@ -104,6 +104,15 @@ export default class SyServer {
     return server;
   }
 
+  public static async exists(id: number): Promise<boolean> {
+    return (
+      (await queryOne<DatabaseServer>({
+        text: "SELECT * FROM guilds WHERE id = $1",
+        values: [id],
+      })) !== null
+    );
+  }
+
   public static async fetch(id: number): Promise<SyServer> {
     const result = await queryOne<DatabaseServer>({
       text: "SELECT * FROM guilds WHERE id = $1;",

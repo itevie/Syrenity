@@ -4,6 +4,7 @@ import UserViewer from "../../components/UserViewer";
 import {
   closeAlert,
   showInfoAlert,
+  showInputAlert,
 } from "../../dawn-ui/components/AlertManager";
 import Button from "../../dawn-ui/components/Button";
 import Column from "../../dawn-ui/components/Column";
@@ -41,6 +42,22 @@ export default function AccountSettings() {
           }}
         >
           {trans("settings.account.changeBanner")}
+        </Button>
+        <Button
+          onClick={async () => {
+            const aboutMe = await showInputAlert(
+              "Enter about me:",
+              client.user?.about,
+            );
+            if (!aboutMe) return;
+
+            await client.user?.edit({
+              about_me: aboutMe,
+            });
+            showInfoAlert("Updated!");
+          }}
+        >
+          {trans("settings.account.changeAboutMe")}
         </Button>
       </Column>
       {client.user ? <UserViewer userId={client.user.id} /> : "Loading..."}

@@ -19,7 +19,8 @@ A Discord-like web application for chatting with your friends.
     - Create a database called `syrenity`: `psql -c "CREATE DATABASE syrenity;"`
     - Load the schema `psql -d syrenity /path/to/project/schema.sql`
 4. Run `npm install`
-5. Start it with `npx ts-node src/index.ts`
+5. Run `git submodule update --init --recursive`
+6. Start it with `npx ts-node src/index.ts`
 
 ## Issues
 

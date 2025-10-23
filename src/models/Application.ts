@@ -54,6 +54,22 @@ export default class SyApplication {
     return new SyApplication(result);
   }
 
+  public static async fetchByUserId(userId: number) {
+    const result = await queryOne<DatabaseApplication>({
+      text: "SELECT * FROM applications WHERE bot_account = $1",
+      values: [userId],
+    });
+
+    if (result === null)
+      throw new DatabaseError({
+        message: `Application with that user id does not exist`,
+        errorCode: "NonexistentResource",
+        statusCode: 404,
+      });
+
+    return new SyApplication(result);
+  }
+
   toJSON() {
     return this.data;
   }

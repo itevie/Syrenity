@@ -141,14 +141,14 @@ export default class SyChannel {
   }
 
   public static async fetch(id: number): Promise<SyChannel> {
-    return new SyChannel(
-      (
-        await query<DatabaseChannel>({
-          text: "SELECT * FROM channels WHERE id = $1",
-          values: [id],
-        })
-      ).rows[0],
-    );
+    let result = await queryOne<DatabaseChannel>({
+      text: "SELECT * FROM channels WHERE id = $1",
+      values: [id],
+    });
+
+    if (!result) throw new Error();
+
+    return new SyChannel(result);
   }
 
   public static async exists(id: number): Promise<boolean> {

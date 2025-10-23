@@ -3,23 +3,19 @@ import {
   showInputAlert,
   showConfirmModel,
 } from "../../dawn-ui/components/AlertManager";
-import {
-  ContextMenuEvent,
-  showContextMenu,
-} from "../../dawn-ui/components/ContextMenuManager";
 import { trans } from "../../i18n";
 import { ChannelAPIData } from "../../syrenity-client/structures/Channel";
 import { setPage } from "../PageManager";
 import ChannelSettings from "../../app-pages/ChannelSettings";
-import { todo } from "../../dawn-ui/util";
+import { ClickEvent, todo } from "../../dawn-ui/util";
 import showChannelDetails from "../alerts/channelDetails";
+import { updateContextMenu } from "../../dawn-ui/components/ContextMenuManager";
 
 export default function showChannelContextMenu(
-  e: ContextMenuEvent,
+  e: ClickEvent,
   channel: ChannelAPIData,
 ) {
-  showContextMenu({
-    event: e,
+  updateContextMenu(e, {
     elements: [
       {
         type: "button",

@@ -7,7 +7,7 @@ import Relationship from "../syrenity-client/structures/Relationship";
 import { client } from "../App";
 import Row from "../dawn-ui/components/Row";
 import UserIcon from "./UserIcon";
-import showUserContextMenu from "./context-menus/userContextMenu";
+import { UserContextMenu } from "./context-menus/userContextMenu";
 import { useTranslation } from "react-i18next";
 import showFriendsPage from "../app-pages/FriendsPage";
 import Words from "../dawn-ui/components/Words";
@@ -43,7 +43,6 @@ export default function DmBar(props: {
             .sort((a, b) => a.lastMessage.getTime() - b.lastMessage.getTime())
             .map((r) => (
               <Button
-                onContextMenu={(e) => showUserContextMenu(e, r.recipient.data)}
                 key={r.recipient.id}
                 type="inherit"
                 util={[
@@ -59,6 +58,7 @@ export default function DmBar(props: {
                   <UserIcon id={r.recipient.id} size="32px" />
                   {r.recipient.username}
                 </Row>
+                <UserContextMenu user={r.recipient.data} />
               </Button>
             ))}
         </Column>

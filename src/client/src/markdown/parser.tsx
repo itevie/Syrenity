@@ -14,6 +14,7 @@ const FORMATTING = new Set([
   TokenType.Underscore,
   TokenType.Strikethrough,
   TokenType.Code,
+  TokenType.BoldItalic,
 ]);
 
 function isToken(x: any): x is Token {
@@ -29,6 +30,12 @@ function getElementFor(token?: Token, data?: React.ReactNode): JSX.Element {
       return <b>{content}</b>;
     case TokenType.Italic:
       return <i>{content}</i>;
+    case TokenType.BoldItalic:
+      return (
+        <b>
+          <i>{content}</i>
+        </b>
+      );
     case TokenType.Underscore:
       return <u>{content}</u>;
     case TokenType.Strikethrough:

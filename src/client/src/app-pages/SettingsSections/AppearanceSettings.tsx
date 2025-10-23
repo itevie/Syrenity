@@ -19,6 +19,10 @@ export default function AppearanceSettings() {
             "--sy-base-color",
             e.currentTarget.value,
           );
+          document.body.style.setProperty(
+            "--dawn-accent-base-color",
+            e.currentTarget.value,
+          );
           localStorage.setItem("sy-app-hue", e.currentTarget.value.toString());
         }}
         min="0"

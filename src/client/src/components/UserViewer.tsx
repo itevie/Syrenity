@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import DateText from "./DateText";
 import { setFullscreenImage } from "../dawn-ui/components/ImageViewer";
 import showImageContextMenu from "./context-menus/imageContextMenu";
+import Markdown from "./message/Markdown";
 
 export default function UserViewer({ userId }: { userId: number }) {
   const users = useAppSelector((x) => x.users);
@@ -63,6 +64,9 @@ export default function UserViewer({ userId }: { userId: number }) {
             {{
               [t("userViewer.aboutMe.name")]: (
                 <Column>
+                  <Words>
+                    <Markdown>{users[userId].about_me}</Markdown>
+                  </Words>
                   <Words type={TextType.Heading}>
                     {t("userViewer.aboutMe.joined")}
                   </Words>

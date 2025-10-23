@@ -1,3 +1,4 @@
+import SyChannel from "../../../../models/Channel";
 import { RouteDetails } from "../../../../types/route";
 import { actions } from "../../../../util/database";
 
@@ -7,7 +8,7 @@ const handler: RouteDetails = {
   handler: async (req, res) => {
     return res
       .status(200)
-      .send(await actions.channels.fetch(parseInt(req.params.channel)));
+      .send((await SyChannel.fetch(parseInt(req.params.channel))).data);
   },
 
   auth: {

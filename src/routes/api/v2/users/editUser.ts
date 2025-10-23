@@ -12,17 +12,29 @@ const handler: RouteDetails<EditUserOptions> = {
     let user = await SyUser.fetch(parseInt(req.params.user));
     const body = req.body as EditUserOptions;
 
-    if (
-      body.avatar &&
-      !(await SyFile.fetch(body.avatar))?.data.mime?.startsWith("image/")
-    ) {
-      return res.status(400).send(
-        new SyrenityError({
-          message: "The avatar file must be an image",
-          errorCode: "InvalidFileType",
-          statusCode: 400,
-        }),
-      );
+    if (body.avatar) {
+      let file = await SyFile.fetch(body.avatar);
+
+      if (!file) {
+        return res.status(404).send(
+          new SyrenityError({
+            message: "An invalid file ID was provided",
+            errorCode: "NonexistentResource",
+            statusCode: 404,
+          }),
+        );
+      }
+
+      if (!file.data.mime?.startsWith("image/")) {
+        return res.status(400).send(
+          new SyrenityError({
+            message:
+              "The avatar file must be an image, got a " + file.data.mime,
+            errorCode: "InvalidFileType",
+            statusCode: 400,
+          }),
+        );
+      }
     }
 
     if (
@@ -63,6 +75,10 @@ const handler: RouteDetails<EditUserOptions> = {
         nullable: true,
       },
       profile_banner: {
+        type: "string",
+        nullable: true,
+      },
+      about_me: {
         type: "string",
         nullable: true,
       },

@@ -4,6 +4,7 @@ import Logger from "../util/Logger";
 import WebsocketHandler from "./WebsocketHandler";
 import * as database from "../util/database";
 import { WebsocketDispatchTypes } from "./WebsocketDispatchTypes";
+import SyUser from "../models/User";
 
 interface Connection {
   uuid: string;
@@ -23,7 +24,7 @@ interface WebsocketDispatchOptions<T extends keyof WebsocketDispatchTypes> {
 }
 
 export async function send<T extends keyof WebsocketDispatchTypes>(
-  options: WebsocketDispatchOptions<T>
+  options: WebsocketDispatchOptions<T>,
 ) {
   // Get the IDs of the connections
   let ids = getConnectionUserIds();
@@ -74,7 +75,7 @@ export function initialise(app: expressWs.Application): void {
 
     // Check if already logged in
     if (req.user) {
-      const user = await database.actions.users.fetch((req.user as User).id);
+      const user = SyUser.fetch((req.user as User).id);
 
       // Set the connection
       connections.set(id, {

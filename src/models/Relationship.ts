@@ -8,7 +8,9 @@ export interface DatabaseRelationship {
   user1: number;
   user2: number;
   last_message: Date;
-  active: boolean;
+  active_user_1: boolean;
+  active_user_2: boolean;
+  is_friends: boolean;
   created_at: Date;
 }
 
@@ -33,6 +35,43 @@ export default class SyRelationship {
     };
   }
 
+  public async setFriends(friends: boolean): Promise<SyRelationship> {
+    let result = await queryOne<DatabaseRelationship>({
+      text: "UPDATE relationships SET is_friends = $1 WHERE (user1 = $2 AND user2 = $3) OR (user1 = $3 AND user2 = $2) RETURNING *",
+      values: [friends, this.data.user1, this.data.user2],
+    });
+
+    return new SyRelationship(result!);
+  }
+
+  public static async create(
+    user1: number,
+    user2: number,
+  ): Promise<SyRelationship> {
+    if (await SyRelationship.existsBetween(user1, user2))
+      throw new DatabaseError({
+        errorCode: "Conflict",
+        message: "The relationship already exists",
+        statusCode: 500,
+      });
+
+    const channel = await SyChannel.createDMChannel();
+
+    const result = await queryOne<DatabaseRelationship>({
+      text: "INSERT INTO relationships (channel_id, user1, user2, active_user_1, active_user_2, is_friends, last_message, created_at) VALUES ($1, $2, $3, $4, $5, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING *",
+      values: [channel.data.id, user1, user2, true, false],
+    });
+
+    if (!result)
+      throw new DatabaseError({
+        errorCode: "UnknownServerError",
+        message: "Failed to create relationship",
+        statusCode: 500,
+      });
+
+    return new SyRelationship(result);
+  }
+
   public static async fetchByChannel(channel: number): Promise<SyRelationship> {
     const result = await queryOne<DatabaseRelationship>({
       text: "SELECT * FROM relationships WHERE channel_id = $1",
@@ -55,7 +94,7 @@ export default class SyRelationship {
   ): Promise<boolean> {
     return (
       (await queryOne<DatabaseUser>({
-        text: "SELECT * FROM relationships WHERE user1 = $1 OR user2 = $2",
+        text: "SELECT * FROM relationships WHERE (user1 = $1 AND user2 = $2) OR (user1 = $2 AND user2 = $1)",
         values: [user1, user2],
         ignoreErrors: true,
       })) !== null
@@ -66,17 +105,12 @@ export default class SyRelationship {
     user1: number,
     user2: number,
   ): Promise<SyRelationship> {
-    const result = await queryOne<DatabaseRelationship>({
+    let result = await queryOne<DatabaseRelationship>({
       text: "SELECT * FROM relationships WHERE user1 = $1 OR user2 = $2",
       values: [user1, user2],
     });
 
-    if (result === null)
-      throw new DatabaseError({
-        message: "Failed to fetch relationship",
-        statusCode: 404,
-        errorCode: "NonexistentResource",
-      });
+    if (!result) result = (await SyRelationship.create(user1, user2)).data;
 
     return new SyRelationship(result);
   }

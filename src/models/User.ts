@@ -31,6 +31,7 @@ export interface EditUserOptions {
   avatar?: string;
   profile_banner?: string;
   about_me?: string;
+  username?: string;
 }
 
 export default class SyUser {
@@ -82,6 +83,16 @@ export default class SyUser {
   }
 
   public async edit(options: EditUserOptions): Promise<SyUser> {
+    // Special ones
+    if (options.username) {
+      if (await SyUser.usernameExists(options.username))
+        throw new DatabaseError({
+          message: "This username already exists",
+          statusCode: 400,
+          errorCode: "Conflict",
+        });
+    }
+
     const setClause = Object.entries(options)
       .map((x, i) => `${x[0]} = $${i + 2}`)
       .join(", ");
@@ -182,6 +193,13 @@ export default class SyUser {
     return user;
   }
 
+  public static async usernameExists(username: string): Promise<boolean> {
+    return !!(await queryOne<DatabaseUser>({
+      text: "SELECT * FROM users WHERE username = $1",
+      values: [username],
+    }));
+  }
+
   public static async create(
     email: string,
     password: string,
@@ -194,12 +212,7 @@ export default class SyUser {
         statusCode: 400,
       });
 
-    let u = await queryOne<DatabaseUser>({
-      text: "SELECT * FROM users WHERE username = $1",
-      values: [username],
-    });
-
-    if (!!u)
+    if (await SyUser.usernameExists(username))
       throw new DatabaseError({
         message: "Somebody already has this username!",
         errorCode: "Conflict",

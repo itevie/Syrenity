@@ -1,6 +1,9 @@
 export interface SystemMessageTypes {
-    "MessagePinned": {
-        pinned_by: number,
-        message_id: number,
-    }
+  MessagePinned: {
+    pinned_by: number;
+    message_id: number;
+  };
+  MemberJoin: {
+    user_id: number;
+  };
 }

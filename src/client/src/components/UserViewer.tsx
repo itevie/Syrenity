@@ -64,7 +64,7 @@ export default function UserViewer({ userId }: { userId: number }) {
               [t("userViewer.aboutMe.name")]: (
                 <Column>
                   <Words>
-                    <Markdown>{users[userId].about_me}</Markdown>
+                    <Markdown>{users[userId]?.about_me ?? ""}</Markdown>
                   </Words>
                   <Words type={TextType.Heading}>
                     {t("userViewer.aboutMe.joined")}

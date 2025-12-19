@@ -10,11 +10,30 @@ import Button from "../../dawn-ui/components/Button";
 import Column from "../../dawn-ui/components/Column";
 import Row from "../../dawn-ui/components/Row";
 import { trans } from "../../i18n";
+import { handleClientError, isErr, wrap } from "../../util";
 
 export default function AccountSettings() {
   return (
     <Row style={{ justifyContent: "space-between" }}>
       <Column>
+        <Button
+          onClick={async () => {
+            const result = await showInputAlert("Enter new username");
+            if (!result || result === client.user?.username) return;
+
+            let r = await wrap(
+              client.user!.edit({
+                username: result,
+              }),
+            );
+
+            if (isErr(r)) {
+              handleClientError("change username", r.v);
+            }
+          }}
+        >
+          {trans("settings.account.changeUsername")}
+        </Button>
         <Button
           onClick={async () => {
             const result = await uploadImageAlert();

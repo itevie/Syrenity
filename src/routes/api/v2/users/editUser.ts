@@ -82,6 +82,10 @@ const handler: RouteDetails<EditUserOptions> = {
         type: "string",
         nullable: true,
       },
+      username: {
+        type: "string",
+        nullable: true,
+      },
     },
     additionalProperties: false,
   },

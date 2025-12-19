@@ -47,6 +47,9 @@ app.use(
   }),
 );
 
+// const constring = `postgresql://${process.env.DB_USER}:${encodeURIComponent(process.env.DB_PASSWORD!)}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`;
+// process.env.DB_CONSTRING = constring;
+
 if (!process.env.DB_CONSTRING) {
   throw new Error("Missing DB_CONSTRING in env");
 }

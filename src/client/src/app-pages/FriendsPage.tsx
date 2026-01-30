@@ -1,8 +1,9 @@
-import FriendList from "../components/FriendList";
-import FriendRequestList from "../components/FriendRequestList";
+import FriendList from "./FriendList";
+import FriendRequestList from "./FriendRequestList";
 import Page from "../components/Page";
 import { setPage } from "../components/PageManager";
 import { trans } from "../i18n";
+import AddFriend from "./AddFriend";
 
 export default function showFriendsPage() {
   setPage(
@@ -34,7 +35,7 @@ export default function showFriendsPage() {
             type: "button",
             label: trans("friends.add.name"),
             icon: "add",
-            element: <></>,
+            element: <AddFriend />,
           },
           {
             type: "br",

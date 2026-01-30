@@ -3,7 +3,7 @@ import FriendRequest from "../syrenity-client/structures/FriendRequest";
 import { client } from "../App";
 import Column from "../dawn-ui/components/Column";
 import Container from "../dawn-ui/components/Container";
-import UserIcon from "./UserIcon";
+import UserIcon from "../components/UserIcon";
 import GoogleMatieralIcon from "../dawn-ui/components/GoogleMaterialIcon";
 import Row from "../dawn-ui/components/Row";
 import Button from "../dawn-ui/components/Button";

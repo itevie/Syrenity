@@ -4,12 +4,12 @@ import Relationship from "../syrenity-client/structures/Relationship";
 import Column from "../dawn-ui/components/Column";
 import Container from "../dawn-ui/components/Container";
 import Row from "../dawn-ui/components/Row";
-import UserIcon from "./UserIcon";
 import GoogleMatieralIcon from "../dawn-ui/components/GoogleMaterialIcon";
 import Words, { TextType } from "../dawn-ui/components/Words";
-import DateText from "./DateText";
 import Button from "../dawn-ui/components/Button";
 import { useTranslation } from "react-i18next";
+import UserIcon from "../components/UserIcon";
+import DateText from "../components/DateText";
 
 export default function FriendList() {
   const { i18n } = useTranslation();

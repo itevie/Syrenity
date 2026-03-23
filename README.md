@@ -12,7 +12,7 @@ A Discord-like web application for chatting with your friends.
 - [Flutter Client](https://github.com/itevie/syrenity_client_flutter) The flutter interface for all OS's
 - [Dart API Client](https://github.com/itevie/syrenity_flutter_client_api) The api client for dart
 - [Dart API Tests](https://github.com/itevie/syrenity_dart_tests) Tests for Syrenity using the dart client
-- [Typescript API Client](https://github.com/itevie/syrenity-api-client) The api client for dart
+- [Typescript API Client](https://github.com/itevie/syrenity-api-client) The api client for TypeScript
 - [Dawn UI](https://github.com/itevie/dawn-ui) The UI the browser client uses
 
 ## Running yourself

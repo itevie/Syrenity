@@ -2,6 +2,7 @@ import SyrenityError from "../../../../errors/BaseError";
 import SyChannel from "../../../../models/Channel";
 import SyInvite, { CreateInviteOptions } from "../../../../models/Invite";
 import SyServer from "../../../../models/Servers";
+import SyUser from "../../../../models/User";
 import { RouteDetails } from "../../../../types/route";
 import permissionsBitfield from "../../../../util/PermissionBitfield";
 
@@ -27,7 +28,7 @@ let handler: RouteDetails<CreateInviteOptions> = {
 
     const invite = await SyInvite.create(
       server.data.id,
-      (req.user as User).id,
+      (req.user as SyUser).data.id,
       body
     );
 

@@ -20,6 +20,9 @@ type ErrorType =
   | "DownloadFailed"
   | "InvalidBase64"
 
+  // Servers
+  | "UnallowedServerOwnerAction"
+
   // Members
   | "UserNotInServer"
 
@@ -51,6 +54,13 @@ type ErrorType =
   // Resource
   | "NonexistentResource"
   | "AlreadyAMember"
+
+  // Application
+  | "ApplicationAlreadyJoined"
+  | "ApplicationNotPublic"
+
+  // Friend Requests
+  | "FriendRequestExists"
 
   // Codes
   | "UnknownVerifyCode"

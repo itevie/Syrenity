@@ -11,7 +11,7 @@ const handler: RouteDetails = {
     return res
       .status(200)
       .send(
-        fs.readFileSync(__dirname + "/../client/build/index.html", "utf-8"),
+        fs.readFileSync(__dirname + "/../client/build/index.html", "utf-8")
       );
   },
 

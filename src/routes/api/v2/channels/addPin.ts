@@ -1,5 +1,6 @@
 import SyrenityError from "../../../../errors/BaseError";
 import SyMessage from "../../../../models/Message";
+import SyUser from "../../../../models/User";
 import { RouteDetails } from "../../../../types/route";
 import permissionsBitfield from "../../../../util/PermissionBitfield";
 
@@ -15,12 +16,12 @@ const route: RouteDetails = {
           message: "The message is already pinned",
           errorCode: "Conflict",
           statusCode: 400,
-        }).extract(),
+        }).extract()
       );
 
     return res
       .status(200)
-      .send(await message.setPinned(true, (req.user as User).id));
+      .send(await message.setPinned(true, (req.user as SyUser).data.id));
   },
 
   auth: {

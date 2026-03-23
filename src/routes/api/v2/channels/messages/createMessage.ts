@@ -4,6 +4,7 @@ import config from "../../../../../config";
 import { send } from "../../../../../ws/websocketUtil";
 import permissionsBitfield from "../../../../../util/PermissionBitfield";
 import SyMessage from "../../../../../models/Message";
+import SyUser from "../../../../../models/User";
 
 interface CreateMessageBody {
   content: string;
@@ -19,7 +20,7 @@ const handler: RouteDetails<CreateMessageBody> = {
     // Create the message
     const message = await SyMessage.create({
       channelId: channel,
-      authorId: (req.user as User).id,
+      authorId: (req.user as SyUser).data.id,
       content: body.content,
     });
     const expanded = await message.expand();

@@ -1,4 +1,5 @@
 import { DatabaseChannel } from "../models/Channel";
+import { DatabaseCustomStatus } from "../models/CustomStatus";
 import { DatabaseMember } from "../models/Member";
 import { ExpandedMessage } from "../models/Message";
 import { DatabaseReaction } from "../models/Reaction";
@@ -53,6 +54,10 @@ export interface WebsocketDispatchTypes {
 
   UserUpdate: {
     user: StrippedDatabaseUser;
+  };
+
+  UserStatusUpdate: {
+    status: DatabaseCustomStatus;
   };
 
   MessageReactionAdd: {

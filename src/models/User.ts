@@ -15,17 +15,22 @@ export interface DatabaseUser {
   password: string;
   email: string;
   email_verified: boolean;
+  "2fa_secret": String;
   avatar: string | null;
   created_at: Date;
   is_bot: boolean;
   bio: string;
   profile_banner: string | null;
+  is_test: boolean;
 }
 
 /**
  * This should only be sent in a context where it is needed
  */
-export type StrippedDatabaseUser = Omit<DatabaseUser, "password" | "email">;
+export type StrippedDatabaseUser = Omit<
+  DatabaseUser,
+  "password" | "email" | "2fa_secret"
+>;
 
 export interface EditUserOptions {
   avatar?: string;
@@ -40,7 +45,7 @@ export default class SyUser {
 
   constructor(data: DatabaseUser) {
     this.fullData = data;
-    const { password, email, ...rest } = data;
+    const { password, email, "2fa_secret": tfa, ...rest } = data;
     this.data = rest;
   }
 
@@ -174,13 +179,13 @@ export default class SyUser {
 
   public static async fetchByEmailAndPassword(
     email: string,
-    password: string,
+    password: string
   ): Promise<SyUser> {
     const user = await SyUser.fetchByEmail(email);
     console.log(
       user.fullData.password,
       password,
-      await bcrypt.compare(password, user.fullData.password),
+      await bcrypt.compare(password, user.fullData.password)
     );
     if (!(await bcrypt.compare(password, user.fullData.password))) {
       throw new AuthenticationError({
@@ -204,6 +209,7 @@ export default class SyUser {
     email: string,
     password: string,
     username: string,
+    isTest: boolean = false
   ): Promise<SyUser> {
     if (await SyUser.emailExists(email))
       throw new DatabaseError({
@@ -222,8 +228,8 @@ export default class SyUser {
     const _password = await bcrypt.hash(password, 10);
 
     const user = (await queryOne<DatabaseUser>({
-      text: "INSERT INTO users (username, password, email) VALUES ($1, $2, $3, $4) RETURNING *",
-      values: [username, _password, email],
+      text: "INSERT INTO users (username, password, email, is_test) VALUES ($1, $2, $3, $4) RETURNING *",
+      values: [username, _password, email, isTest],
     })) as DatabaseUser;
 
     return new SyUser(user);

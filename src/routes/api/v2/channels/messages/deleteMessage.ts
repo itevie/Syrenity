@@ -31,6 +31,7 @@ const route: RouteDetails = {
   },
 
   permissions: {
+    unlessSelf: true,
     permissions: permissionsBitfield.ManageMessages,
     channelParam: "channel",
   },

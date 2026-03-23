@@ -31,7 +31,7 @@ const metaTags = {
 export default async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction,
+  next: express.NextFunction
 ) => {
   try {
     // Get the url
@@ -65,7 +65,7 @@ export default async (
             data: {
               expectedFormat: `Token token-here`,
             },
-          }).extract(),
+          }).extract()
         );
       }
       const token = authHeader.split(" ")[1];
@@ -80,13 +80,13 @@ export default async (
             data: {
               expectedFormat: `Token token-here`,
             },
-          }).extract(),
+          }).extract()
         );
       }
 
       // Try fetch the application
       try {
-        const user = (await SyUser.fetchByToken(token)).fullData;
+        const user = await SyUser.fetchByToken(token);
         req.login(user, () => {});
         req.user = user;
       } catch {
@@ -95,7 +95,7 @@ export default async (
             message: `Invalid token`,
             errorCode: `InvalidToken`,
             at: `header.authorization`,
-          }).extract(),
+          }).extract()
         );
       }
     }
@@ -109,18 +109,17 @@ export default async (
       try {
         const user = await SyUser.fetchByEmailAndPassword(
           req.body.email,
-          req.body.password,
+          req.body.password
         );
-        console.log(user);
         req.login(user, () => {});
-        req.user = user.fullData;
+        req.user = user;
       } catch (e) {
         console.log(e);
         return res.status(401).send(
           new AuthenticationError({
             message: "Invalid email and password in body",
             errorCode: "InvalidEmailOrPassword",
-          }).extract(),
+          }).extract()
         );
       }
     }
@@ -134,7 +133,7 @@ export default async (
             new AuthenticationError({
               message: `You need to be logged in to access this resource`,
               errorCode: `NotLoggedIn`,
-            }).extract(),
+            }).extract()
           );
         }
       }
@@ -146,7 +145,7 @@ export default async (
             new AuthenticationError({
               message: `You must be accessing this resource via a browser session`,
               errorCode: "SessionsOnly",
-            }).extract(),
+            }).extract()
           );
       }
     }
@@ -176,7 +175,7 @@ export default async (
             data: {
               errors: generateErrorFromSchemaErrors(validate),
             },
-          }).extract(),
+          }).extract()
         );
       }
     }

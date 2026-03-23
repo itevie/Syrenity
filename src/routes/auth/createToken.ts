@@ -1,5 +1,6 @@
 import database from "../../database/database";
 import SyToken from "../../models/Token";
+import SyUser from "../../models/User";
 import { RouteDetails } from "../../types/route";
 
 interface GetTokenBody {
@@ -14,8 +15,8 @@ const handler: RouteDetails = {
   handler: async (req, res, next) => {
     try {
       const token = await SyToken.createFor(
-        (req.user as User).id,
-        "auth-get-token",
+        (req.user as SyUser).data.id,
+        "auth-get-token"
       );
 
       return res.status(200).send(token);

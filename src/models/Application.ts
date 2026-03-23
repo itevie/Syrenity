@@ -9,6 +9,8 @@ export interface DatabaseApplication {
   bot_account: number;
   owner_id: number;
   created_at: Date;
+  public: boolean;
+  descriptionn: string | null;
 }
 
 export type ExpandedApplication = DatabaseApplication & {
@@ -28,7 +30,7 @@ export default class SyApplication {
   }
 
   public static async fetchUsersApplications(
-    userId: number,
+    userId: number
   ): Promise<SyApplication[]> {
     return (
       await query<DatabaseApplication>({
@@ -36,6 +38,15 @@ export default class SyApplication {
         values: [userId],
       })
     ).rows.map((x) => new SyApplication(x));
+  }
+
+  public static async fetchPublic(): Promise<SyApplication[]> {
+    return (
+      await query<DatabaseApplication>({
+        text: "SELECT * FROM applications WHERE public = true",
+        values: [],
+      })
+    ).rows.map((x) => new SyApplication({ ...x, token: "" }));
   }
 
   public static async fetchByToken(token: string) {

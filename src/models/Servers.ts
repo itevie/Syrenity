@@ -3,7 +3,7 @@ import DatabaseError from "../errors/DatabaseError";
 import { query } from "../util/database";
 import { send } from "../ws/websocketUtil";
 import SyChannel from "./Channel";
-import SyMember from "./Member";
+import SyMember, { ExpandedDatabaseMember } from "./Member";
 
 export interface DatabaseServer {
   id: number;
@@ -28,10 +28,10 @@ export default class SyServer {
   public async organiseChannels() {
     const channels = await this.fetchChannels();
     const validChannels = channels.filter(
-      (channel) => channel.data.position >= 0,
+      (channel) => channel.data.position >= 0
     );
     const unpositionedChannels = channels.filter(
-      (channel) => channel.data.position === -1,
+      (channel) => channel.data.position === -1
     );
 
     validChannels.sort((a, b) => a.data.position - b.data.position);
@@ -69,7 +69,7 @@ export default class SyServer {
     const data = await multiUpadate<DatabaseServer>(
       "guilds",
       this.data.id,
-      options,
+      options
     );
     this.data = data;
 
@@ -86,13 +86,13 @@ export default class SyServer {
 
   public static async create(
     ownerId: number,
-    options: CreateServerOptions,
+    options: CreateServerOptions
   ): Promise<SyServer> {
     const server = new SyServer(
       (await queryOne<DatabaseServer>({
         text: "INSERT INTO guilds (owner_id, name) VALUES ($1, $2) RETURNING *",
         values: [ownerId, options.name],
-      })) as DatabaseServer,
+      })) as DatabaseServer
     );
 
     await SyChannel.createServerChannel(server.data.id, {
@@ -127,6 +127,14 @@ export default class SyServer {
       });
 
     return new SyServer(result);
+  }
+
+  public async fetchMembers(): Promise<SyMember[]> {
+    return await SyMember.fetchAll(this.data.id);
+  }
+
+  public async fetchMembersWithUser(): Promise<ExpandedDatabaseMember[]> {
+    return await SyMember.fetchAllWithUser(this);
   }
 
   toJSON() {

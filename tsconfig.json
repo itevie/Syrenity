@@ -10,6 +10,7 @@
     "moduleResolution": "NodeNext",
     "typeRoots": ["./src/types"],
     "resolveJsonModule": true,
+    "noImplicitAny": false,
     "strictNullChecks": true
   },
   "ts-node": {

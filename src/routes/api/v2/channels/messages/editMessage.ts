@@ -1,6 +1,7 @@
 import config from "../../../../../config";
 import SyrenityError from "../../../../../errors/BaseError";
 import SyMessage, { EditMessageOptions } from "../../../../../models/Message";
+import SyUser from "../../../../../models/User";
 import { RouteDetails } from "../../../../../types/route";
 import { send } from "../../../../../ws/websocketUtil";
 
@@ -18,7 +19,7 @@ const route: RouteDetails<EditMessagesBody> = {
 
   handler: async (req, res) => {
     let message = await SyMessage.fetch(parseInt(req.params.message));
-    if (message.data.author_id !== (req.user as User).id) {
+    if (message.data.author_id !== (req.user as SyUser).data.id) {
       return res.status(401).send(
         new SyrenityError({
           message: "You can only edit your own messages",

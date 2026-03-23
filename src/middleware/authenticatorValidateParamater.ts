@@ -12,7 +12,7 @@ import SyServer from "../models/Servers";
 export default async function validateURLParameters(
   req: express.Request,
   res: express.Response,
-  params: { [key: string]: ParameterDetails },
+  params: { [key: string]: ParameterDetails }
 ): Promise<void | AuthenticationError> {
   // Loop through the params to test
   for (const i in params) {
@@ -47,7 +47,7 @@ export default async function validateURLParameters(
           if (
             paramTest.mustBeSelf === true &&
             param !== "@me" &&
-            param !== (req.user as FullUser)?.id.toString()
+            param !== (req.user as SyUser)?.fullData.id.toString()
           )
             return new AuthenticationError({
               message: `@me must be used for this route`,
@@ -113,9 +113,9 @@ export default async function validateURLParameters(
       req.params[i] !== "-1"
     ) {
       let ableToView = await canView(
-        req.user as User,
+        req.user as SyUser,
         paramTest.is as Resource,
-        parseInt(req.params[i]),
+        parseInt(req.params[i])
       );
 
       if (!ableToView) {
@@ -155,7 +155,7 @@ export default async function validateURLParameters(
         }
       } else {
         console.error(
-          `Cannot compare ${paramTest.is} and ${otherThing.is} for mustBeFrom`,
+          `Cannot compare ${paramTest.is} and ${otherThing.is} for mustBeFrom`
         );
         process.exit(0);
       }

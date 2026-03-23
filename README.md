@@ -9,6 +9,10 @@ A Discord-like web application for chatting with your friends.
 ## Related projects
 
 - [Syrenity Client](https://github.com/itevie/syrenity-api-client)
+- [Flutter Client](https://github.com/itevie/syrenity_client_flutter)
+- [Dart API Client](https://github.com/itevie/syrenity_flutter_client_api)
+- [Dart API Tests](https://github.com/itevie/syrenity_dart_tests)
+- [Typescript API Client](https://github.com/itevie/syrenity-api-client)
 - [Dawn UI](https://github.com/itevie/dawn-ui)
 
 ## Running yourself
@@ -16,8 +20,8 @@ A Discord-like web application for chatting with your friends.
 1. Download the repository
 2. Install [NodeJS](https://nodejs.org/en) and [PostgreSQL](https://www.postgresql.org/) on your system
 3. Initialise the project
-    - Create a database called `syrenity`: `psql -c "CREATE DATABASE syrenity;"`
-    - Load the schema `psql -d syrenity /path/to/project/schema.sql`
+   - Create a database called `syrenity`: `psql -c "CREATE DATABASE syrenity;"`
+   - Load the schema `psql -d syrenity /path/to/project/schema.sql`
 4. Run `npm install`
 5. Run `git submodule update --init --recursive`
 6. Start it with `npx ts-node src/index.ts`

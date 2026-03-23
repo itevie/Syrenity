@@ -11,6 +11,8 @@ import SyRelationship from "../models/Relationship";
 import permissionsBitfield from "../util/PermissionBitfield";
 import SyChannel from "../models/Channel";
 import SyServer from "../models/Servers";
+import SyMessage from "../models/Message";
+import SyUser from "../models/User";
 
 const DM_PERMISSIONS =
   permissionsBitfield.CreateMessages | permissionsBitfield.ReadChannelHistory;
@@ -18,7 +20,7 @@ const DM_PERMISSIONS =
 export default async function validatePermissions(
   req: express.Request,
   res: express.Response,
-  permissionDetails: PermissionDetails,
+  permissionDetails: PermissionDetails
 ): Promise<void | AuthenticationError> {
   let guild: null | SyServer = null;
   let channel: null | SyChannel = null;
@@ -39,10 +41,10 @@ export default async function validatePermissions(
       guild = await SyServer.fetch(channel.data.guild_id);
     } else if (channel.data.type === "dm") {
       const relationship = await SyRelationship.fetchByChannel(channel.data.id);
-      const user = req.user as User;
+      const user = req.user as SyUser;
       if (
-        relationship.data.user1 !== user.id &&
-        relationship.data.user2 !== user.id
+        relationship.data.user1 !== user.data.id &&
+        relationship.data.user2 !== user.data.id
       )
         return new AuthenticationError({
           message: "You are not apart of this DM channel",
@@ -70,10 +72,27 @@ export default async function validatePermissions(
     });
   }
 
+  // Check if self
+  const channelMessageRegex =
+    /^\/api(?:\/v\d+)?\/channels\/[^/]+\/messages\/([^/]+)$/;
+
+  const match = req.path.match(channelMessageRegex);
+
+  if (match && (req.method === "POST" || req.method === "DELETE")) {
+    const messageId = Number(match[1]);
+
+    if (!Number.isNaN(messageId)) {
+      const message = await SyMessage.fetch(messageId);
+      if (message.data.author_id === (req.user as SyUser).data.id) {
+        return;
+      }
+    }
+  }
+
   const gotPermissionYo = await hasPermission({
-    user: req.user as User,
-    guild: guild.data,
-    channel: channel?.data ?? undefined,
+    user: req.user as SyUser,
+    guild: guild,
+    channel: channel ?? undefined,
     permission: permissionDetails.permissions,
   });
 

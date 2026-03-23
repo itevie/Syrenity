@@ -1,4 +1,5 @@
 import { query, queryOne } from "../database/database";
+import DatabaseError from "../errors/DatabaseError";
 import SyRelationship from "./Relationship";
 
 export interface DatabaseFriendRequest {
@@ -61,7 +62,12 @@ export default class FriendRequest {
     let exists = await FriendRequest.fetch(sender, sendee);
 
     // TODO: Do this
-    if (exists) throw new Error();
+    if (exists)
+      throw new DatabaseError({
+        message: "The friend request already exists",
+        statusCode: 409,
+        errorCode: "FriendRequestExists",
+      });
 
     let friendRequest = await queryOne<DatabaseFriendRequest>({
       text: "INSERT INTO friend_requests (for_user, by_user, created_at) VALUES ($1, $2, CURRENT_TIMESTAMP) RETURNING *",

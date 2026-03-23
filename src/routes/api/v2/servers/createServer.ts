@@ -1,5 +1,6 @@
 import config from "../../../../config";
 import SyServer, { CreateServerOptions } from "../../../../models/Servers";
+import SyUser from "../../../../models/User";
 import { RouteDetails } from "../../../../types/route";
 
 const route: RouteDetails<CreateServerOptions> = {
@@ -8,7 +9,7 @@ const route: RouteDetails<CreateServerOptions> = {
 
   handler: async (req, res) => {
     const server = await SyServer.create(
-      (req.user as User).id,
+      (req.user as SyUser).data.id,
       req.body as CreateServerOptions
     );
 

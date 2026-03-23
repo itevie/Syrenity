@@ -1,6 +1,7 @@
 import SyrenityError from "../../../../errors/BaseError";
 import SyInvite from "../../../../models/Invite";
 import SyMember from "../../../../models/Member";
+import SyUser from "../../../../models/User";
 import { RouteDetails } from "../../../../types/route";
 
 const handler: RouteDetails = {
@@ -8,10 +9,10 @@ const handler: RouteDetails = {
   path: "/invites/:inviteId",
 
   handler: async (req, res) => {
-    const user = req.user as User;
+    const user = req.user as SyUser;
     const invite = await SyInvite.fetch(req.params.inviteId);
 
-    if (await SyMember.has(invite.data.guild_id, user.id)) {
+    if (await SyMember.has(invite.data.guild_id, user.data.id)) {
       return res.status(400).send(
         new SyrenityError({
           errorCode: "AlreadyAMember",
@@ -20,7 +21,7 @@ const handler: RouteDetails = {
       );
     }
 
-    const member = await invite.use(user.id);
+    const member = await invite.use(user.data.id);
 
     return res.status(200).send(member.data);
   },

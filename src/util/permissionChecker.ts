@@ -1,5 +1,6 @@
 import SyChannel from "../models/Channel";
 import SyServer from "../models/Servers";
+import SyUser from "../models/User";
 import { actions, query } from "./database";
 import permissionsBitfield from "./PermissionBitfield";
 
@@ -10,14 +11,14 @@ import permissionsBitfield from "./PermissionBitfield";
  * @param id The ID of the resource (assumed to be existent)
  */
 export async function canView(
-  user: User,
+  user: SyUser,
   what: Resource,
-  id: number,
+  id: number
 ): Promise<boolean> {
   switch (what) {
     case "guild":
       // Simple has member check will suit it
-      let r = await actions.guilds.hasMember(id, user.id);
+      let r = await actions.guilds.hasMember(id, user.data.id);
       return r;
     case "message":
       const message = await actions.messages.fetch(id);
@@ -26,19 +27,22 @@ export async function canView(
       // Check if relationship
       if (channel.data.type === "dm") {
         const relationship = await actions.relationships.fetchForChannel(
-          channel.data.id,
+          channel.data.id
         );
 
         // Check if user is one of them
-        return relationship.user1 === user.id || relationship.user2 === user.id;
+        return (
+          relationship.user1 === user.data.id ||
+          relationship.user2 === user.data.id
+        );
       }
 
       // Fetch guild and check if has permission
       const guild = await SyServer.fetch(channel.data.guild_id);
       const hasPerm = await hasPermission({
         permission: permissionsBitfield.ReadChannelHistory,
-        guild: guild.data,
-        channel: channel.data,
+        guild: guild,
+        channel: channel,
         user,
       });
 
@@ -79,13 +83,13 @@ export async function canView(
                             ELSE FALSE
                         END AS result;
                 `,
-          values: [user.id, id],
+          values: [user.data.id, id],
         })
       ).rows[0].result;
 
       return cresult;
     case "user":
-      if (user.id === id) return true;
+      if (user.data.id === id) return true;
       const result = (
         await query({
           text: `
@@ -111,7 +115,7 @@ export async function canView(
                             ELSE FALSE
                         END AS result;
                 `,
-          values: [user.id, id],
+          values: [user.data.id, id],
         })
       ).rows[0].result;
 
@@ -135,9 +139,9 @@ export function bitfieldToStringArray(permissions: number): string[] {
 }
 
 interface PermissionCheckDetails {
-  user: User;
-  channel?: Channel;
-  guild: Server;
+  user: SyUser;
+  channel?: SyChannel;
+  guild: SyServer;
   permission: number;
 }
 
@@ -153,16 +157,16 @@ export async function getBitfieldForMember({
   channel,
   guild,
 }: {
-  user: User;
-  channel?: Channel;
-  guild: Server;
+  user: SyUser;
+  channel?: SyChannel;
+  guild: SyServer;
 }): Promise<number> {
-  if (user.id === guild.owner_id) return getFullBitfield();
+  if (user.data.id === guild.data.owner_id) return getFullBitfield();
 
   let currentBitfield = 0;
 
   // Get guild @everyone
-  const everyone = await actions.roles.getEveryoneFor(guild.id);
+  const everyone = await actions.roles.getEveryoneFor(guild.data.id);
 
   // Apply them
   currentBitfield |= everyone.bitfield_allow;
@@ -171,8 +175,8 @@ export async function getBitfieldForMember({
   // Apply channel overrides
   if (channel) {
     const everyoneOverrides = await actions.channels.fetchRoleOverride(
-      channel.id,
-      everyone.id,
+      channel.data.id,
+      everyone.id
     );
     if (everyoneOverrides) {
       currentBitfield |= everyoneOverrides.bitfield_allow;
@@ -190,7 +194,7 @@ export async function hasPermission({
   permission,
 }: PermissionCheckDetails): Promise<boolean> {
   // Check if the user is the owner of the server
-  if (user.id === guild.owner_id) {
+  if (user.data.id === guild.data.owner_id) {
     return true;
   }
 

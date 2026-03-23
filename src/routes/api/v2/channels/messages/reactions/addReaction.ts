@@ -1,6 +1,7 @@
 import SyrenityError from "../../../../../../errors/BaseError";
 import SyMessage from "../../../../../../models/Message";
 import SyReaction from "../../../../../../models/Reaction";
+import SyUser from "../../../../../../models/User";
 import { RouteDetails } from "../../../../../../types/route";
 
 const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/u;
@@ -22,8 +23,12 @@ const route: RouteDetails = {
         }).extract()
       );
 
-    const user = req.user as User;
-    const reaction = await SyReaction.create(message.data.id, user.id, emoji);
+    const user = req.user as SyUser;
+    const reaction = await SyReaction.create(
+      message.data.id,
+      user.data.id,
+      emoji
+    );
     return res.status(200).send(reaction);
   },
 
